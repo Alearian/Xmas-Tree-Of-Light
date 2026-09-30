@@ -1,0 +1,22 @@
+{
+  "name": "Xmas Tree",
+  "ledsPerStrip": 360,
+  "stripCount": 12,
+  "heightMetres": 6,
+  "ledType": 22,
+  "colorOrder": 0,
+  "abl": { "ledMa": 11, "maxMa": 40000 },
+  "layoutPreset": 10,
+  "controllers": [
+    {
+      "name": "Dig-Quad A",
+      "host": "4.3.2.1",
+      "outputs": [
+        { "gpio": 16, "strips": [1, 2, 3] },
+        { "gpio": 3,  "strips": [4, 5, 6] },
+        { "gpio": 1,  "strips": [7, 8, 9] },
+        { "gpio": 4,  "strips": [10, 11, 12] }
+      ]
+    }
+  ]
+}

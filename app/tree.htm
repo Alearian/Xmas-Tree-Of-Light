@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1410">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Xmas Tree</title>
+<style>
+  :root {
+    --bg: #0b1410; --panel: #13211b; --panel2: #1a2c24; --line: #29423a;
+    --text: #eef3ef; --dim: #93a89e; --accent: #e8b44c; --red: #d9434b; --ok: #4cc38a;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { display: flex; flex-direction: column; }
+
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    padding-top: calc(12px + env(safe-area-inset-top)); background: var(--panel); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 18px; margin: 0; flex: 1; letter-spacing: .02em; }
+  #conn { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex: none; }
+  #conn.ok { background: var(--ok); }
+  #power { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel2);
+    color: var(--dim); font-size: 24px; cursor: pointer; }
+  #power.on { background: var(--accent); border-color: var(--accent); color: #231a05; box-shadow: 0 0 18px #e8b44c66; }
+
+  .bri { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .bri span { color: var(--dim); font-size: 14px; min-width: 38px; text-align: right; }
+
+  main { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 96px; }
+  section { display: none; }
+  section.active { display: block; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 20px 0 8px; }
+  h2:first-child { margin-top: 0; }
+
+  nav { position: fixed; left: 0; right: 0; bottom: 0; display: flex; background: var(--panel);
+    border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  nav button { flex: 1; background: none; border: 0; color: var(--dim); padding: 12px 4px 14px; font-size: 13px; cursor: pointer; }
+  nav button b { display: block; font-size: 20px; font-weight: normal; margin-bottom: 2px; }
+  nav button.active { color: var(--accent); }
+
+  input[type=range] { flex: 1; width: 100%; accent-color: var(--accent); height: 28px; }
+  select, input[type=search] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--panel2); color: var(--text); font-size: 16px; }
+  .row { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
+  .row label { color: var(--dim); font-size: 14px; min-width: 76px; }
+  .btn { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2);
+    color: var(--text); font-size: 15px; cursor: pointer; }
+  .btn.primary { background: var(--accent); color: #231a05; border-color: var(--accent); font-weight: 600; }
+  .btn:active { transform: scale(.97); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .swatch { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; }
+  .colours { display: flex; gap: 12px; }
+  .colours input { width: 56px; height: 56px; border: 2px solid var(--line); border-radius: 12px; padding: 0; background: none; }
+  .target { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--dim); font-size: 14px; }
+  .target b { color: var(--text); }
+
+  #treeCanvas { width: 100%; aspect-ratio: 3 / 4; max-height: 60vh; display: block; background: radial-gradient(#10201a, var(--bg) 70%); border-radius: var(--radius); }
+  .note { color: var(--dim); font-size: 13px; }
+
+  #stripSvg { width: 100%; max-width: 340px; display: block; margin: 0 auto; }
+  #stripSvg .s { cursor: pointer; }
+  #stripSvg .s circle { fill: var(--panel2); stroke: var(--line); stroke-width: 2; }
+  #stripSvg .s.sel circle { fill: var(--accent); stroke: var(--accent); }
+  #stripSvg .s text { fill: var(--text); font-size: 13px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  #stripSvg .s.sel text { fill: #231a05; font-weight: 700; }
+  #stripSvg .compass { fill: var(--dim); font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+
+  #presetList .btn { text-align: left; min-height: 56px; }
+  #toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line);
+    padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <div id="conn" title="Connection"></div>
+  <h1 id="title">Xmas Tree</h1>
+  <button id="power" aria-label="Power">⏻</button>
+</header>
+<div class="bri">
+  <input id="bri" type="range" min="1" max="255" value="128" aria-label="Brightness">
+  <span id="briVal">50%</span>
+</div>
+
+<main>
+  <section id="tab-tree" class="active">
+    <canvas id="treeCanvas"></canvas>
+    <p class="note" id="previewNote">Live preview of what the controller is sending to the strips.</p>
+    <h2>Quick colours (whole tree)</h2>
+    <div class="swatches" id="quick"></div>
+  </section>
+
+  <section id="tab-effects">
+    <div class="target" id="fxTarget"></div>
+    <h2>Effect</h2>
+    <input id="fxFilter" type="search" placeholder="Search effects…">
+    <div class="row"><select id="fxSel" size="6"></select></div>
+    <h2>Palette</h2>
+    <select id="palSel"></select>
+    <h2>Colours</h2>
+    <div class="colours">
+      <input type="color" id="c0" value="#ff2020" aria-label="Primary colour">
+      <input type="color" id="c1" value="#10a040" aria-label="Secondary colour">
+      <input type="color" id="c2" value="#ffd080" aria-label="Tertiary colour">
+    </div>
+    <h2>Motion</h2>
+    <div class="row"><label for="sx">Speed</label><input id="sx" type="range" min="0" max="255" value="128"></div>
+    <div class="row"><label for="ix">Intensity</label><input id="ix" type="range" min="0" max="255" value="128"></div>
+    <div class="row" style="margin-top:16px"><button class="btn primary" id="fxApply" style="flex:1">Apply</button></div>
+  </section>
+
+  <section id="tab-strips">
+    <p class="note">Tap strips to choose where effects and colours go. Nothing selected means the whole tree.</p>
+    <svg id="stripSvg" viewBox="-170 -170 340 340"></svg>
+    <h2>Groups</h2>
+    <div class="grid" id="groups"></div>
+  </section>
+
+  <section id="tab-presets">
+    <h2>Saved shows</h2>
+    <div class="grid" id="presetList"></div>
+    <div class="row" style="margin-top:16px"><button class="btn" id="savePreset" style="flex:1">Save current look as a preset…</button></div>
+  </section>
+</main>
+
+<nav>
+  <button data-tab="tree" class="active"><b>🎄</b>Tree</button>
+  <button data-tab="effects"><b>✨</b>Effects</button>
+  <button data-tab="strips"><b>◎</b>Strips</button>
+  <button data-tab="presets"><b>★</b>Presets</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+// Used when /tree.json is missing (e.g. only the HTML was uploaded).
+const DEFAULT_LAYOUT = {
+  name: "Xmas Tree", ledsPerStrip: 360, stripCount: 12,
+  controllers: [{ name: "Dig-Quad A", host: location.host || "4.3.2.1", outputs: [
+    { gpio: 16, strips: [1, 2, 3] }, { gpio: 3, strips: [4, 5, 6] },
+    { gpio: 1, strips: [7, 8, 9] }, { gpio: 4, strips: [10, 11, 12] } ] }]
+};
+
+const S = { layout: null, strips: [], effects: [], selected: new Set(), on: false, bri: 128,
+            live: [], rot: 0, dragging: false };
+const $ = id => document.getElementById(id);
+
+// ---------- layout: must match TreeTool's LayoutMath ----------
+// One segment per strip, chained end to end per output; chains zig-zag, so every 2nd strip runs down.
+function buildStrips(layout) {
+  const strips = [];
+  layout.controllers.forEach((c, ci) => {
+    let start = 0, seg = 0;
+    for (const out of c.outputs) {
+      out.strips.forEach((n, i) => {
+        strips.push({ n, ctrl: ci, seg: seg++, start, stop: start + layout.ledsPerStrip, down: i % 2 === 1,
+                      angle: (n - 1) * 2 * Math.PI / layout.stripCount });
+        start += layout.ledsPerStrip;
+      });
+    }
+  });
+  return strips.sort((a, b) => a.n - b.n);
+}
+
+// ---------- API ----------
+// The page is served by the first controller, so it is same-origin; others are addressed by host.
+function base(ci) { return ci === 0 ? "" : "http://" + S.layout.controllers[ci].host; }
+
+async function api(ci, path, body) {
+  const opts = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+  const r = await fetch(base(ci) + path, opts);
+  if (!r.ok) throw new Error(path + " " + r.status);
+  return r.json();
+}
+
+async function sendAll(body) {
+  const results = await Promise.allSettled(S.layout.controllers.map((_, ci) => api(ci, "/json/state", body)));
+  const failed = results.filter(r => r.status === "rejected").length;
+  setConn(failed === 0);
+  if (failed) toast(failed + " controller(s) did not respond");
+}
+
+// Sends per-segment settings to the selected strips (or all strips), grouped per controller.
+async function sendSegments(segFn, extra = {}) {
+  const targets = S.selected.size ? S.strips.filter(s => S.selected.has(s.n)) : S.strips;
+  const jobs = S.layout.controllers.map((_, ci) => {
+    const seg = targets.filter(s => s.ctrl === ci).map(s => Object.assign({ id: s.seg, on: true }, segFn(s)));
+    return seg.length ? api(ci, "/json/state", Object.assign({ on: true, seg }, extra)) : null;
+  }).filter(Boolean);
+  const results = await Promise.allSettled(jobs);
+  setConn(results.every(r => r.status === "fulfilled"));
+  S.on = true; renderPower();
+}
+
+// ---------- UI helpers ----------
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function setConn(ok) { $("conn").classList.toggle("ok", ok); }
+function hexToRgb(h) { const v = parseInt(h.slice(1), 16); return [v >> 16, (v >> 8) & 255, v & 255]; }
+function throttle(fn, ms) {
+  let last = 0, timer = null;
+  return (...a) => {
+    const now = Date.now(); clearTimeout(timer);
+    if (now - last >= ms) { last = now; fn(...a); } else timer = setTimeout(() => { last = Date.now(); fn(...a); }, ms);
+  };
+}
+
+function renderPower() {
+  $("power").classList.toggle("on", S.on);
+  if (!S.dragging) $("bri").value = S.bri;
+  $("briVal").textContent = Math.round(S.bri / 2.55) + "%";
+}
+
+function targetText() {
+  const n = S.selected.size;
+  return n === 0 ? "Applies to: <b>whole tree</b>" : "Applies to: <b>strip" + (n > 1 ? "s " : " ") +
+    [...S.selected].sort((a, b) => a - b).join(", ") + "</b>";
+}
+
+// ---------- tabs ----------
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("active", x === b));
+  document.querySelectorAll("main section").forEach(s => s.classList.toggle("active", s.id === "tab-" + b.dataset.tab));
+  if (b.dataset.tab === "effects") $("fxTarget").innerHTML = targetText();
+});
+
+// ---------- power & brightness ----------
+$("power").onclick = () => { S.on = !S.on; renderPower(); sendAll({ on: S.on }); };
+const sendBri = throttle(v => sendAll({ bri: v, on: true }), 150);
+$("bri").addEventListener("input", e => { S.dragging = true; S.bri = +e.target.value; S.on = true; renderPower(); sendBri(S.bri); });
+$("bri").addEventListener("change", () => { S.dragging = false; });
+
+// ---------- quick colours ----------
+const QUICK = [["Warm white", "#ffb060"], ["Red", "#ff1010"], ["Green", "#10c030"], ["Gold", "#ffa000"],
+               ["Blue", "#1040ff"], ["Ice", "#b0e0ff"]];
+for (const [name, hex] of QUICK) {
+  const b = document.createElement("button");
+  b.className = "swatch"; b.style.background = hex; b.title = name; b.setAttribute("aria-label", name);
+  b.onclick = () => { S.selected.clear(); renderStrips(); sendSegments(() => ({ fx: 0, col: [hexToRgb(hex), [0, 0, 0], [0, 0, 0]] })); toast(name); };
+  $("quick").appendChild(b);
+}
+
+// ---------- effects ----------
+function renderEffects() {
+  const f = $("fxFilter").value.trim().toLowerCase();
+  const sel = $("fxSel"), current = sel.value;
+  sel.innerHTML = "";
+  S.effects.forEach((name, id) => {
+    if (name === "RSVD" || name === "-" || (f && !name.toLowerCase().includes(f))) return;
+    const o = document.createElement("option"); o.value = id; o.textContent = name; sel.appendChild(o);
+  });
+  if (current) sel.value = current;
+  if (sel.selectedIndex < 0 && sel.options.length) sel.selectedIndex = 0;
+}
+$("fxFilter").addEventListener("input", renderEffects);
+
+function currentFx() {
+  return { fx: +$("fxSel").value || 0, pal: +$("palSel").value || 0, sx: +$("sx").value, ix: +$("ix").value,
+           col: ["c0", "c1", "c2"].map(id => hexToRgb($(id).value)) };
+}
+$("fxApply").onclick = () => { sendSegments(currentFx); toast("Applied"); };
+for (const id of ["sx", "ix"]) {
+  const send = throttle(() => sendSegments(() => ({ [id]: +$(id).value })), 200);
+  $(id).addEventListener("input", send);
+}
+
+// ---------- strip selector ----------
+function renderStrips() {
+  const svg = $("stripSvg"), NS = "http://www.w3.org/2000/svg";
+  svg.innerHTML = "";
+  for (const [label, x, y] of [["N", 0, -150], ["E", 150, 0], ["S", 0, 150], ["W", -150, 0]]) {
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("class", "compass"); t.setAttribute("x", x); t.setAttribute("y", y); t.textContent = label; svg.appendChild(t);
+  }
+  const ring = document.createElementNS(NS, "circle");
+  ring.setAttribute("r", 110); ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#29423a"); ring.setAttribute("stroke-dasharray", "4 6");
+  svg.appendChild(ring);
+  for (const s of S.strips) {
+    const g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "s" + (S.selected.has(s.n) ? " sel" : ""));
+    g.setAttribute("transform", `translate(${110 * Math.sin(s.angle)} ${-110 * Math.cos(s.angle)})`);
+    const c = document.createElementNS(NS, "circle"); c.setAttribute("r", 22);
+    const t = document.createElementNS(NS, "text"); t.textContent = s.n;
+    g.append(c, t);
+    g.onclick = () => { S.selected.has(s.n) ? S.selected.delete(s.n) : S.selected.add(s.n); renderStrips(); };
+    svg.appendChild(g);
+  }
+}
+
+function renderGroups() {
+  const deg = s => (s.angle * 180 / Math.PI + 360) % 360;
+  const inQuad = (s, centre) => { const d = Math.abs(((deg(s) - centre + 540) % 360) - 180); return d < 45 || (d === 45 && centre !== 270); };
+  const groups = [
+    ["All (clear)", () => []],
+    ["North", () => S.strips.filter(s => inQuad(s, 0))],
+    ["East", () => S.strips.filter(s => inQuad(s, 90))],
+    ["South", () => S.strips.filter(s => inQuad(s, 180))],
+    ["West", () => S.strips.filter(s => inQuad(s, 270))],
+    ["Odd strips", () => S.strips.filter(s => s.n % 2 === 1)],
+    ["Even strips", () => S.strips.filter(s => s.n % 2 === 0)],
+  ];
+  for (const [label, pick] of groups) {
+    const b = document.createElement("button"); b.className = "btn"; b.textContent = label;
+    b.onclick = () => { S.selected = new Set(pick().map(s => s.n)); renderStrips(); };
+    $("groups").appendChild(b);
+  }
+}
+
+// ---------- presets ----------
+async function loadPresets() {
+  const list = $("presetList"); list.innerHTML = "";
+  let presets = {};
+  try { const r = await fetch("/presets.json"); if (r.ok) presets = await r.json(); } catch { /* none saved yet */ }
+  const ids = Object.keys(presets).filter(id => id !== "0" && presets[id] && presets[id].n).sort((a, b) => a - b);
+  if (!ids.length) { list.innerHTML = '<p class="note">No presets saved yet.</p>'; return presets; }
+  for (const id of ids) {
+    const b = document.createElement("button"); b.className = "btn";
+    b.textContent = (presets[id].playlist ? "▶ " : "") + presets[id].n;
+    b.onclick = () => { sendAll({ ps: +id }); S.on = true; renderPower(); toast(presets[id].n); };
+    list.appendChild(b);
+  }
+  return presets;
+}
+
+$("savePreset").onclick = async () => {
+  const name = prompt("Preset name?");
+  if (!name) return;
+  const presets = await loadPresets();
+  let id = 2;
+  while (presets[id] && id < 250) id++;
+  await sendAll({ psave: id, n: name, ib: true, sb: true });
+  setTimeout(loadPresets, 800);
+  toast("Saved as preset " + id);
+};
+
+// ---------- live preview ----------
+// WLED's /json/live returns a down-sampled frame: leds[k] is LED k*n on that controller.
+async function pollLive() {
+  if ($("tab-tree").classList.contains("active") && !document.hidden) {
+    const frames = await Promise.allSettled(S.layout.controllers.map((_, ci) => api(ci, "/json/live")));
+    const points = [];
+    frames.forEach((f, ci) => {
+      if (f.status !== "fulfilled") return;
+      const { leds = [], n = 1 } = f.value;
+      leds.forEach((hex, k) => {
+        const i = k * n, s = S.strips.find(x => x.ctrl === ci && i >= x.start && i < x.stop);
+        if (!s) return;
+        const pos = (i - s.start + 0.5) / S.layout.ledsPerStrip;
+        points.push({ s, h: s.down ? 1 - pos : pos, c: "#" + hex.slice(-6) });
+      });
+    });
+    S.live = points;
+    setConn(frames.some(f => f.status === "fulfilled"));
+  }
+  setTimeout(pollLive, 300);
+}
+
+function drawTree() {
+  const cv = $("treeCanvas"), dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== w * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  const cx = w / 2, baseY = h * 0.92, H = h * 0.82, R = Math.min(w * 0.42, H * 0.45);
+  const proj = (s, hh) => { const a = s.angle + S.rot, r = R * (1 - hh);
+    return { x: cx + r * Math.sin(a), y: baseY - hh * H + r * 0.18 * Math.cos(a), z: Math.cos(a) }; };
+
+  // strip guide lines
+  g.lineWidth = 1;
+  for (const s of S.strips) {
+    const b = proj(s, 0), t = proj(s, 1);
+    g.strokeStyle = b.z > 0 ? "#29423a" : "#1a2c24";
+    g.beginPath(); g.moveTo(b.x, b.y); g.lineTo(t.x, t.y); g.stroke();
+  }
+  // LEDs, back to front
+  const pts = S.live.map(p => Object.assign(proj(p.s, p.h), { c: p.c })).sort((a, b) => a.z - b.z);
+  for (const p of pts) {
+    if (p.c === "#000000") continue;
+    g.globalAlpha = 0.45 + 0.55 * (p.z + 1) / 2;
+    g.shadowColor = p.c; g.shadowBlur = 8;
+    g.fillStyle = p.c;
+    g.beginPath(); g.arc(p.x, p.y, 2.2 + 1.2 * (p.z + 1) / 2, 0, Math.PI * 2); g.fill();
+  }
+  g.globalAlpha = 1; g.shadowBlur = 0;
+  // star
+  g.fillStyle = "#e8b44c"; g.font = "20px system-ui"; g.textAlign = "center"; g.fillText("★", cx, baseY - H - 4);
+
+  S.rot += 0.004;
+  requestAnimationFrame(drawTree);
+}
+
+// ---------- state sync ----------
+async function pollState() {
+  try {
+    const st = await api(0, "/json/state");
+    S.on = st.on; if (!S.dragging) S.bri = st.bri;
+    renderPower(); setConn(true);
+  } catch { setConn(false); }
+  setTimeout(pollState, 3000);
+}
+
+// ---------- start ----------
+(async function init() {
+  try { const r = await fetch("/tree.json", { cache: "no-store" }); S.layout = r.ok ? await r.json() : DEFAULT_LAYOUT; }
+  catch { S.layout = DEFAULT_LAYOUT; }
+  $("title").textContent = S.layout.name || "Xmas Tree";
+  S.strips = buildStrips(S.layout);
+  renderStrips(); renderGroups();
+
+  try {
+    const [eff, pal] = await Promise.all([api(0, "/json/eff"), api(0, "/json/pal")]);
+    S.effects = eff; renderEffects();
+    pal.forEach((name, id) => { const o = document.createElement("option"); o.value = id; o.textContent = name; $("palSel").appendChild(o); });
+  } catch { toast("Can't reach the tree. Are you on its Wi-Fi?"); }
+
+  loadPresets();
+  pollState();
+  pollLive();
+  drawTree();
+})();
+</script>
+</body>
+</html>
