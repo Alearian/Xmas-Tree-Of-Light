@@ -24,7 +24,7 @@
   #conn { width: 10px; height: 10px; border-radius: 50%; background: var(--red); flex: none; }
   #conn.ok { background: var(--ok); }
   #power { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel2);
-    color: var(--dim); font-size: 24px; cursor: pointer; }
+    color: var(--dim); cursor: pointer; display: grid; place-items: center; padding: 0; }
   #power.on { background: var(--accent); border-color: var(--accent); color: #231a05; box-shadow: 0 0 18px #e8b44c66; }
 
   .bri { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
@@ -80,7 +80,7 @@
 <header>
   <div id="conn" title="Connection"></div>
   <h1 id="title">Xmas Tree</h1>
-  <button id="power" aria-label="Power">⏻</button>
+  <button id="power" aria-label="Power"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></button>
 </header>
 <div class="bri">
   <input id="bri" type="range" min="1" max="255" value="128" aria-label="Brightness">
@@ -343,6 +343,14 @@ $("savePreset").onclick = async () => {
 
 // ---------- live preview ----------
 // WLED's /json/live returns a down-sampled frame: leds[k] is LED k*n on that controller.
+// Its colours already include master brightness; undo that so the preview stays readable when dimmed.
+function previewColour(hex) {
+  const gain = Math.min(255 / Math.max(S.bri, 1), 8);
+  const v = parseInt(hex.slice(-6), 16);
+  const ch = x => Math.min(255, Math.round(x * gain)).toString(16).padStart(2, "0");
+  return "#" + ch(v >> 16) + ch((v >> 8) & 255) + ch(v & 255);
+}
+
 async function pollLive() {
   if ($("tab-tree").classList.contains("active") && !document.hidden) {
     const frames = await Promise.allSettled(S.layout.controllers.map((_, ci) => api(ci, "/json/live")));
@@ -354,7 +362,7 @@ async function pollLive() {
         const i = k * n, s = S.strips.find(x => x.ctrl === ci && i >= x.start && i < x.stop);
         if (!s) return;
         const pos = (i - s.start + 0.5) / S.layout.ledsPerStrip;
-        points.push({ s, h: s.down ? 1 - pos : pos, c: "#" + hex.slice(-6) });
+        points.push({ s, h: s.down ? 1 - pos : pos, c: previewColour(hex) });
       });
     });
     S.live = points;
