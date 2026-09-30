@@ -29,6 +29,10 @@ Follows the four phases in the technical doc, plus our own software work.
 - [x] Shared layout file (`config/tree.json`) and C# TreeTool (backup/plan/apply/upload/test/serve)
 - [x] Full-tree layout applied to the board. The app has been uploaded to `http://4.3.2.1/tree.htm`.
 - [ ] Try the app on a phone and polish it
+- [ ] **Paused here (2026-09-30):** choose the networking option.
+  1. The board joins home Wi-Fi `<home-wifi>`, with `WLED-AP` as a fallback. **Recommended.** The user types the password at `http://4.3.2.1/settings/wifi`. Afterwards: find its new IP, update `config/tree.json`, re-upload, and consider a fixed IP.
+  2. PC bridge: `treetool serve` listening on the LAN at <pc-ip>:8080 (needs a firewall rule).
+  3. A travel router in the enclosure (later, for multiple controllers).
 - [ ] **Phone controller**: a mobile-first web app (PWA) using the WLED JSON API. It gives on/off, brightness, speed, presets and playlists, plus tree-aware controls (per strip or quadrant, bands by height).
 - [ ] **Config tool**: applies a version-controlled WLED config (outputs, segments, presets, AP settings) and always backs up the current config first
 - [ ] **Decision:** how to run xLights shows standalone ([open-questions.md](open-questions.md) §6). The choices are WLED built-in effects only, an FPP/Pi player, or a custom FSEQ player.
