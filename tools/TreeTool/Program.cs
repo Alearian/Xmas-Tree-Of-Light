@@ -14,6 +14,9 @@ Commands
   apply           Backup, then set LED outputs, current limiter, one segment per strip,
                   and save them as the layout preset (asks for confirmation)
   upload          Upload the phone app (app/tree.htm) and the layout (as tree.json)
+  looks [--looks config/looks.json]
+                  Backup, then save the cone looks as presets and the shows as playlists,
+                  and start the first show (asks for confirmation)
   test <mode>     strips  - each strip a different colour (check numbering/mapping)
                   chase   - chase effect on every strip (check up/down direction)
                   white   - full white on every strip (for current measurement;
@@ -48,6 +51,7 @@ try
         "plan" => await Plan(layout),
         "apply" => await Apply(layout),
         "upload" => await Upload(layout),
+        "looks" => await InstallLooks(layout),
         "test" => await Test(layout, argsList.ElementAtOrDefault(1) ?? ""),
         "serve" => await DevServer.Run(root, layoutPath, layout, int.Parse(Option("--port") ?? "8080")),
         _ => Fail($"Unknown command '{argsList[0]}'.\n\n{Usage}"),
@@ -173,6 +177,66 @@ async Task<int> Upload(TreeLayout layout)
     }
     return 0;
 }
+
+async Task<int> InstallLooks(TreeLayout layout)
+{
+    var looksPath = Path.GetFullPath(Path.Combine(root, Option("--looks") ?? "config/looks.json"));
+    var file = JsonNode.Parse(await File.ReadAllTextAsync(looksPath))
+        ?? throw new InvalidDataException($"Empty looks file: {looksPath}");
+    var looks = file["looks"]?.AsArray() ?? [];
+    var shows = file["shows"]?.AsArray() ?? [];
+    Console.WriteLine($"Looks: {looks.Count}, shows: {shows.Count} ({Path.GetRelativePath(root, looksPath)})");
+    foreach (var look in looks)
+        Console.WriteLine($"  preset {look!["id"],3}  {look["name"]}");
+    foreach (var show in shows)
+        Console.WriteLine($"  preset {show!["id"],3}  {show["name"]} (playlist of {show["looks"]?.AsArray().Count} looks)");
+    Console.WriteLine();
+
+    foreach (var c in layout.Controllers)
+    {
+        using var wled = new WledClient(c.Host);
+        if (!assumeYes && !Confirm($"Save these presets on {c.Name}? Presets with the same numbers are replaced."))
+        {
+            Console.WriteLine("Skipped.");
+            continue;
+        }
+        await Backup(wled, c);
+        var effects = Names(await wled.GetJsonAsync("json/eff"));
+        var palettes = Names(await wled.GetJsonAsync("json/pal"));
+        int Find(List<string> names, string name, string kind)
+        {
+            var i = names.FindIndex(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase));
+            return i >= 0 ? i : throw new InvalidDataException($"{kind} '{name}' not found on {c.Name}");
+        }
+
+        foreach (var look in looks.Select(n => n!))
+        {
+            // "o": true stores exactly this body as the preset, without showing it first. Saving the live
+            // state instead would also capture anything another phone or app changes at the same moment.
+            var preset = Looks.State(layout, c, look, n => Find(effects, n, "Effect"), n => Find(palettes, n, "Palette"));
+            preset["psave"] = look["id"]!.GetValue<int>();
+            preset["n"] = look["name"]!.ToString();
+            preset["o"] = true;
+            await wled.PostJsonAsync("json/state", preset);
+            await Task.Delay(400); // let WLED finish writing presets.json
+            Console.WriteLine($"Saved preset {look["id"]}: {look["name"]}");
+        }
+        foreach (var show in shows.Select(n => n!))
+        {
+            await wled.PostJsonAsync("json/state", Looks.ShowPreset(show));
+            await Task.Delay(400);
+            Console.WriteLine($"Saved playlist {show["id"]}: {show["name"]}");
+        }
+        if (shows.Count > 0)
+        {
+            await wled.PostJsonAsync("json/state", new JsonObject { ["ps"] = shows[0]!["id"]!.GetValue<int>() });
+            Console.WriteLine($"Playing '{shows[0]!["name"]}'.");
+        }
+    }
+    return 0;
+}
+
+static List<string> Names(JsonNode list) => list.AsArray().Select(n => n?.ToString() ?? "").ToList();
 
 async Task<int> Test(TreeLayout layout, string mode)
 {

@@ -1,0 +1,67 @@
+{
+  "looks": [
+    {
+      "id": 20, "name": "Candy cane spiral",
+      "fx": "Running", "pal": "Default", "sx": 70, "ix": 40,
+      "colours": ["#ff1010", "#ffffff", "#000000"],
+      "twist": 12
+    },
+    {
+      "id": 21, "name": "Rainbow helix",
+      "fx": "Rainbow", "pal": "Default", "sx": 90, "ix": 60,
+      "colours": ["#ff0000", "#000000", "#000000"],
+      "twist": 25
+    },
+    {
+      "id": 22, "name": "Rising rings",
+      "fx": "Running", "pal": "Default", "sx": 90, "ix": 30,
+      "colours": ["#ffa000", "#002a08", "#000000"],
+      "twist": 0
+    },
+    {
+      "id": 23, "name": "Up and down",
+      "fx": "Running", "pal": "Default", "sx": 80, "ix": 40,
+      "colours": ["#ff1010", "#000000", "#000000"],
+      "twist": 0, "flip": "even",
+      "groups": { "even": { "colours": ["#10c030", "#000000", "#000000"] } }
+    },
+    {
+      "id": 24, "name": "Fire tree",
+      "fx": "Fire 2012", "pal": "Fire", "sx": 110, "ix": 120,
+      "colours": ["#ff0000", "#000000", "#000000"]
+    },
+    {
+      "id": 25, "name": "Snowfall",
+      "fx": "Drip", "pal": "Default", "sx": 90, "ix": 180,
+      "colours": ["#d0e8ff", "#000000", "#000000"]
+    },
+    {
+      "id": 26, "name": "Four quarters",
+      "fx": "Twinklefox", "pal": "Default", "sx": 100, "ix": 160,
+      "colours": ["#ff1010", "#000000", "#000000"],
+      "groups": {
+        "E": { "colours": ["#10c030", "#000000", "#000000"] },
+        "S": { "colours": ["#ffa000", "#000000", "#000000"] },
+        "W": { "colours": ["#d0e8ff", "#000000", "#000000"] }
+      }
+    },
+    {
+      "id": 27, "name": "Christmas lights",
+      "fx": "Twinklefox", "pal": "C9", "sx": 90, "ix": 170,
+      "colours": ["#ff0000", "#000000", "#000000"]
+    },
+    {
+      "id": 28, "name": "Spiral fill",
+      "fx": "Wipe", "pal": "Default", "sx": 120, "ix": 128,
+      "colours": ["#10c030", "#ffa000", "#000000"],
+      "twist": 20
+    }
+  ],
+  "shows": [
+    {
+      "id": 40, "name": "Tree show",
+      "looks": [20, 27, 21, 24, 22, 25, 28, 26, 23],
+      "seconds": 60, "fadeSeconds": 2
+    }
+  ]
+}

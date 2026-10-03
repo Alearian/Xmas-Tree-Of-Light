@@ -17,8 +17,13 @@ public sealed record TreeLayout(
     int ColorOrder,
     Abl Abl,
     int LayoutPreset,
-    Controller[] Controllers)
+    Controller[] Controllers,
+    int[]? Attached = null)
 {
+    /// <summary>Strips physically wired up. The rest are still rendered by WLED (and previewed by the app).</summary>
+    public IReadOnlyCollection<int> AttachedStrips =>
+        Attached ?? Controllers.SelectMany(c => c.Outputs).SelectMany(o => o.Strips).ToArray();
+
     static readonly JsonSerializerOptions Options = new() { PropertyNameCaseInsensitive = true };
 
     public static TreeLayout Load(string path)
@@ -38,6 +43,8 @@ public sealed record TreeLayout(
             throw new InvalidDataException("A strip number appears on more than one output");
         if (all.Any(s => s < 1 || s > StripCount))
             throw new InvalidDataException($"Strip numbers must be 1..{StripCount}");
+        if (Attached?.Any(s => !all.Contains(s)) == true)
+            throw new InvalidDataException("attached lists a strip that isn't on any output");
         foreach (var c in Controllers)
             if (c.Outputs.Length > 4)
                 throw new InvalidDataException($"{c.Name}: a Dig-Quad has at most 4 outputs");

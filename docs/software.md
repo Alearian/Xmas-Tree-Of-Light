@@ -30,6 +30,7 @@ dotnet run --project tools/TreeTool -- <command> [--layout config/bench.json] [-
 | `plan` | Shows current vs desired outputs, limiter and segments | no |
 | `apply` | Backs up, shows the plan, asks, writes the LED outputs (then reboots), creates one segment per strip and saves them as the boot preset. **Safe to re-run:** it skips the config step and the reboot if the outputs already match. | **yes** |
 | `upload` | Uploads `app/tree.htm` and the layout (as `/tree.json`) | yes (files only) |
+| `looks [--looks config/looks.json]` | Backs up, saves the cone looks as presets 20+ and the shows as playlists (40+), then starts the first show. See [config/README.md](../config/README.md#looks-looksjson). | yes (presets) |
 | `test strips` / `chase` / `white` / `off` | Test patterns: a colour per strip, a direction check, full white for measuring current, and off | state only |
 | `serve [--port 8080]` | Serves the app from disk and proxies the API to the first controller, so you can edit the app without uploading it each time | no |
 
@@ -40,7 +41,7 @@ dotnet run --project tools/TreeTool -- <command> [--layout config/bench.json] [-
 ## Phone app
 
 - **Header:** connection dot, power button and brightness (these affect every controller)
-- **Tree:** a slowly rotating 3D cone preview made from WLED's live feed (about 15 samples per strip), plus quick whole-tree colours
+- **Tree:** a slowly rotating 3D cone preview made from WLED's live feed (about 15 samples per strip), plus quick whole-tree colours. Strips listed in the layout's `attached` glow and are tagged LIVE. The others are drawn faded with dashed guides, showing what they would display.
 - **Effects:** search the effect list, palette, 3 colours, speed and intensity. Applies to the selected strips (or the whole tree).
 - **Strips:** a top-down tree with 12 tappable strips, plus groups (North/East/South/West, odd, even)
 - **Presets:** tap to load, including playlists (▶), and save the current look as a new preset

@@ -1,0 +1,23 @@
+{
+  "name": "Prototype tree (strip 1 live)",
+  "ledsPerStrip": 300,
+  "stripCount": 12,
+  "heightMetres": 5,
+  "ledType": 22,
+  "colorOrder": 0,
+  "abl": { "ledMa": 11, "maxMa": 60000 },
+  "layoutPreset": 10,
+  "attached": [1],
+  "controllers": [
+    {
+      "name": "Dig-Quad A",
+      "host": "xmastree.local",
+      "outputs": [
+        { "gpio": 16, "strips": [1, 2, 3] },
+        { "gpio": 3,  "strips": [4, 5, 6] },
+        { "gpio": 1,  "strips": [7, 8, 9] },
+        { "gpio": 4,  "strips": [10, 11, 12] }
+      ]
+    }
+  ]
+}

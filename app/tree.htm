@@ -68,6 +68,11 @@
   #stripSvg .s.sel circle { fill: var(--accent); stroke: var(--accent); }
   #stripSvg .s text { fill: var(--text); font-size: 13px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
   #stripSvg .s.sel text { fill: #231a05; font-weight: 700; }
+  #stripSvg .s.live circle { stroke: var(--ok); stroke-width: 3; }
+  #stripSvg .s.live.sel circle { stroke: var(--ok); }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--dim); font-size: 13px; margin: 8px 0 0; }
+  .legend[hidden] { display: none; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
   #stripSvg .compass { fill: var(--dim); font-size: 13px; text-anchor: middle; dominant-baseline: central; }
 
   #presetList .btn { text-align: left; min-height: 56px; }
@@ -91,8 +96,11 @@
   <section id="tab-tree" class="active">
     <canvas id="treeCanvas"></canvas>
     <p class="note" id="previewNote">Live preview of what the controller is sending to the strips.</p>
+    <p class="legend" id="previewLegend" hidden><span><i style="background:var(--ok);box-shadow:0 0 6px var(--ok)"></i>Attached (what the strip is showing)</span><span><i style="background:var(--dim);opacity:.5"></i>Not attached yet (what it would show)</span></p>
     <h2>Quick colours (whole tree)</h2>
     <div class="swatches" id="quick"></div>
+    <!-- bump when changing the app, so it's easy to tell which copy a phone has loaded -->
+    <p class="note" style="text-align:center;margin-top:24px">App version 2026-10-03b</p>
   </section>
 
   <section id="tab-effects">
@@ -115,7 +123,7 @@
   </section>
 
   <section id="tab-strips">
-    <p class="note">Tap strips to choose where effects and colours go. Nothing selected means the whole tree.</p>
+    <p class="note">Tap strips to choose where effects and colours go. Nothing selected means the whole tree. Strips with a green ring are attached.</p>
     <svg id="stripSvg" viewBox="-170 -170 340 340"></svg>
     <h2>Groups</h2>
     <div class="grid" id="groups"></div>
@@ -147,8 +155,8 @@ const DEFAULT_LAYOUT = {
     { gpio: 1, strips: [7, 8, 9] }, { gpio: 4, strips: [10, 11, 12] } ] }]
 };
 
-const S = { layout: null, strips: [], effects: [], selected: new Set(), on: false, bri: 128,
-            live: [], rot: 0, dragging: false };
+const S = { layout: null, strips: [], attached: new Set(), effects: [], selected: new Set(), on: false, bri: 128,
+            colours: [], ledMap: [], wsSeen: [], rot: 0, dragging: false };
 const $ = id => document.getElementById(id);
 
 // ---------- layout: must match TreeTool's LayoutMath ----------
@@ -285,7 +293,7 @@ function renderStrips() {
   svg.appendChild(ring);
   for (const s of S.strips) {
     const g = document.createElementNS(NS, "g");
-    g.setAttribute("class", "s" + (S.selected.has(s.n) ? " sel" : ""));
+    g.setAttribute("class", "s" + (S.selected.has(s.n) ? " sel" : "") + (S.attached.has(s.n) ? " live" : ""));
     g.setAttribute("transform", `translate(${110 * Math.sin(s.angle)} ${-110 * Math.cos(s.angle)})`);
     const c = document.createElementNS(NS, "circle"); c.setAttribute("r", 22);
     const t = document.createElementNS(NS, "text"); t.textContent = s.n;
@@ -342,31 +350,69 @@ $("savePreset").onclick = async () => {
 };
 
 // ---------- live preview ----------
-// WLED's /json/live returns a down-sampled frame: leds[k] is LED k*n on that controller.
-// Its colours already include master brightness; undo that so the preview stays readable when dimmed.
-function previewColour(hex) {
+// Two feeds, both down-sampled by WLED (sample k = LED k*n on that controller):
+//  - the WebSocket live view: up to 1,024 LEDs per frame on an ESP32, pushed as WLED renders (preferred)
+//  - /json/live: 180 LEDs, polled (fallback, e.g. when served by "treetool serve")
+// Each sample is spread over the n LEDs it stands for, so every LED position on every strip gets a colour.
+// The colours already include master brightness; previewColour undoes that so the preview stays readable when dimmed.
+function previewColour(r, g, b) {
   const gain = Math.min(255 / Math.max(S.bri, 1), 8);
-  const v = parseInt(hex.slice(-6), 16);
   const ch = x => Math.min(255, Math.round(x * gain)).toString(16).padStart(2, "0");
-  return "#" + ch(v >> 16) + ch((v >> 8) & 255) + ch(v & 255);
+  return "#" + ch(r) + ch(g) + ch(b);
+}
+
+// For each controller: LED index -> [index into S.strips, position from the bottom of that strip].
+function buildLedMaps() {
+  const L = S.layout.ledsPerStrip;
+  S.colours = S.strips.map(() => new Array(L).fill(null));
+  S.ledMap = S.layout.controllers.map((_, ci) => {
+    const map = [];
+    S.strips.forEach((s, si) => {
+      if (s.ctrl !== ci) return;
+      for (let i = s.start; i < s.stop; i++) { const p = i - s.start; map[i] = [si, s.down ? L - 1 - p : p]; }
+    });
+    return map;
+  });
+}
+
+function applyFrame(ci, count, n, colourAt) {
+  const map = S.ledMap[ci];
+  for (let k = 0; k < count; k++) {
+    const c = colourAt(k);
+    for (let j = 0; j < n; j++) { const m = map[k * n + j]; if (m) S.colours[m[0]][m[1]] = c; }
+  }
+}
+
+const treeVisible = () => $("tab-tree").classList.contains("active") && !document.hidden;
+
+function openLiveSocket(ci) {
+  const host = ci === 0 ? location.host : S.layout.controllers[ci].host;
+  if (!host || !("WebSocket" in window)) return;
+  let ws;
+  try { ws = new WebSocket("ws://" + host + "/ws"); } catch { return; }
+  ws.binaryType = "arraybuffer";
+  ws.onopen = () => ws.send(JSON.stringify({ lv: true }));
+  ws.onmessage = ev => {
+    if (!(ev.data instanceof ArrayBuffer)) return;          // text messages are state updates
+    const b = new Uint8Array(ev.data);
+    if (b[0] !== 76) return;                                 // 'L' = live LED frame
+    const pos = b[1] === 2 ? 4 : 2, count = Math.floor((b.length - pos) / 3);
+    const total = S.ledMap[ci].length, n = Math.max(1, Math.round(total / Math.max(count, 1)));
+    S.wsSeen[ci] = Date.now();
+    if (!treeVisible()) return;
+    applyFrame(ci, count, n, k => previewColour(b[pos + 3 * k], b[pos + 3 * k + 1], b[pos + 3 * k + 2]));
+    setConn(true);
+  };
+  ws.onclose = () => { S.wsSeen[ci] = 0; setTimeout(() => openLiveSocket(ci), 3000); };
 }
 
 async function pollLive() {
-  if ($("tab-tree").classList.contains("active") && !document.hidden) {
-    const frames = await Promise.allSettled(S.layout.controllers.map((_, ci) => api(ci, "/json/live")));
-    const points = [];
-    frames.forEach((f, ci) => {
-      if (f.status !== "fulfilled") return;
-      const { leds = [], n = 1 } = f.value;
-      leds.forEach((hex, k) => {
-        const i = k * n, s = S.strips.find(x => x.ctrl === ci && i >= x.start && i < x.stop);
-        if (!s) return;
-        const pos = (i - s.start + 0.5) / S.layout.ledsPerStrip;
-        points.push({ s, h: s.down ? 1 - pos : pos, c: previewColour(hex) });
-      });
-    });
-    S.live = points;
-    setConn(frames.some(f => f.status === "fulfilled"));
+  if (treeVisible()) {
+    const jobs = S.layout.controllers.map((_, ci) => Date.now() - (S.wsSeen[ci] || 0) < 2000 ? null :
+      api(ci, "/json/live").then(({ leds = [], n = 1 }) => applyFrame(ci, leds.length, n, k => {
+        const v = parseInt(leds[k].slice(-6), 16); return previewColour(v >> 16, (v >> 8) & 255, v & 255);
+      }))).filter(Boolean);
+    if (jobs.length) setConn((await Promise.allSettled(jobs)).some(r => r.status === "fulfilled"));
   }
   setTimeout(pollLive, 300);
 }
@@ -382,23 +428,43 @@ function drawTree() {
   const proj = (s, hh) => { const a = s.angle + S.rot, r = R * (1 - hh);
     return { x: cx + r * Math.sin(a), y: baseY - hh * H + r * 0.18 * Math.cos(a), z: Math.cos(a) }; };
 
-  // strip guide lines
+  // strip guide lines: solid for attached strips, dashed for ones that aren't wired up yet
   g.lineWidth = 1;
   for (const s of S.strips) {
-    const b = proj(s, 0), t = proj(s, 1);
-    g.strokeStyle = b.z > 0 ? "#29423a" : "#1a2c24";
+    const b = proj(s, 0), t = proj(s, 1), live = S.attached.has(s.n);
+    g.setLineDash(live ? [] : [3, 5]);
+    g.strokeStyle = live ? (b.z > 0 ? "#4cc38a99" : "#4cc38a44") : (b.z > 0 ? "#29423a" : "#1a2c24");
     g.beginPath(); g.moveTo(b.x, b.y); g.lineTo(t.x, t.y); g.stroke();
   }
-  // LEDs, back to front
-  const pts = S.live.map(p => Object.assign(proj(p.s, p.h), { c: p.c })).sort((a, b) => a.z - b.z);
-  for (const p of pts) {
-    if (p.c === "#000000") continue;
-    g.globalAlpha = 0.45 + 0.55 * (p.z + 1) / 2;
-    g.shadowColor = p.c; g.shadowBlur = 8;
-    g.fillStyle = p.c;
-    g.beginPath(); g.arc(p.x, p.y, 2.2 + 1.2 * (p.z + 1) / 2, 0, Math.PI * 2); g.fill();
+  g.setLineDash([]);
+  // Every LED of every strip, strips drawn back to front. Attached strips glow;
+  // the others show what they would display, slightly softer.
+  const L = S.layout.ledsPerStrip;
+  const order = S.strips.map((s, si) => ({ s, si, z: Math.cos(s.angle + S.rot) })).sort((a, b) => a.z - b.z);
+  for (const { s, si, z } of order) {
+    const live = S.attached.has(s.n), depth = (z + 1) / 2, cols = S.colours[si] || [];
+    g.globalAlpha = live ? 0.55 + 0.45 * depth : 0.3 + 0.5 * depth;
+    g.shadowBlur = live ? 6 : 0;
+    const rad = (live ? 1.6 : 1.3) + 0.7 * depth;
+    for (let p = 0; p < L; p++) {
+      const c = cols[p];
+      if (!c || c === "#000000") continue;
+      const q = proj(s, (p + 0.5) / L);
+      g.fillStyle = c; if (live) g.shadowColor = c;
+      g.beginPath(); g.arc(q.x, q.y, rad, 0, Math.PI * 2); g.fill();
+    }
   }
   g.globalAlpha = 1; g.shadowBlur = 0;
+  // label attached strips at the base, unless every strip is attached
+  if (S.attached.size < S.strips.length) {
+    g.font = "11px system-ui"; g.textAlign = "center"; g.fillStyle = "#4cc38a";
+    for (const s of S.strips) if (S.attached.has(s.n)) {
+      const b = proj(s, 0);
+      g.globalAlpha = b.z > -0.3 ? 1 : 0.35;
+      g.fillText("LIVE " + s.n, b.x, b.y + 16);
+    }
+    g.globalAlpha = 1;
+  }
   // star
   g.fillStyle = "#e8b44c"; g.font = "20px system-ui"; g.textAlign = "center"; g.fillText("★", cx, baseY - H - 4);
 
@@ -422,6 +488,14 @@ async function pollState() {
   catch { S.layout = DEFAULT_LAYOUT; }
   $("title").textContent = S.layout.name || "Xmas Tree";
   S.strips = buildStrips(S.layout);
+  S.attached = new Set(Array.isArray(S.layout.attached) ? S.layout.attached : S.strips.map(s => s.n));
+  if (S.attached.size < S.strips.length) {
+    const live = [...S.attached].sort((a, b) => a - b);
+    $("previewNote").textContent = `Strip${live.length > 1 ? "s" : ""} ${live.join(", ")} ${live.length > 1 ? "are" : "is"} wired up and live. ` +
+      `The other ${S.strips.length - live.length} show what they would display: the controller calculates them too.`;
+    $("previewLegend").hidden = false;
+  }
+  buildLedMaps();
   renderStrips(); renderGroups();
 
   try {
@@ -432,6 +506,7 @@ async function pollState() {
 
   loadPresets();
   pollState();
+  S.layout.controllers.forEach((_, ci) => openLiveSocket(ci));
   pollLive();
   drawTree();
 })();

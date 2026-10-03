@@ -38,7 +38,9 @@ Follows the four phases in the technical doc, plus our own software work.
 - [ ] **Phone controller**: a mobile-first web app (PWA) using the WLED JSON API. It gives on/off, brightness, speed, presets and playlists, plus tree-aware controls (per strip or quadrant, bands by height).
 - [ ] **Config tool**: applies a version-controlled WLED config (outputs, segments, presets, AP settings) and always backs up the current config first
 - [x] **Decision (2026-10-03):** the tree runs standalone on WLED built-in effects, presets and playlists, controlled from the phone app. No laptop is needed ([open-questions.md](open-questions.md) §6).
-- [ ] **Look library:** a version-controlled set of tree presets (whole-tree and per-strip/quadrant looks) and a "show" playlist that cycles through them, applied by TreeTool so the board can be rebuilt from the repo
+- [x] **Look library (first version, 2026-10-03):** `config/looks.json`, installed by `treetool looks`: 9 cone looks (presets 20–28) and the "Tree show" playlist (40). Next: tune them on the real strip.
+- [ ] **Custom cone effects in firmware (later):** a WLED add-on in C++ for effects that presets can't do, such as a rotating beam, true snowfall and a star burst. Needs USB recovery working first.
+- [ ] ~~Look library~~ (original note): a version-controlled set of tree presets (whole-tree and per-strip/quadrant looks) and a "show" playlist that cycles through them, applied by TreeTool so the board can be rebuilt from the repo
 - [ ] **App time sync:** the board has no internet, so it has no clock. The app sends the phone's time when it opens, which lets WLED run on/off schedules.
 - [ ] **Consider WLED 2D mapping:** the zig-zag strips form a 12 × 360 serpentine matrix, so 2D effects (scrolling text, fire, plasma, rain) could wrap around the tree
 
