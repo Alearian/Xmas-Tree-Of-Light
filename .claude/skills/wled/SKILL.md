@@ -1,25 +1,25 @@
 ---
 name: wled
-description: Talk to the Xmas tree's WLED controller (QuinLED Dig-Quad V3 at http://4.3.2.1) — read status, set colours/effects/brightness, back up and change device config. Use whenever the task involves the tree lights, WLED, the Dig-Quad, segments, presets or the LED JSON API.
+description: Talk to the Xmas tree's WLED controller (QuinLED Dig-Quad V3 at http://xmastree.local) — read status, set colours/effects/brightness, back up and change device config. Use whenever the task involves the tree lights, WLED, the Dig-Quad, segments, presets or the LED JSON API.
 ---
 
 # WLED controller
 
-Device base URL: `http://4.3.2.1` (WLED AP mode). If it moves onto the home Wi-Fi, update this URL and `docs/hardware.md`.
+Device base URL: `http://xmastree.local` (home Wi-Fi, DHCP, currently <board-ip>). If the board can't find the home Wi-Fi at boot, it falls back to its own AP `WLED-AP` at `http://4.3.2.1`. If the name stops resolving, find the board by its MAC 28:56:2f:55:35:8c with `arp -a`.
 
 ## Read (always safe)
 ```powershell
-Invoke-RestMethod http://4.3.2.1/json/info    # version, LED count, uptime
-Invoke-RestMethod http://4.3.2.1/json/state   # on, bri, segments
-Invoke-RestMethod http://4.3.2.1/json/cfg     # full config (hw.led.ins = outputs)
-Invoke-RestMethod http://4.3.2.1/json/eff     # effect names (index = fx id)
+Invoke-RestMethod http://xmastree.local/json/info    # version, LED count, uptime
+Invoke-RestMethod http://xmastree.local/json/state   # on, bri, segments
+Invoke-RestMethod http://xmastree.local/json/cfg     # full config (hw.led.ins = outputs)
+Invoke-RestMethod http://xmastree.local/json/eff     # effect names (index = fx id)
 ```
 
 ## Change state (fine while testing)
 POST JSON to `/json/state`:
 ```powershell
 $b = @{ on = $true; bri = 80; seg = @(@{ id = 0; fx = 0; col = @(@(255,0,0)) }) } | ConvertTo-Json -Depth 5
-Invoke-RestMethod -Method Post -Uri http://4.3.2.1/json/state -Body $b -ContentType 'application/json'
+Invoke-RestMethod -Method Post -Uri http://xmastree.local/json/state -Body $b -ContentType 'application/json'
 ```
 - `on`, `bri` 0–255, `transition` (in units of 100 ms)
 - `seg[]`: `id`, `start`, `stop`, `fx`, `sx` (speed), `ix` (intensity), `pal`, `col` (up to 3 RGB triples), `rev`

@@ -10,7 +10,7 @@
   "controllers": [
     {
       "name": "Dig-Quad A",
-      "host": "4.3.2.1",
+      "host": "xmastree.local",
       "outputs": [
         { "gpio": 16, "strips": [1] }
       ]

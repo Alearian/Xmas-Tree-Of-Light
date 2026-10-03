@@ -1,12 +1,12 @@
 # Xmas Tree Lighting
 
-An outdoor 5–6 m cone tree: 12 × 6 m **WS2815** 12 V strips (4,320 px) driven by a QuinLED **Dig-Quad V3** (ESP32) running **WLED 0.14.0**. Designs are made in **xLights** (streamed over DDP), and phones control it through the WLED app/API. The controller runs its own Wi-Fi AP. It doesn't use the home internet.
+An outdoor 5–6 m cone tree: 12 × 6 m **WS2815** 12 V strips (4,320 px) driven by a QuinLED **Dig-Quad V3** (ESP32) running **WLED 0.14.0**. Designs are made in **xLights** (streamed over DDP), and phones control it through the WLED app/API. Since 2026-10-03 the controller is on the home Wi-Fi (`<home-wifi>`) as **`xmastree.local`** (DHCP, currently <board-ip>). If it can't find that network at boot, it falls back to its own AP `WLED-AP` at `4.3.2.1`.
 
-- Device: `http://4.3.2.1/`. WLED JSON API: `/json/info`, `/json/state`, `/json/cfg`, `/json/eff`, `/json/pal`.
+- Device: `http://xmastree.local/` (fallback AP: `http://4.3.2.1/`). The app is at `http://xmastree.local/tree.htm`. WLED JSON API: `/json/info`, `/json/state`, `/json/cfg`, `/json/eff`, `/json/pal`.
 - Docs: `docs/`. The source PDFs are `01`–`04`. Start with `docs/design-summary.md`, the current one-strip prototype wiring in `docs/prototype-one-strip.md`, the final 12-strip wiring in `docs/dig-quad-connections.md` (stored for later), then `docs/open-questions.md` (unresolved conflicts) and `docs/roadmap.md`.
 - Project skill for talking to the device: `.claude/skills/wled/SKILL.md`.
 - Software (`docs/software.md`): the layout lives in `config/tree.json` (shared by the tool and the app), the C# **TreeTool** is in `tools/TreeTool` (`dotnet run --project tools/TreeTool -- info|backup|plan|apply|upload|test|serve`), and the phone app is `app/tree.htm`, served from the board at `/tree.htm`. The app's strip mapping (`buildStrips`) must stay in step with `LayoutMath` in the tool.
-- After a board reboot, Windows may not rejoin `WLED-AP` by itself. Reconnect with `netsh wlan connect name="WLED-AP"`.
+- Only in AP fallback mode: after a board reboot, Windows may not rejoin `WLED-AP` by itself. Reconnect with `netsh wlan connect name="WLED-AP"`.
 - Don't open the browser pane without asking first.
 
 ## Rules

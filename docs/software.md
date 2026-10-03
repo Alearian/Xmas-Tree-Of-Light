@@ -6,13 +6,13 @@ Three pieces, all in this repo:
 |---|---|---|
 | **Tree layout** | `config/tree.json` (full tree), `config/bench.json` (one strip) | The single source of truth for which strips are on which controller, output and position. See [config/README.md](../config/README.md). |
 | **TreeTool** (C# / .NET 10) | `tools/TreeTool` | Backs up, plans and applies the WLED config, uploads the phone app, runs test patterns, and serves the app locally for development |
-| **Phone app** | `app/tree.htm` | A single HTML file stored **on the controller**. Phones join the tree's Wi-Fi and open `http://4.3.2.1/tree.htm`. |
+| **Phone app** | `app/tree.htm` | A single HTML file stored **on the controller**. Phones on the home Wi-Fi open `http://xmastree.local/tree.htm` (or `http://4.3.2.1/tree.htm` when the board is in AP fallback mode). |
 
 ```
  config/tree.json ──► TreeTool ──► WLED /json/cfg   (LED outputs, limiter, boot preset)
                                ──► WLED /json/state (one segment per strip → preset 10)
                                ──► WLED filesystem: /tree.htm + /tree.json
- Phone ── tree Wi-Fi ──► http://4.3.2.1/tree.htm ──► WLED JSON API
+ Phone ── home Wi-Fi ──► http://xmastree.local/tree.htm ──► WLED JSON API
 ```
 
 ## TreeTool
@@ -33,7 +33,9 @@ dotnet run --project tools/TreeTool -- <command> [--layout config/bench.json] [-
 | `test strips` / `chase` / `white` / `off` | Test patterns: a colour per strip, a direction check, full white for measuring current, and off | state only |
 | `serve [--port 8080]` | Serves the app from disk and proxies the API to the first controller, so you can edit the app without uploading it each time | no |
 
-**Wi-Fi gotcha:** when `apply` reboots the board, Windows doesn't always rejoin `WLED-AP` by itself. If `apply` times out, reconnect the PC to `WLED-AP` and run `apply` again.
+**Host:** both layouts use `xmastree.local`. If the board is in AP fallback mode, use `4.3.2.1` instead.
+
+**Wi-Fi gotcha (AP mode only):** when `apply` reboots the board, Windows doesn't always rejoin `WLED-AP` by itself. If `apply` times out, reconnect the PC to `WLED-AP` and run `apply` again.
 
 ## Phone app
 

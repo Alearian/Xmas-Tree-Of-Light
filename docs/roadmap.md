@@ -24,15 +24,15 @@ Follows the four phases in the technical doc, plus our own software work.
 ## Stage 3 — Mapping & design
 > **Optional since 2026-10-03.** The tree runs standalone on WLED presets ([open-questions.md](open-questions.md) §6), so xLights is only for experiments while a laptop is available.
 
-- [ ] xLights: controller `4.3.2.1` over DDP, Tree model with 12 strings × 360 nodes and the zig-zag order
+- [ ] xLights: controller `xmastree.local` over DDP, Tree model with 12 strings × 360 nodes and the zig-zag order
 - [ ] Live-stream tests from xLights
 
 ## Stage 4 — Our software (see [software.md](software.md))
 - [x] Shared layout file (`config/tree.json`) and C# TreeTool (backup/plan/apply/upload/test/serve)
 - [x] Full-tree layout applied to the board. The app has been uploaded to `http://4.3.2.1/tree.htm`.
 - [ ] Try the app on a phone and polish it
-- [ ] **Paused here (2026-09-30):** choose the networking option.
-  1. The board joins home Wi-Fi `<home-wifi>`, with `WLED-AP` as a fallback. **Recommended.** The user types the password at `http://4.3.2.1/settings/wifi`. Afterwards: find its new IP, update `config/tree.json`, re-upload, and consider a fixed IP.
+- [x] **Networking (done 2026-10-03, option 1):** the board is on home Wi-Fi `<home-wifi>` as `xmastree.local` (DHCP <board-ip>), with `WLED-AP` as the boot fallback. Both layouts now use `xmastree.local`.
+  1. ~~The board joins home Wi-Fi `<home-wifi>`, with `WLED-AP` as a fallback.~~ **Chosen.** The user types the password at `http://4.3.2.1/settings/wifi`. Afterwards: find its new IP, update `config/tree.json`, re-upload, and consider a fixed IP.
   2. PC bridge: `treetool serve` listening on the LAN at <pc-ip>:8080 (needs a firewall rule).
   3. A travel router in the enclosure (later, for multiple controllers).
 - [ ] **Phone controller**: a mobile-first web app (PWA) using the WLED JSON API. It gives on/off, brightness, speed, presets and playlists, plus tree-aware controls (per strip or quadrant, bands by height).

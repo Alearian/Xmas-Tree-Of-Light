@@ -49,7 +49,7 @@ The final 12-strip build is wired differently, with strip power going around the
 1. Everything unplugged. Wire the start end only.
 2. With a multimeter on continuity, check there's **no beep** between the Dig-Quad `+` and `−` inputs. A beep means a short.
 3. Check the polarity at the PSU: V+ to `+`, V− to `−`.
-4. Plug in the PSU. The board's AP `WLED-AP` comes up after 10–60 s. Reconnect with `netsh wlan connect name="WLED-AP"` if Windows doesn't.
+4. Plug in the PSU. After 10–60 s the board joins the home Wi-Fi as `xmastree.local`. If it can't, it opens its own AP `WLED-AP` at `4.3.2.1` instead.
 5. Set brightness low from the app, then try colours and effects.
 
 ## Measurements (roadmap Stage 1)
