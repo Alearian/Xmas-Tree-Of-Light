@@ -40,6 +40,8 @@ One quadrant (LED1 → strips 1–3):
 
 ## Revised power layout
 
+The full terminal-by-terminal version is in [dig-quad-connections.md](dig-quad-connections.md), with a drawn diagram in [dig-quad-wiring.html](dig-quad-wiring.html).
+
 ```
  Mains ─┬─► PSU 1 (12 V, 40 A) ─► fuse block A ─► strips 1–6    (top + bottom feed per strip, 5 A fuse each)
         └─► PSU 2 (12 V, 40 A) ─► fuse block B ─► strips 7–12

@@ -10,7 +10,7 @@ Follows the four phases in the technical doc, plus our own software work.
 ## Stage 1 — Bench validation (doc Phase 1)
 - [ ] Back up the current WLED config
 - [ ] Commission the AP: SSID `MatrixTree-WiFi`, a new password, channel 1/6/11, DDP/E1.31 enabled
-- [ ] Wire **one** WS2815 strip to LED1 (BI tied to GND) on a bench PSU with a shared ground. Set WLED to 360 px.
+- [ ] Wire **one** WS2815 strip to LED1, powered through the board ([prototype-one-strip.md](prototype-one-strip.md)) (BI tied to GND) on a bench PSU with a shared ground. Set WLED to 360 px.
 - [ ] Test colours, effects, heat, and bypassing a dead pixel
 - [ ] ⚠️ **Power check (before buying PSUs):** with the current limiter off, set the strip to solid white at 255 brightness. Record the current and the voltage at the far end. We're working on the builder's **4 A per 6 m strip**. If it's above about 4.5 A, revisit [open-questions.md](open-questions.md) §1 (it may need 3 PSUs instead of 2).
 - [ ] Check the wire colours and pad labels on the real strip (the spec says black = GND, the doc says white = GND)

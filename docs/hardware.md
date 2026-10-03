@@ -7,6 +7,7 @@ Read live from `http://4.3.2.1/json/info` and `/json/cfg` on 2026-09-30.
 | Item | Now | Target (from the docs) |
 |---|---|---|
 | Board | QuinLED **Dig-Quad V3** (ESP32), name `Dig-Quad-V3` | same |
+| Version | **Pre-assembled**, with automatic 5/12/24 V input detection and no voltage jumper (confirmed by the user on 2026-10-03) | same |
 | Firmware | WLED **0.14.0** (build 2310130) | WLED (upgrading is worth considering, see open-questions §7) |
 | Wi-Fi | AP `WLED-AP`, **factory password**, channel 1, 4.3.2.1 | AP `MatrixTree-WiFi`, strong password, channel 1/6/11 |
 | Client Wi-Fi | SSID `<home-wifi>` saved without a password (not joined) | not needed, because the design is AP-only |

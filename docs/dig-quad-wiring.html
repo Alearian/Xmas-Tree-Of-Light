@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dig-Quad Tree Wiring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; wide schematics scroll inside their own frames. Wire colours carry meaning everywhere. */
+:root{
+  --paper:#eef0ec; --panel:#f9faf7; --ink:#1b211e; --muted:#59635d; --line:#c3cac2;
+  --v12:#c62f25; --gnd:#1b211e; --data:#14844a; --bi:#2a63c6; --mains:#b06c0b;
+  --warn-bg:#fbefd9; --warn-ink:#6b4304;
+  --display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#121513; --panel:#1a1e1b; --ink:#e3e8e2; --muted:#9ba59e; --line:#36403a;
+  --v12:#ff6b5d; --gnd:#e3e8e2; --data:#4ad08a; --bi:#83a9ff; --mains:#f0b44a;
+  --warn-bg:#2e2412; --warn-ink:#f3cf8a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121513; --panel:#1a1e1b; --ink:#e3e8e2; --muted:#9ba59e; --line:#36403a;
+  --v12:#ff6b5d; --gnd:#e3e8e2; --data:#4ad08a; --bi:#83a9ff; --mains:#f0b44a;
+  --warn-bg:#2e2412; --warn-ink:#f3cf8a; color-scheme:dark}
+
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:grid;gap:36px}
+h1,h2{font-family:var(--display);font-weight:700;text-wrap:balance;margin:0;letter-spacing:.01em}
+h1{font-size:2.3rem;line-height:1.05}
+h2{font-size:1.45rem}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header{display:grid;gap:8px;max-width:70ch}
+header p{margin:0;color:var(--muted)}
+section{display:grid;gap:14px;min-width:0}
+section>p{margin:0;max-width:72ch}
+.frame{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow-x:auto}
+.frame svg{display:block;min-width:900px;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:.85rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{display:inline-block;width:26px;height:0;border-top:3px solid}
+.warn{background:var(--warn-bg);color:var(--warn-ink);border-radius:6px;padding:14px 16px;display:grid;gap:6px;max-width:80ch}
+.warn strong{font-family:var(--display);font-size:1.05rem;letter-spacing:.02em}
+.warn ul{margin:0;padding-left:1.2em}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.88rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td code,p code,li code{font-family:var(--mono);font-size:.92em}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px 28px}
+.why div{min-width:0}
+.why h3{font-family:var(--display);font-size:1.1rem;margin:0 0 4px}
+.why p{margin:0;color:var(--muted)}
+
+/* SVG */
+svg text{font-family:var(--body);fill:var(--ink);font-size:13px}
+svg .t-title{font-family:var(--display);font-weight:700;font-size:17px}
+svg .t-mono{font-family:var(--mono);font-size:11.5px}
+svg .t-small{font-size:11px;fill:var(--muted)}
+svg .t-lbl{font-family:var(--mono);font-size:10.5px;fill:var(--muted);letter-spacing:.04em}
+svg .box{fill:var(--paper);stroke:var(--muted);stroke-width:1.4}
+svg .board{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+svg .w{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+svg .thin{stroke-width:2}
+svg .v12{stroke:var(--v12)} svg .gnd{stroke:var(--gnd)} svg .data{stroke:var(--data)}
+svg .bi{stroke:var(--bi)} svg .mains{stroke:var(--mains)}
+svg .dash{stroke-dasharray:6 4}
+svg .dot{stroke:none}
+svg .f-v12{fill:var(--v12)} svg .f-gnd{fill:var(--gnd)} svg .f-data{fill:var(--data)} svg .f-bi{fill:var(--bi)} svg .f-mains{fill:var(--mains)}
+svg .bar{fill:var(--gnd)}
+svg .strip{fill:var(--panel);stroke:var(--muted);stroke-width:1.2}
+svg .led{fill:var(--muted);opacity:.45}
+svg .fuse{fill:var(--panel);stroke:var(--v12);stroke-width:2}
+svg .x{stroke:var(--v12);stroke-width:2}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Xmas tree · QuinLED Dig-Quad V3 · WLED 0.14</span>
+  <h1>Dig-Quad connection diagram</h1>
+  <p>How the controller, the two 12 V supplies and the 12 WS2815 strips connect. The Dig-Quad sends <b>data only</b>. Strip power goes from each PSU through its own fuse block, never through the board.</p>
+</header>
+
+<div class="warn">
+  <strong>Before anything is bought or switched on</strong>
+  <ul>
+    <li>This uses the working assumption of <b>4 A per 6 m strip</b> (The builder's figure). One source says 7.2 A. Measure one strip at full white first. Above about 4.5 A, change to 3 PSUs with 4 strips each.</li>
+    <li>Mains wiring to the PSUs, and any relay that switches mains, must be done by a qualified electrician.</li>
+    <li>Terminal positions are drawn schematically. Use the labels printed on the board and on the strip pads.</li>
+  </ul>
+</div>
+
+<section>
+  <h2>1 · Whole system</h2>
+  <p>Two supplies, each with its own fuse block. PSU 1 also runs the Dig-Quad through a small 2 A fuse. Every negative terminal meets at one ground bar.</p>
+  <div class="legend">
+    <span><i style="border-color:var(--v12)"></i>+12 V</span>
+    <span><i style="border-color:var(--gnd)"></i>GND (0 V)</span>
+    <span><i style="border-color:var(--data)"></i>Data</span>
+    <span><i style="border-color:var(--bi)"></i>Backup data (BI/BO)</span>
+    <span><i style="border-color:var(--mains)"></i>Mains AC</span>
+    <span>● joined &nbsp; ⌒ hop = crossing, not joined</span>
+  </div>
+  <div class="frame">
+  <svg viewBox="0 0 1130 720" role="img" aria-label="System wiring: mains to two PSUs, fuse blocks, Dig-Quad and strips, with a common ground bar">
+    <!-- Mains -->
+    <rect class="box" x="20" y="290" width="110" height="90" rx="4"/>
+    <text class="t-title" x="34" y="318">MAINS AC</text>
+    <text class="t-small" x="34" y="338">via RCD</text>
+    <text class="t-small" x="34" y="354">electrician-</text>
+    <text class="t-small" x="34" y="368">installed</text>
+    <path class="w mains" d="M130 335 H155 M155 175 V495 M155 175 H180 M155 495 H180"/>
+    <circle class="dot f-mains" cx="155" cy="335" r="4.5"/>
+
+    <!-- PSU 1 -->
+    <rect class="box" x="180" y="120" width="150" height="110" rx="4"/>
+    <text class="t-title" x="194" y="146">PSU 1</text>
+    <text class="t-mono" x="194" y="166">HLG-480H-12A</text>
+    <text class="t-small" x="194" y="184">12 V · 40 A max</text>
+    <text class="t-small" x="194" y="200">load ≈ 24 A</text>
+    <text class="t-mono" x="300" y="146">V+</text>
+    <text class="t-mono" x="300" y="214">V−</text>
+    <!-- PSU 2 -->
+    <rect class="box" x="180" y="440" width="150" height="110" rx="4"/>
+    <text class="t-title" x="194" y="466">PSU 2</text>
+    <text class="t-mono" x="194" y="486">HLG-480H-12A</text>
+    <text class="t-small" x="194" y="504">12 V · 40 A max</text>
+    <text class="t-small" x="194" y="520">load ≈ 24 A</text>
+    <text class="t-mono" x="300" y="466">V+</text>
+    <text class="t-mono" x="300" y="534">V−</text>
+
+    <!-- PSU V+ to fuse blocks (PSU 2 hops over the ground riser) -->
+    <path class="w v12" d="M330 150 H400"/>
+    <path class="w v12" d="M330 470 H349 a6 6 0 0 1 12 0 H400"/>
+    <text class="t-lbl" x="338" y="140">8–10 AWG</text>
+    <!-- PSU V- to ground riser -->
+    <path class="w gnd" d="M330 200 H355 V665 M330 520 H355"/>
+    <circle class="dot f-gnd" cx="355" cy="520" r="4.5"/>
+    <circle class="dot f-gnd" cx="355" cy="665" r="4.5"/>
+
+    <!-- Fuse block A -->
+    <rect class="box" x="400" y="95" width="220" height="170" rx="4"/>
+    <text class="t-title" x="414" y="120">FUSE BLOCK A</text>
+    <text class="t-small" x="530" y="120">from PSU 1</text>
+    <text class="t-mono" x="414" y="154">F1  15 A → top bus A</text>
+    <text class="t-mono" x="414" y="189">F2–F7 5 A → strips 1–6 base</text>
+    <text class="t-mono" x="414" y="229">F8   2 A → Dig-Quad</text>
+    <!-- Fuse block B -->
+    <rect class="box" x="400" y="420" width="220" height="140" rx="4"/>
+    <text class="t-title" x="414" y="445">FUSE BLOCK B</text>
+    <text class="t-small" x="530" y="445">from PSU 2</text>
+    <text class="t-mono" x="414" y="484">F1–F6 5 A → strips 7–12 base</text>
+    <text class="t-mono" x="414" y="519">F7  15 A → top bus B</text>
+
+    <!-- Block A outputs -->
+    <path class="w v12" d="M620 150 H635 V45 H1070 V150"/>
+    <path class="w v12" d="M620 185 H650 V75 H1000 V150"/>
+    <path class="w v12 thin" d="M620 225 H690"/>
+    <rect class="box" x="760" y="31" width="170" height="28" rx="3"/>
+    <text class="t-mono" x="770" y="50">top junction A · 6 × 5 A</text>
+    <text class="t-lbl" x="664" y="24">12 AWG pair, up the mast</text>
+    <text class="t-lbl" x="664" y="92">6 × 18 AWG pigtails to strip bases</text>
+    <text class="t-lbl" x="627" y="216">18 AWG</text>
+
+    <!-- Block B outputs -->
+    <path class="w v12" d="M620 480 H650 V605 H1000 V540"/>
+    <path class="w v12" d="M620 515 H635 V630 H1070 V540"/>
+    <rect class="box" x="760" y="616" width="170" height="28" rx="3"/>
+    <text class="t-mono" x="770" y="635">top junction B · 6 × 5 A</text>
+    <text class="t-lbl" x="694" y="597">6 × 18 AWG pigtails to strip bases</text>
+
+    <!-- Dig-Quad -->
+    <rect class="board" x="690" y="180" width="180" height="270" rx="6"/>
+    <text class="t-title" x="704" y="204">QuinLED Dig-Quad</text>
+    <text class="t-small" x="704" y="220">ESP32 · WLED · 4.3.2.1</text>
+    <text class="t-mono" x="700" y="230">+12V in</text>
+    <text class="t-mono" x="700" y="264">GND in</text>
+    <text class="t-small" x="704" y="296">draws well under 1 A</text>
+    <text class="t-small" x="704" y="318">LED output V+ terminals:</text>
+    <text class="t-small" x="704" y="334" style="fill:var(--v12)">leave empty</text>
+    <text class="t-mono" x="862" y="206" text-anchor="end">LED1 · 16</text>
+    <text class="t-mono" x="862" y="246" text-anchor="end">LED2 · 3</text>
+    <text class="t-mono" x="862" y="396" text-anchor="end">LED3 · 1</text>
+    <text class="t-mono" x="862" y="436" text-anchor="end">LED4 · 4</text>
+    <!-- Dig-Quad ground to bar, hopping over block B feeds -->
+    <path class="w gnd thin" d="M690 260 H675 V599 a6 6 0 0 1 0 12 V624 a6 6 0 0 1 0 12 V665"/>
+    <circle class="dot f-gnd" cx="675" cy="665" r="4"/>
+
+    <!-- Data + GND pairs -->
+    <path class="w data" d="M870 212 H930"/><path class="w gnd thin dash" d="M870 221 H930"/>
+    <path class="w data" d="M870 252 H930"/><path class="w gnd thin dash" d="M870 261 H930"/>
+    <path class="w data" d="M870 402 H930"/><path class="w gnd thin dash" d="M870 411 H930"/>
+    <path class="w data" d="M870 442 H930"/><path class="w gnd thin dash" d="M870 451 H930"/>
+
+    <!-- Strip groups -->
+    <rect class="box" x="930" y="150" width="170" height="150" rx="4"/>
+    <text class="t-title" x="944" y="176">STRIPS 1–6</text>
+    <text class="t-small" x="944" y="192">powered by PSU 1</text>
+    <text class="t-mono" x="944" y="216">LED1: S1▲ S2▼ S3▲</text>
+    <text class="t-mono" x="944" y="256">LED2: S4▲ S5▼ S6▲</text>
+    <text class="t-small" x="944" y="280">each strip fed at</text>
+    <text class="t-small" x="944" y="294">top and base</text>
+
+    <rect class="box" x="930" y="390" width="170" height="150" rx="4"/>
+    <text class="t-mono" x="944" y="406">LED3: S7▲ S8▼ S9▲</text>
+    <text class="t-mono" x="944" y="446">LED4: S10▲ S11▼ S12▲</text>
+    <text class="t-title" x="944" y="480">STRIPS 7–12</text>
+    <text class="t-small" x="944" y="496">powered by PSU 2</text>
+    <text class="t-small" x="944" y="514">each strip fed at</text>
+    <text class="t-small" x="944" y="528">top and base</text>
+
+    <!-- Strip ground returns -->
+    <path class="w gnd" d="M1100 285 H1112 V665"/>
+    <path class="w gnd" d="M1090 540 V665"/>
+    <circle class="dot f-gnd" cx="1112" cy="665" r="4.5"/>
+    <circle class="dot f-gnd" cx="1090" cy="665" r="4.5"/>
+
+    <!-- Ground bar -->
+    <rect class="bar" x="340" y="660" width="784" height="10" rx="2"/>
+    <text class="t-lbl" x="370" y="692">COMMON GND BAR · PSU 1 −, PSU 2 −, Dig-Quad −, every strip GND (white) and both top-bus returns</text>
+  </svg>
+  </div>
+</section>
+
+<section>
+  <h2>2 · One output in detail (LED1 → strips 1, 2, 3)</h2>
+  <p>All four outputs are wired the same way. LED2 drives strips 4–6, LED3 drives 7–9 and LED4 drives 10–12. Data snakes up, down and up. Power goes into both ends of every strip, each feed with its own 5 A fuse.</p>
+  <div class="frame">
+  <svg viewBox="0 0 900 600" role="img" aria-label="Zig-zag wiring of three strips on one Dig-Quad output with top and base power feeds">
+    <!-- Ring labels -->
+    <text class="t-lbl" x="20" y="44">TOP JUNCTION A</text>
+    <text class="t-lbl" x="20" y="59">(from top bus A)</text>
+    <text class="t-lbl" x="20" y="534">FUSE BLOCK A</text>
+    <text class="t-lbl" x="20" y="549">(base, F2–F4)</text>
+
+    <!-- Top feed rails -->
+    <path class="w v12" d="M190 40 H760"/><text class="t-mono" x="770" y="44">+12 V</text>
+    <path class="w gnd" d="M190 55 H760"/><text class="t-mono" x="770" y="59">GND</text>
+    <!-- Base feed rails -->
+    <path class="w v12" d="M190 530 H760"/><text class="t-mono" x="770" y="534">+12 V</text>
+    <path class="w gnd" d="M190 545 H760"/><text class="t-mono" x="770" y="549">GND</text>
+
+    <!-- Strips: x1=330 x2=530 x3=730 -->
+    <g>
+      <rect class="strip" x="308" y="134" width="44" height="292" rx="3"/>
+      <rect class="strip" x="508" y="134" width="44" height="292" rx="3"/>
+      <rect class="strip" x="708" y="134" width="44" height="292" rx="3"/>
+      <g class="led">
+        <circle cx="330" cy="170" r="3"/><circle cx="330" cy="200" r="3"/><circle cx="330" cy="230" r="3"/><circle cx="330" cy="330" r="3"/><circle cx="330" cy="360" r="3"/><circle cx="330" cy="390" r="3"/>
+        <circle cx="530" cy="170" r="3"/><circle cx="530" cy="200" r="3"/><circle cx="530" cy="230" r="3"/><circle cx="530" cy="330" r="3"/><circle cx="530" cy="360" r="3"/><circle cx="530" cy="390" r="3"/>
+        <circle cx="730" cy="170" r="3"/><circle cx="730" cy="200" r="3"/><circle cx="730" cy="230" r="3"/><circle cx="730" cy="330" r="3"/><circle cx="730" cy="360" r="3"/><circle cx="730" cy="390" r="3"/>
+      </g>
+      <!-- direction arrows -->
+      <path class="f-data" d="M330 262 l-9 16 h18 z"/><path class="f-data" d="M530 298 l-9 -16 h18 z"/><path class="f-data" d="M730 262 l-9 16 h18 z"/>
+      <text class="t-title" x="362" y="290">S1 ▲</text><text class="t-small" x="362" y="306">up · px 0–359</text>
+      <text class="t-title" x="562" y="290">S2 ▼</text><text class="t-small" x="562" y="306">down · 360–719</text>
+      <text class="t-title" x="762" y="290">S3 ▲</text><text class="t-small" x="762" y="306">up · 720–1079</text>
+    </g>
+
+    <!-- Top power drops: + and GND, fuse on + -->
+    <path class="w v12 thin" d="M315 40 V130 M545 40 V130 M715 40 V130"/>
+    <path class="w gnd thin" d="M345 55 V130 M515 55 V130 M745 55 V130"/>
+    <circle class="dot f-v12" cx="315" cy="40" r="3.5"/><circle class="dot f-v12" cx="545" cy="40" r="3.5"/><circle class="dot f-v12" cx="715" cy="40" r="3.5"/>
+    <circle class="dot f-gnd" cx="345" cy="55" r="3.5"/><circle class="dot f-gnd" cx="515" cy="55" r="3.5"/><circle class="dot f-gnd" cx="745" cy="55" r="3.5"/>
+    <g><rect class="fuse" x="310" y="62" width="10" height="16"/><rect class="fuse" x="540" y="62" width="10" height="16"/><rect class="fuse" x="710" y="62" width="10" height="16"/></g>
+    <text class="t-lbl" x="236" y="74">5 A each</text>
+
+    <!-- Base power drops -->
+    <path class="w v12 thin" d="M315 530 V430 M545 530 V430 M715 530 V430"/>
+    <path class="w gnd thin" d="M345 545 V430 M515 545 V430 M745 545 V430"/>
+    <circle class="dot f-v12" cx="315" cy="530" r="3.5"/><circle class="dot f-v12" cx="545" cy="530" r="3.5"/><circle class="dot f-v12" cx="715" cy="530" r="3.5"/>
+    <circle class="dot f-gnd" cx="345" cy="545" r="3.5"/><circle class="dot f-gnd" cx="515" cy="545" r="3.5"/><circle class="dot f-gnd" cx="745" cy="545" r="3.5"/>
+    <g><rect class="fuse" x="310" y="496" width="10" height="16"/><rect class="fuse" x="540" y="496" width="10" height="16"/><rect class="fuse" x="710" y="496" width="10" height="16"/></g>
+    <text class="t-lbl" x="236" y="508">5 A each</text>
+
+    <!-- Top jumper S1 -> S2 : data outer, BI inner -->
+    <path class="w data" d="M325 130 V92 H535 V130"/>
+    <path class="w bi" d="M335 130 V104 H525 V130"/>
+    <text class="t-lbl" x="380" y="86">jumper: DO→DI and BO→BI</text>
+
+    <!-- Bottom jumper S2 -> S3 : data inner, BI outer -->
+    <path class="w data" d="M535 430 V462 H725 V430"/>
+    <path class="w bi" d="M525 430 V476 H735 V430"/>
+    <text class="t-lbl" x="570" y="492">jumper: DO→DI and BO→BI</text>
+
+    <!-- S3 top: end of chain -->
+    <text class="t-small" x="760" y="118">end of chain:</text>
+    <text class="t-small" x="760" y="132">DO, BO unused</text>
+
+    <!-- Pads -->
+    <g>
+      <circle class="dot f-v12" cx="315" cy="430" r="4"/><circle class="dot f-data" cx="325" cy="430" r="4"/><circle class="dot f-bi" cx="335" cy="430" r="4"/><circle class="dot f-gnd" cx="345" cy="430" r="4"/>
+      <circle class="dot f-v12" cx="315" cy="130" r="4"/><circle class="dot f-data" cx="325" cy="130" r="4"/><circle class="dot f-bi" cx="335" cy="130" r="4"/><circle class="dot f-gnd" cx="345" cy="130" r="4"/>
+      <circle class="dot f-gnd" cx="515" cy="130" r="4"/><circle class="dot f-bi" cx="525" cy="130" r="4"/><circle class="dot f-data" cx="535" cy="130" r="4"/><circle class="dot f-v12" cx="545" cy="130" r="4"/>
+      <circle class="dot f-gnd" cx="515" cy="430" r="4"/><circle class="dot f-bi" cx="525" cy="430" r="4"/><circle class="dot f-data" cx="535" cy="430" r="4"/><circle class="dot f-v12" cx="545" cy="430" r="4"/>
+      <circle class="dot f-v12" cx="715" cy="430" r="4"/><circle class="dot f-data" cx="725" cy="430" r="4"/><circle class="dot f-bi" cx="735" cy="430" r="4"/><circle class="dot f-gnd" cx="745" cy="430" r="4"/>
+      <circle class="dot f-v12" cx="715" cy="130" r="4"/><circle class="dot f-data" cx="725" cy="130" r="4"/><circle class="dot f-bi" cx="735" cy="130" r="4"/><circle class="dot f-gnd" cx="745" cy="130" r="4"/>
+      <text class="t-lbl" x="311" y="420">+ D B G</text>
+    </g>
+
+    <!-- Dig-Quad LED1 -->
+    <rect class="board" x="20" y="400" width="150" height="80" rx="5"/>
+    <text class="t-title" x="32" y="424">Dig-Quad</text>
+    <text class="t-mono" x="32" y="443">LED1 · GPIO16</text>
+    <text class="t-mono" x="142" y="460" text-anchor="end">D</text>
+    <text class="t-mono" x="142" y="475" text-anchor="end">−</text>
+    <path class="w data" d="M170 456 H325 V430"/>
+    <path class="w gnd thin" d="M170 471 H345 V430"/>
+    <circle class="dot f-gnd" cx="345" cy="471" r="3.5"/>
+    <text class="t-lbl" x="180" y="494">data + GND pair</text>
+    <!-- BI tied to GND at chain start -->
+    <path class="w bi" d="M335 430 V446 H345"/>
+    <circle class="dot f-gnd" cx="345" cy="446" r="3.5"/>
+    <text class="t-small" x="358" y="450" style="fill:var(--bi)">BI tied to GND here only</text>
+  </svg>
+  </div>
+  <p class="t-small" style="color:var(--muted);font-size:.85rem">Pads are drawn as <code>+ D B G</code> (+12 V, data, backup, GND) reading along a strip that points up. A strip that points down is rotated, so its pad order is mirrored. Check the labels printed on the real strip, because the order varies between makers.</p>
+</section>
+
+<section>
+  <h2>3 · Connection list</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>From</th><th>To</th><th>Wire</th><th>Fuse</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><span class="sw" style="background:var(--v12)"></span>PSU 1 V+</td><td>Fuse block A input</td><td>8–10 AWG, short</td><td>n/a</td><td>Sized for the PSU's full 40 A</td></tr>
+      <tr><td><span class="sw" style="background:var(--v12)"></span>PSU 2 V+</td><td>Fuse block B input</td><td>8–10 AWG, short</td><td>n/a</td><td>Never joined to PSU 1 V+</td></tr>
+      <tr><td><span class="sw" style="background:var(--gnd)"></span>PSU 1 V−, PSU 2 V−</td><td>Common GND bar</td><td>8–10 AWG</td><td>none</td><td>Grounds are always joined</td></tr>
+      <tr><td><span class="sw" style="background:var(--v12)"></span>Block A, 2 A way</td><td>Dig-Quad <code>+</code> input</td><td>18 AWG</td><td>2 A</td><td>Board electronics only</td></tr>
+      <tr><td><span class="sw" style="background:var(--gnd)"></span>Dig-Quad <code>−</code> input</td><td>Common GND bar</td><td>18 AWG</td><td>none</td><td>Gives the data signal its 0 V reference</td></tr>
+      <tr><td><span class="sw" style="background:var(--data)"></span>LED1 data (GPIO16)</td><td>Strip 1 DI, at its base</td><td>data + GND pair, keep short</td><td>none</td><td>LED2 → S4, LED3 → S7, LED4 → S10</td></tr>
+      <tr><td><span class="sw" style="background:var(--gnd)"></span>LED1–4 <code>−</code> terminal</td><td>Same strip's GND pad</td><td>runs beside its data wire</td><td>none</td><td>Return path for the data signal</td></tr>
+      <tr><td><span class="sw" style="background:var(--v12)"></span>LED1–4 V+ terminal</td><td><b>nothing</b></td><td>n/a</td><td>n/a</td><td>Strip power never goes through the board</td></tr>
+      <tr><td><span class="sw" style="background:var(--bi)"></span>BI at S1, S4, S7, S10 base</td><td>GND at the same pad</td><td>short link</td><td>none</td><td>Chain start only. Leaving BI floating there can cause flicker.</td></tr>
+      <tr><td><span class="sw" style="background:var(--data)"></span>DO / BO at each strip end</td><td>DI / BI of next strip</td><td>jumper</td><td>none</td><td>S1→S2 at top, S2→S3 at base, and so on</td></tr>
+      <tr><td><span class="sw" style="background:var(--v12)"></span>Block A 5 A ways (×6)</td><td>Base <code>+</code> of strips 1–6</td><td>18 AWG pigtails</td><td>5 A each</td><td>Block B does the same for strips 7–12</td></tr>
+      <tr><td><span class="sw" style="background:var(--v12)"></span>Block A 15 A way</td><td>Top bus A → top junction A</td><td>12 AWG pair (10 AWG better), UV-rated</td><td>15 A</td><td>Junction has 6 × 5 A to the strip tops. Bus GND returns to the bar.</td></tr>
+      <tr><td><span class="sw" style="background:var(--gnd)"></span>Every strip GND (white)</td><td>GND rail at that end</td><td>18 AWG</td><td>none</td><td>Both ends of every strip</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="color:var(--muted);font-size:.88rem;margin:0">The 15 A top-bus fuse and the 2 A controller fuse are my suggestions to protect those wires. They aren't in the source PDFs. Gauges are preliminary, from <code>docs/power-and-wiring.md</code>.</p>
+</section>
+
+<section>
+  <h2>Why it's wired this way</h2>
+  <div class="why">
+    <div><h3>Data needs a shared 0 V</h3><p>The data line is a voltage measured against ground. If the strip's GND and the board's GND aren't connected, the strip can't read the signal. That's why every negative goes to one bar and why each data wire has a GND wire beside it.</p></div>
+    <div><h3>Join grounds, never V+</h3><p>Two supplies never output exactly 12.00 V. Joining their V+ makes one push current into the other. Joining their grounds is safe and gives everything the same reference.</p></div>
+    <div><h3>Power bypasses the board</h3><p>Each PSU feeds about 24 A. The Dig-Quad is rated 30 A for the whole board and 10 A per fuse, and takes only one supply, so the strips are fed from fuse blocks instead.</p></div>
+    <div><h3>Feeding both ends</h3><p>A 6 m strip loses voltage along its thin copper. Feeding the top and the base halves the current in each half, which keeps the far LEDs from going dim and orange at full white.</p></div>
+    <div><h3>A fuse protects the wire</h3><p>Each fuse is sized for the thinnest wire after it. A 5 A fuse on an 18 AWG pigtail blows before the wire overheats if a strip end shorts.</p></div>
+    <div><h3>BI and the backup line</h3><p>WS2815 has a second data line. If one pixel dies, the next one reads BI instead and the rest of the strip keeps working. At the first pixel there's nothing before it, so BI is tied to GND.</p></div>
+  </div>
+</section>
+</div>
+</body>
+</html>
