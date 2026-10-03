@@ -2,3 +2,6 @@ bin/
 obj/
 *.user
 .vs/
+
+# Board backups can contain Wi-Fi passwords; keep them on this PC only
+device-backups/
