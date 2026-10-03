@@ -22,6 +22,8 @@ Follows the four phases in the technical doc, plus our own software work.
 - [ ] Set the current limit to match the real PSUs
 
 ## Stage 3 — Mapping & design
+> **Optional since 2026-10-03.** The tree runs standalone on WLED presets ([open-questions.md](open-questions.md) §6), so xLights is only for experiments while a laptop is available.
+
 - [ ] xLights: controller `4.3.2.1` over DDP, Tree model with 12 strings × 360 nodes and the zig-zag order
 - [ ] Live-stream tests from xLights
 
@@ -35,7 +37,10 @@ Follows the four phases in the technical doc, plus our own software work.
   3. A travel router in the enclosure (later, for multiple controllers).
 - [ ] **Phone controller**: a mobile-first web app (PWA) using the WLED JSON API. It gives on/off, brightness, speed, presets and playlists, plus tree-aware controls (per strip or quadrant, bands by height).
 - [ ] **Config tool**: applies a version-controlled WLED config (outputs, segments, presets, AP settings) and always backs up the current config first
-- [ ] **Decision:** how to run xLights shows standalone ([open-questions.md](open-questions.md) §6). The choices are WLED built-in effects only, an FPP/Pi player, or a custom FSEQ player.
+- [x] **Decision (2026-10-03):** the tree runs standalone on WLED built-in effects, presets and playlists, controlled from the phone app. No laptop is needed ([open-questions.md](open-questions.md) §6).
+- [ ] **Look library:** a version-controlled set of tree presets (whole-tree and per-strip/quadrant looks) and a "show" playlist that cycles through them, applied by TreeTool so the board can be rebuilt from the repo
+- [ ] **App time sync:** the board has no internet, so it has no clock. The app sends the phone's time when it opens, which lets WLED run on/off schedules.
+- [ ] **Consider WLED 2D mapping:** the zig-zag strips form a 12 × 360 serpentine matrix, so 2D effects (scrolling text, fire, plasma, rain) could wrap around the tree
 
 ## Stage 5 — Rig, seal, run (doc Phases 2 & 4)
 - [ ] Mechanical rigging, power buses, sealing and the enclosure

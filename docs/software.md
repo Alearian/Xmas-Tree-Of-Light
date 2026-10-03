@@ -58,4 +58,4 @@ Tip: in the phone browser, use "Add to Home Screen" to get an app icon.
 - Try it on a phone, then polish the UI
 - Height bands (top/middle/bottom) need more segments per strip. WLED allows 32 in total, so 12 strips × 2 bands (24) would fit.
 - Multiple controllers: the app and tool already handle a `controllers` list. Cross-controller requests from the phone may need CORS checking.
-- Standalone xLights playback (open-questions §6)
+- **Standalone running (decided 2026-10-03):** no laptop at the tree. Effects live on the board as WLED presets and playlists, and the phone app is the remote. Next steps: a look library applied by TreeTool, a show playlist, phone time sync for schedules, and possibly WLED 2D mapping (roadmap Stage 4).

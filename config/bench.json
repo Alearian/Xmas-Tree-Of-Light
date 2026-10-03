@@ -1,8 +1,8 @@
 {
   "name": "Bench test (one strip)",
-  "ledsPerStrip": 360,
+  "ledsPerStrip": 300,
   "stripCount": 1,
-  "heightMetres": 6,
+  "heightMetres": 5,
   "ledType": 22,
   "colorOrder": 0,
   "abl": { "ledMa": 11, "maxMa": 5000 },

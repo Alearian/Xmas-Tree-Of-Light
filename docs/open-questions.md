@@ -58,7 +58,10 @@ The doc routes strip power **through the Dig-Quad's fused outputs** and wires **
 
 The doc says "42+ FPS". WS281x data takes about 30 µs per pixel, so **1,080 px per port gives at most about 30 FPS**. That's still smooth for Christmas effects, but don't expect 42+. The only fix is more ports with fewer pixels each.
 
-## 6. Playing xLights shows standalone on WLED
+## 6. Playing xLights shows standalone on WLED — DECIDED 2026-10-03: option a
+
+> **Decision (user, 2026-10-03):** there may be no laptop at the tree once it's deployed. So the tree runs **standalone on the board**, using WLED's built-in effects saved as presets and playlists and controlled from a phone through our app at `http://4.3.2.1/tree.htm`. xLights becomes optional: useful for experiments while a laptop is around, but nothing depends on it. Options b and c stay open as a later upgrade if music-synced shows are ever wanted.
+
 
 The docs say to "export compiled xLights shows and upload them as presets" to WLED. **Standard WLED can't play xLights sequences (.fseq).** Its presets and playlists only use WLED's own built-in effects. The options are:
 
@@ -89,6 +92,8 @@ QuinLED's guidance is about **2,000 LEDs per ESP32 running WLED** (about 3,000 w
 - It's modular. The **brainboard** is the controller: 8 level-shifted outputs, ESP32-WROOM-32UE with an external antenna, LAN8720A Ethernet, microSD, 2 buttons and a relay output. It stacks with a separate **powerboard**. Note that LED8 shares its pin with I²C.
 - Powerboards ([Power-7 specs](https://quinled.info/quinled-dig-octa-power-7-specifications/)): Power-7 is 50 A and Power-7HC is 100 A continuous. Both have 16 screw terminals, **each with its own fuse** (10 A maximum each), and take **one PSU per powerboard**. A Power-7HC could replace our DIY fuse block for 6 strips (12 feeds, about 72 A at the worst-case 10 A-roll figure). But that needs a single PSU of about 900 W, which usually means a fan, and the design doc advises against that outdoors.
 - **ESPixelStick with SD card:** ESPixelStick can play xLights `.fseq` files from the SD card on its own. That's a possible answer to **§6** (running xLights shows without the laptop), at the cost of WLED's phone app and built-in effects on those boards. This needs checking before we rely on it.
+
+**Effect of the §6 decision:** the effects are now computed on the ESP32 itself, not streamed from a laptop, so the per-board LED load and frame rate matter more. Option D's main draw (ESPixelStick playing `.fseq` from SD) no longer applies. Options **B** or **C** (WLED on every board, kept in step with WLED sync and our app) fit best.
 
 **Recommendation for now:** bench test with the Dig-Quad we have (option A, one strip, then one quadrant) and measure the frame rate and stability. Choose B, C or D once the strip datasheet is in and we've decided how shows will play standalone (§6). If standalone xLights playback matters, option D with ESPixelStick deserves a serious look.
 

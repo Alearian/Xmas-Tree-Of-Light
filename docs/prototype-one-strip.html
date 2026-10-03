@@ -89,7 +89,7 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
 <header>
   <span class="eyebrow">Xmas tree · prototype · one WS2815 strip</span>
   <h1>One-strip bench wiring</h1>
-  <p>One 12 V supply feeds the Dig-Quad, and the board passes that 12 V straight through to the strip. This is the board's normal wiring. One strip uses about a third of a single output's 10 A fuse.</p>
+  <p>One 12 V supply feeds the Dig-Quad, and the board passes that 12 V straight through to the strip. This is the board's normal wiring. Power goes in at the start end only. One strip draws 4–7 A, within a single output's 10 A fuse.</p>
 </header>
 
 <div class="warn">
@@ -97,7 +97,8 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
   <ul>
     <li>Use a 12 V supply rated <b>at least 10 A (120 W)</b>. One strip draws 4–7 A at full white (sources disagree), so a 10 A supply can't be overloaded even with the limiter off.</li>
     <li>Use a supply with a moulded mains plug or IEC lead. An open-frame PSU with bare mains screw terminals needs a proper enclosure and someone qualified to wire it.</li>
-    <li>Check the strip's printed pad labels. This strip's sheet says <b>black = GND</b>, while the design doc says white.</li>
+    <li>If the board has a 5 V / 12 V jumper, it's the DIY version. Set the jumper to <b>12 V</b> first. The pre-assembled board detects the voltage by itself.</li>
+    <li>Check the strip's printed pad labels. The usual WS2815 colours are red +12 V, <b>green DI</b>, <b>blue BI</b> and black or white GND, but sellers vary. This strip's sheet says <b>black = GND</b>, while the design doc says white. A data/backup swap can still light normally, so check the pads rather than the lights.</li>
   </ul>
 </div>
 
@@ -113,7 +114,7 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
     <span>● joined &nbsp; ⌒ hop = crossing, not joined</span>
   </div>
   <div class="frame">
-  <svg viewBox="0 0 1120 490" role="img" aria-label="One 12 V supply into the Dig-Quad, which passes power and data to one WS2815 strip, with optional far-end injection from terminal 5">
+  <svg viewBox="0 0 1120 410" role="img" aria-label="One 12 V supply into the Dig-Quad, which passes power and data to one WS2815 strip, fed from the start end only">
     <!-- Mains -->
     <rect class="box" x="20" y="180" width="100" height="70" rx="4"/>
     <text class="t-title" x="32" y="206">MAINS</text>
@@ -140,14 +141,12 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
     <text class="t-mono" x="406" y="194">+ in</text>
     <text class="t-mono" x="406" y="278">− in</text>
     <!-- internal +12 V copper with fuses -->
-    <path class="w v12 thin dash" d="M400 200 H440 M440 160 V320 M440 160 H620 M440 320 H464 a6 6 0 0 1 12 0 H620"/>
+    <path class="w v12 thin dash" d="M400 200 H440 M440 160 V200 M440 160 H620"/>
     <circle class="dot f-v12" cx="440" cy="200" r="3.5"/>
     <rect class="fuse" x="552" y="153" width="18" height="14"/>
-    <rect class="fuse" x="552" y="313" width="18" height="14"/>
     <text class="t-lbl" x="488" y="152">fuse 1 · LED1+2</text>
-    <text class="t-lbl" x="500" y="312">fuse · T5</text>
     <!-- internal GND copper -->
-    <path class="w gnd thin dash" d="M400 260 H434 a6 6 0 0 1 12 0 H470 M470 185 V345 M470 185 H620 M470 345 H620"/>
+    <path class="w gnd thin dash" d="M400 260 H470 M470 185 V260 M470 185 H620"/>
     <circle class="dot f-gnd" cx="470" cy="260" r="3.5"/>
     <!-- ESP32 -->
     <rect class="box" x="505" y="222" width="95" height="56" rx="3"/>
@@ -162,8 +161,6 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
     <text class="t-lbl" x="626" y="155">LED1 +</text>
     <text class="t-lbl" x="626" y="180">LED1 −</text>
     <text class="t-lbl" x="626" y="205">LED1 D</text>
-    <text class="t-lbl" x="626" y="315">T5 +</text>
-    <text class="t-lbl" x="626" y="340">T5 −</text>
 
     <!-- LED1 to strip start -->
     <path class="w v12" d="M620 160 H710 V190 H760"/>
@@ -185,16 +182,12 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
     <!-- JST callout -->
     <rect class="box" x="700" y="262" width="270" height="104" rx="4"/>
     <text class="t-mono" x="712" y="282" style="font-weight:600">JST plug at the strip start</text>
-    <text class="t-mono" x="712" y="300" style="fill:var(--data)">DI   ← LED1 D (GPIO 16)</text>
-    <text class="t-mono" x="712" y="316" style="fill:var(--bi)">BI   → twist to JST GND</text>
-    <text class="t-mono" x="712" y="332">GND  → twist to BI</text>
-    <text class="t-mono" x="712" y="348" style="fill:var(--v12)">+12V → thin wire: insulate</text>
+    <text class="t-mono" x="712" y="300" style="fill:var(--data)">DI green ← LED1 D (GPIO 16)</text>
+    <text class="t-mono" x="712" y="316" style="fill:var(--bi)">BI blue  → twist to JST GND</text>
+    <text class="t-mono" x="712" y="332">GND      → twist to BI</text>
+    <text class="t-mono" x="712" y="348" style="fill:var(--v12)">+12V red → thin, insulate</text>
     <path class="w data thin" d="M744 248 V262"/>
 
-    <!-- far-end injection from T5 -->
-    <path class="w v12" d="M620 320 H648 V440 H1080 V190 H1060"/>
-    <path class="w gnd" d="M620 345 H632 V455 H1095 V210 H1086 a6 6 0 0 0 -12 0 H1060"/>
-    <text class="t-lbl" x="700" y="432">optional step 2: far-end feed from terminal 5, same PSU · 16–18 AWG</text>
     <text class="t-small" x="1000" y="262" text-anchor="middle">far JST:</text>
     <text class="t-small" x="1000" y="276" text-anchor="middle">DO, BO unused,</text>
     <text class="t-small" x="1000" y="290" text-anchor="middle">cap it</text>
@@ -212,22 +205,22 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
       <tr><td><span class="sw" style="background:var(--gnd)"></span>PSU V−</td><td>Dig-Quad <code>−</code> input</td><td>14 AWG, short</td><td></td></tr>
       <tr><td><span class="sw" style="background:var(--v12)"></span>LED1 <code>+</code></td><td>Strip start, bare red lead</td><td>16–18 AWG</td><td>12 V through fuse 1 (shared by LED1 and LED2)</td></tr>
       <tr><td><span class="sw" style="background:var(--gnd)"></span>LED1 <code>−</code></td><td>Strip start, bare GND lead</td><td>16–18 AWG</td><td>Black on this strip. Check the label.</td></tr>
-      <tr><td><span class="sw" style="background:var(--data)"></span>LED1 data (GPIO 16)</td><td>JST DI wire</td><td>keep under about 2 m</td><td>Run it alongside the GND lead</td></tr>
-      <tr><td><span class="sw" style="background:var(--bi)"></span>JST BI wire</td><td>JST GND wire</td><td>twist, solder, heat-shrink</td><td>BI must not float at the first pixel</td></tr>
+      <tr><td><span class="sw" style="background:var(--data)"></span>LED1 data (GPIO 16)</td><td>JST DI wire (usually green)</td><td>keep under about 2 m</td><td>Run it alongside the GND lead</td></tr>
+      <tr><td><span class="sw" style="background:var(--bi)"></span>JST BI wire (usually blue)</td><td>JST GND wire</td><td>twist, solder, heat-shrink</td><td>BI must not float at the first pixel</td></tr>
       <tr><td><span class="sw" style="background:var(--v12)"></span>JST +12 V wire</td><td><b>nothing</b></td><td>insulate the end</td><td>Too thin for the strip's current. The bare red lead carries it.</td></tr>
       <tr><td>Far-end JST (DO, BO)</td><td><b>nothing</b></td><td>cap or tape</td><td>End of the chain</td></tr>
-      <tr><td><span class="sw" style="background:var(--v12)"></span>Terminal 5 <code>+</code> / <code>−</code> (optional)</td><td>Far-end bare red / GND leads</td><td>16–18 AWG</td><td>Second feed from the same PSU, so it's safe. This is what terminal 5 is for.</td></tr>
+      <tr><td>Far-end bare red / GND leads</td><td><b>nothing</b></td><td>insulate each end separately</td><td>Not fed in the prototype</td></tr>
     </tbody>
   </table>
   </div>
-  <p style="color:var(--muted);font-size:.88rem;margin:0">Fuses: one strip draws 4–7 A, so the board's LED1/LED2 fuse and terminal 5's fuse should be <b>7.5 A</b> (blade/ATO). Check which fuses are fitted. Don't go above 10 A.</p>
+  <p style="color:var(--muted);font-size:.88rem;margin:0">Fuses: one strip draws 4–7 A, so the board's LED1/LED2 fuse should be <b>7.5 A</b> (blade/ATO). Check which fuses are fitted. Don't go above 10 A.</p>
 </section>
 
 <section class="two">
   <div>
     <h3>Power-up order</h3>
     <ol class="steps">
-      <li>Everything unplugged. Wire the start end only (leave terminal 5 for later).</li>
+      <li>Everything unplugged. Wire the start end only.</li>
       <li>With a multimeter on continuity, check there's <b>no beep</b> between the Dig-Quad <code>+</code> and <code>−</code> inputs. A beep means a short.</li>
       <li>Check the polarity at the PSU: V+ to <code>+</code>, V− to <code>−</code>.</li>
       <li>Plug in the PSU. The board's AP <code>WLED-AP</code> comes up after 10–60 s. Reconnect with <code>netsh wlan connect name="WLED-AP"</code> if Windows doesn't.</li>
@@ -240,7 +233,6 @@ h3{font-family:var(--display);font-size:1.15rem;margin:0}
       <li>Solid white, brightness 255, current limiter off.</li>
       <li><b>Current:</b> clamp meter on the red lead, or a multimeter on its 10 A range in series (wire it in before powering on).</li>
       <li><b>Voltage at the far end</b> between the bare red and GND leads. Below about 10.8 V (a 10 % drop) shows up as dimmer, pinker white.</li>
-      <li>Add the terminal 5 far-end feed and repeat both readings.</li>
       <li>Over about 4.5 A per 6 m means the final build needs 3 PSUs instead of 2.</li>
     </ol>
   </div>
