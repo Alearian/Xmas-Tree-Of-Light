@@ -9,34 +9,56 @@ namespace TreeTool;
 /// </summary>
 public static class Looks
 {
-    /// <summary>The /json/state body that shows a look on one controller.</summary>
+    /// <summary>
+    /// The /json/state body that shows a look on one controller. An optional "overlay" adds a second
+    /// segment over each strip, drawn on top of the first with the effect's Overlay option (o2), for
+    /// example white Drip flakes over coloured Meteor snow. Looks without one delete those segments.
+    /// </summary>
     public static JsonObject State(TreeLayout layout, Controller controller, JsonNode look,
         Func<string, int> effectId, Func<string, int> paletteId)
     {
         var segs = new JsonArray();
-        foreach (var s in LayoutMath.Segments(layout, controller))
+        var strips = LayoutMath.Segments(layout, controller);
+        foreach (var s in strips)
+            segs.Add(Segment(s, s.SegmentId, $"Strip {s.Strip}", Merge(look, s.Strip, layout.StripCount),
+                effectId, paletteId));
+        foreach (var s in strips)
         {
-            var p = Merge(look, s.Strip, layout.StripCount);
-            var twist = p["twist"]?.GetValue<int>() ?? 0;
-            var length = s.Stop - s.Start;
-            var flip = Flip(p["flip"]?.ToString(), s.Strip);
-            segs.Add(new JsonObject
+            var id = s.SegmentId + strips.Count;
+            if (look["overlay"] is JsonObject overlay)
             {
-                ["id"] = s.SegmentId,
-                ["start"] = s.Start,
-                ["stop"] = s.Stop,
-                ["n"] = $"Strip {s.Strip}",
-                ["on"] = true,
-                ["fx"] = effectId(p["fx"]?.ToString() ?? "Solid"),
-                ["pal"] = paletteId(p["pal"]?.ToString() ?? "Default"),
-                ["sx"] = p["sx"]?.GetValue<int>() ?? 128,
-                ["ix"] = p["ix"]?.GetValue<int>() ?? 128,
-                ["col"] = Colours(p["colours"]),
-                ["of"] = ((s.Strip - 1) * twist % length + length) % length,
-                ["rev"] = s.RunsDown ^ flip,
-            });
+                var seg = Segment(s, id, $"Strip {s.Strip} overlay", Merge(overlay, s.Strip, layout.StripCount),
+                    effectId, paletteId);
+                seg["o2"] = true;
+                segs.Add(seg);
+            }
+            else
+                segs.Add(new JsonObject { ["id"] = id, ["stop"] = 0 });
         }
         return new JsonObject { ["on"] = true, ["seg"] = segs };
+    }
+
+    static JsonObject Segment(StripSegment s, int id, string name, JsonObject p,
+        Func<string, int> effectId, Func<string, int> paletteId)
+    {
+        var twist = p["twist"]?.GetValue<int>() ?? 0;
+        var length = s.Stop - s.Start;
+        var flip = Flip(p["flip"]?.ToString(), s.Strip);
+        return new JsonObject
+        {
+            ["id"] = id,
+            ["start"] = s.Start,
+            ["stop"] = s.Stop,
+            ["n"] = name,
+            ["on"] = true,
+            ["fx"] = effectId(p["fx"]?.ToString() ?? "Solid"),
+            ["pal"] = paletteId(p["pal"]?.ToString() ?? "Default"),
+            ["sx"] = p["sx"]?.GetValue<int>() ?? 128,
+            ["ix"] = p["ix"]?.GetValue<int>() ?? 128,
+            ["col"] = Colours(p["colours"]),
+            ["of"] = ((s.Strip - 1) * twist % length + length) % length,
+            ["rev"] = s.RunsDown ^ flip,
+        };
     }
 
     /// <summary>The look's own settings, overlaid by every group the strip belongs to.</summary>
@@ -44,7 +66,7 @@ public static class Looks
     {
         var merged = new JsonObject();
         foreach (var (key, value) in look.AsObject())
-            if (key != "groups") merged[key] = value?.DeepClone();
+            if (key is not ("groups" or "overlay")) merged[key] = value?.DeepClone();
         if (look["groups"] is JsonObject groups)
             foreach (var (group, overrides) in groups)
                 if (InGroup(group, strip, stripCount) && overrides is JsonObject o)

@@ -32,8 +32,63 @@
     },
     {
       "id": 25, "name": "Snowfall",
-      "fx": "Drip", "pal": "Default", "sx": 90, "ix": 180,
-      "colours": ["#d0e8ff", "#000000", "#000000"]
+      "fx": "Meteor", "pal": "* Color Gradient", "sx": 10, "ix": 40,
+      "colours": ["#d0e8ff", "#000000", "#000000"],
+      "twist": 137, "flip": "all"
+    },
+    {
+      "id": 30, "name": "Sci-fi tree",
+      "fx": "Meteor", "pal": "* Color Gradient", "sx": 10, "ix": 40,
+      "colours": ["#d0e8ff", "#000000", "#000000"],
+      "twist": 137, "flip": "all",
+      "groups": {
+        "1":  { "colours": ["#ff2020", "#000000", "#000000"] },
+        "2":  { "colours": ["#20a0ff", "#000000", "#000000"] },
+        "3":  { "colours": ["#ffb000", "#000000", "#000000"] },
+        "4":  { "colours": ["#d0e8ff", "#000000", "#000000"] },
+        "5":  { "colours": ["#c020ff", "#000000", "#000000"] },
+        "6":  { "colours": ["#20e040", "#000000", "#000000"] },
+        "7":  { "colours": ["#ff40a0", "#000000", "#000000"] },
+        "8":  { "colours": ["#00e0e0", "#000000", "#000000"] },
+        "9":  { "colours": ["#ff6a00", "#000000", "#000000"] },
+        "10": { "colours": ["#ffffff", "#000000", "#000000"] },
+        "11": { "colours": ["#a0ff20", "#000000", "#000000"] },
+        "12": { "colours": ["#4040ff", "#000000", "#000000"] }
+      }
+    },
+    {
+      "id": 31, "name": "Sci-fi tree snow blizzard",
+      "fx": "Meteor", "pal": "* Color Gradient", "sx": 170, "ix": 110,
+      "colours": ["#d0e8ff", "#000000", "#000000"],
+      "twist": 137, "flip": "all",
+      "overlay": {
+        "fx": "Drip", "pal": "Default", "sx": 255, "ix": 255,
+        "colours": ["#ffffff", "#000000", "#000000"]
+      },
+      "groups": {
+        "1":  { "colours": ["#ff2020", "#000000", "#000000"] },
+        "2":  { "colours": ["#20a0ff", "#000000", "#000000"] },
+        "3":  { "colours": ["#ffb000", "#000000", "#000000"] },
+        "4":  { "colours": ["#d0e8ff", "#000000", "#000000"] },
+        "5":  { "colours": ["#c020ff", "#000000", "#000000"] },
+        "6":  { "colours": ["#20e040", "#000000", "#000000"] },
+        "7":  { "colours": ["#ff40a0", "#000000", "#000000"] },
+        "8":  { "colours": ["#00e0e0", "#000000", "#000000"] },
+        "9":  { "colours": ["#ff6a00", "#000000", "#000000"] },
+        "10": { "colours": ["#ffffff", "#000000", "#000000"] },
+        "11": { "colours": ["#a0ff20", "#000000", "#000000"] },
+        "12": { "colours": ["#4040ff", "#000000", "#000000"] }
+      }
+    },
+    {
+      "id": 32, "name": "Spiral light",
+      "fx": "Meteor Smooth", "pal": "* Color Gradient", "sx": 70, "ix": 235,
+      "colours": ["#ffffff", "#000000", "#000000"],
+      "twist": 25,
+      "overlay": {
+        "fx": "Drip", "pal": "Default", "sx": 0, "ix": 255,
+        "colours": ["#ffffff", "#000000", "#000000"]
+      }
     },
     {
       "id": 26, "name": "Four quarters",
@@ -55,12 +110,17 @@
       "fx": "Wipe", "pal": "Default", "sx": 120, "ix": 128,
       "colours": ["#10c030", "#ffa000", "#000000"],
       "twist": 20
+    },
+    {
+      "id": 29, "name": "Green sparkle",
+      "fx": "Solid Glitter", "pal": "Default", "sx": 128, "ix": 200,
+      "colours": ["#10c030", "#000000", "#ffffff"]
     }
   ],
   "shows": [
     {
       "id": 40, "name": "Tree show",
-      "looks": [20, 27, 21, 24, 22, 25, 28, 26, 23],
+      "looks": [20, 27, 21, 24, 22, 25, 28, 26, 23, 29],
       "seconds": 60, "fadeSeconds": 2
     }
   ]
