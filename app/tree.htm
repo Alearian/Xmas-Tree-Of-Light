@@ -25,6 +25,8 @@
   #conn.ok { background: var(--ok); }
   #power { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel2);
     color: var(--dim); cursor: pointer; display: grid; place-items: center; padding: 0; }
+  #shareBtn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel2);
+    color: var(--dim); cursor: pointer; display: grid; place-items: center; padding: 0; flex: none; }
   #power.on { background: var(--accent); border-color: var(--accent); color: #231a05; box-shadow: 0 0 18px #e8b44c66; }
 
   .bri { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
@@ -48,19 +50,43 @@
   .row { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
   .row label { color: var(--dim); font-size: 14px; min-width: 76px; }
   .btn { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2);
-    color: var(--text); font-size: 15px; cursor: pointer; }
+    color: var(--text); font-size: 15px; cursor: pointer; text-decoration: none; text-align: center; }
   .btn.primary { background: var(--accent); color: #231a05; border-color: var(--accent); font-weight: 600; }
   .btn:active { transform: scale(.97); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-  .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-  .swatch { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; }
-  .colours { display: flex; gap: 12px; }
-  .colours input { width: 56px; height: 56px; border: 2px solid var(--line); border-radius: 12px; padding: 0; background: none; }
   .target { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--dim); font-size: 14px; }
   .target b { color: var(--text); }
+  .target a { color: var(--accent); margin-left: 8px; }
+
+  /* what the tree is doing now */
+  #now { display: flex; align-items: center; gap: 12px; background: var(--panel2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 10px 14px; margin-bottom: 12px; }
+  #nowDot { width: 34px; height: 34px; border-radius: 50%; flex: none; border: 2px solid var(--line); background: #000; }
+  #nowText { flex: 1; min-width: 0; }
+  #nowKind { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  #nowName { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   #treeCanvas { width: 100%; aspect-ratio: 3 / 4; max-height: 60vh; display: block; background: radial-gradient(#10201a, var(--bg) 70%); border-radius: var(--radius); }
   .note { color: var(--dim); font-size: 13px; }
+
+  /* colour wheel */
+  .wheelWrap { position: relative; width: min(100%, 300px); margin: 12px auto 0; aspect-ratio: 1; touch-action: none; }
+  #wheel { width: 100%; height: 100%; display: block; border-radius: 50%; cursor: crosshair; touch-action: none; }
+  #wheelMark { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
+    border: 3px solid #fff; box-shadow: 0 0 0 1px #0008, 0 2px 6px #0008; pointer-events: none; left: 50%; top: 50%; background: #fff; }
+
+  /* palette colours on the Effects tab */
+  #palBar { height: 22px; border-radius: 11px; border: 1px solid var(--line); margin: 10px 0 4px; }
+  .colours { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+  .colours .chip { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; color: var(--dim); }
+  .colours .dot { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line); }
+  .colours input[type=color] { width: 56px; height: 56px; border: 2px solid var(--line); border-radius: 12px; padding: 0; background: none; }
+
+  dl.info { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 14px;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  dl.info dt { color: var(--dim); }
+  dl.info dd { margin: 0; word-break: break-all; }
+  #phoneUrl { font-family: ui-monospace, monospace; color: var(--accent); user-select: all; }
 
   #stripSvg { width: 100%; max-width: 340px; display: block; margin: 0 auto; }
   #stripSvg .s { cursor: pointer; }
@@ -70,12 +96,20 @@
   #stripSvg .s.sel text { fill: #231a05; font-weight: 700; }
   #stripSvg .s.live circle { stroke: var(--ok); stroke-width: 3; }
   #stripSvg .s.live.sel circle { stroke: var(--ok); }
-  .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--dim); font-size: 13px; margin: 8px 0 0; }
-  .legend[hidden] { display: none; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
   #stripSvg .compass { fill: var(--dim); font-size: 13px; text-anchor: middle; dominant-baseline: central; }
 
-  #presetList .btn { text-align: left; min-height: 56px; }
+  #showList .btn { text-align: left; min-height: 56px; }
+  #showList .btn.cur { border-color: var(--accent); color: var(--accent); }
+  /* share: full-screen QR code of the app's address */
+  #share { position: fixed; inset: 0; z-index: 10; background: #000c; display: grid; place-items: center; padding: 16px; }
+  #share[hidden] { display: none; }
+  #share .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
+    width: min(100%, 420px); text-align: center; }
+  #share h2 { margin: 0 0 14px; font-size: 15px; color: var(--text); }
+  #qr { width: min(80vw, 60vh, 360px); aspect-ratio: 1; display: block; margin: 0 auto; background: #fff;
+    border-radius: 8px; image-rendering: pixelated; }
+  #shareUrl { font-family: ui-monospace, monospace; color: var(--accent); margin: 14px 0 6px; word-break: break-all; user-select: all; }
+  #share .btn { margin-top: 14px; width: 100%; }
   #toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line);
     padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   #toast.show { opacity: 1; }
@@ -85,6 +119,7 @@
 <header>
   <div id="conn" title="Connection"></div>
   <h1 id="title">Xmas Tree</h1>
+  <button id="shareBtn" aria-label="Share the app"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3" stroke-linecap="round"/></svg></button>
   <button id="power" aria-label="Power"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></button>
 </header>
 <div class="bri">
@@ -94,13 +129,17 @@
 
 <main>
   <section id="tab-tree" class="active">
+    <div id="now"><div id="nowDot"></div><div id="nowText"><div id="nowKind">Now showing</div><div id="nowName">…</div></div></div>
     <canvas id="treeCanvas"></canvas>
-    <p class="note" id="previewNote">Live preview of what the controller is sending to the strips.</p>
-    <p class="legend" id="previewLegend" hidden><span><i style="background:var(--ok);box-shadow:0 0 6px var(--ok)"></i>Attached (what the strip is showing)</span><span><i style="background:var(--dim);opacity:.5"></i>Not attached yet (what it would show)</span></p>
-    <h2>Quick colours (whole tree)</h2>
-    <div class="swatches" id="quick"></div>
-    <!-- bump when changing the app, so it's easy to tell which copy a phone has loaded -->
-    <p class="note" style="text-align:center;margin-top:24px">App version 2026-10-03b</p>
+    <h2>Pick a colour</h2>
+    <div class="target" id="wheelTarget"></div>
+    <div class="wheelWrap"><canvas id="wheel"></canvas><div id="wheelMark"></div></div>
+  </section>
+
+  <section id="tab-shows">
+    <h2>Shows and looks</h2>
+    <div class="grid" id="showList"></div>
+    <div class="row" style="margin-top:16px"><button class="btn" id="saveShow" style="flex:1">Save current look…</button></div>
   </section>
 
   <section id="tab-effects">
@@ -108,55 +147,79 @@
     <h2>Effect</h2>
     <input id="fxFilter" type="search" placeholder="Search effects…">
     <div class="row"><select id="fxSel" size="6"></select></div>
-    <h2>Palette</h2>
-    <select id="palSel"></select>
-    <h2>Colours</h2>
-    <div class="colours">
-      <input type="color" id="c0" value="#ff2020" aria-label="Primary colour">
-      <input type="color" id="c1" value="#10a040" aria-label="Secondary colour">
-      <input type="color" id="c2" value="#ffd080" aria-label="Tertiary colour">
+    <div id="palBlock">
+      <h2>Palette</h2>
+      <select id="palSel"></select>
+      <div id="palBar"></div>
     </div>
+    <h2 id="colTitle">Colours</h2>
+    <div class="colours" id="colours"></div>
+    <p class="note" id="colNote"></p>
     <h2>Motion</h2>
     <div class="row"><label for="sx">Speed</label><input id="sx" type="range" min="0" max="255" value="128"></div>
     <div class="row"><label for="ix">Intensity</label><input id="ix" type="range" min="0" max="255" value="128"></div>
     <div class="row" style="margin-top:16px"><button class="btn primary" id="fxApply" style="flex:1">Apply</button></div>
   </section>
 
-  <section id="tab-strips">
-    <p class="note">Tap strips to choose where effects and colours go. Nothing selected means the whole tree. Strips with a green ring are attached.</p>
+  <section id="tab-config">
+    <h2>Strips</h2>
+    <p class="note">Tap strips to choose where colours and effects go. Nothing selected means the whole tree. Strips with a green ring are attached.</p>
     <svg id="stripSvg" viewBox="-170 -170 340 340"></svg>
     <h2>Groups</h2>
     <div class="grid" id="groups"></div>
-  </section>
-
-  <section id="tab-presets">
-    <h2>Saved shows</h2>
-    <div class="grid" id="presetList"></div>
-    <div class="row" style="margin-top:16px"><button class="btn" id="savePreset" style="flex:1">Save current look as a preset…</button></div>
+    <h2>Open on a phone</h2>
+    <p class="note">The phone must be on the same Wi-Fi as the tree. Type this address into the phone's browser, then use "Add to Home screen".</p>
+    <dl class="info"><dt>Address</dt><dd id="phoneUrl">…</dd></dl>
+    <div class="row"><button class="btn" id="shareCfg" style="flex:1">Show QR code</button></div>
+    <h2>Controller</h2>
+    <dl class="info" id="devInfo"><dt>Status</dt><dd>Loading…</dd></dl>
+    <div class="grid" style="margin-top:10px">
+      <button class="btn" id="resetLayout">Reset strip layout</button>
+      <a class="btn" href="/settings" target="_blank" rel="noopener">WLED settings</a>
+    </div>
+    <!-- bump when changing the app, so it's easy to tell which copy a phone has loaded -->
+    <p class="note" style="text-align:center;margin-top:24px">App version 2026-10-20a</p>
   </section>
 </main>
 
 <nav>
   <button data-tab="tree" class="active"><b>🎄</b>Tree</button>
+  <button data-tab="shows"><b>★</b>Shows</button>
   <button data-tab="effects"><b>✨</b>Effects</button>
-  <button data-tab="strips"><b>◎</b>Strips</button>
-  <button data-tab="presets"><b>★</b>Presets</button>
+  <button data-tab="config"><b>⚙</b>Config</button>
 </nav>
 <div id="toast"></div>
+<div id="share" hidden>
+  <div class="card">
+    <h2>Scan to control the tree</h2>
+    <canvas id="qr"></canvas>
+    <div id="shareUrl"></div>
+    <p class="note" id="shareNote"></p>
+    <button class="btn" id="shareClose">Close</button>
+  </div>
+</div>
 
+<script>
+/* qrcode-generator 1.4.4, (c) Kazuhiko Arase, MIT licence.
+   Vendored from https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js so the app works offline. */
+var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(l=4*u+17),e(0,0),e(l-7,0),e(0,l-7),i(),o(),v(t,r),7<=u&&h(t),null==n&&(n=w(u,f,c)),d(n,r)}var u=t,f=y[r],g=null,l=0,n=null,c=[],s={},e=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||l<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||l<=r+n||(g[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},o=function(){for(var t=8;t<l-8;t+=1)null==g[t][6]&&(g[t][6]=t%2==0);for(var r=8;r<l-8;r+=1)null==g[6][r]&&(g[6][r]=r%2==0)},i=function(){for(var t=B.getPatternPosition(u),r=0;r<t.length;r+=1)for(var e=0;e<t.length;e+=1){var n=t[r],o=t[e];if(null==g[n][o])for(var i=-2;i<=2;i+=1)for(var a=-2;a<=2;a+=1)g[n+i][o+a]=-2==i||2==i||-2==a||2==a||0==i&&0==a}},h=function(t){for(var r=B.getBCHTypeNumber(u),e=0;e<18;e+=1){var n=!t&&1==(r>>e&1);g[Math.floor(e/3)][e%3+l-8-3]=n}for(e=0;e<18;e+=1){n=!t&&1==(r>>e&1);g[e%3+l-8-3][Math.floor(e/3)]=n}},v=function(t,r){for(var e=f<<3|r,n=B.getBCHTypeInfo(e),o=0;o<15;o+=1){var i=!t&&1==(n>>o&1);o<6?g[o][8]=i:o<8?g[o+1][8]=i:g[l-15+o][8]=i}for(o=0;o<15;o+=1){i=!t&&1==(n>>o&1);o<8?g[8][l-o-1]=i:o<9?g[8][15-o-1+1]=i:g[8][15-o-1]=i}g[l-8][8]=!t},d=function(t,r){for(var e=-1,n=l-1,o=7,i=0,a=B.getMaskFunction(r),u=l-1;0<u;u-=2)for(6==u&&(u-=1);;){for(var f=0;f<2;f+=1)if(null==g[n][u-f]){var c=!1;i<t.length&&(c=1==(t[i]>>>o&1)),a(n,u-f)&&(c=!c),g[n][u-f]=c,-1==(o-=1)&&(i+=1,o=7)}if((n+=e)<0||l<=n){n-=e,e=-e;break}}},w=function(t,r,e){for(var n=b.getRSBlocks(t,r),o=M(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=C(i[u],l.getLength()-1).mod(l);a[u]=new Array(l.getLength()-1);for(g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=0<=s?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};s.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=x(t);break;case"Alphanumeric":e=m(t);break;case"Byte":e=L(t);break;case"Kanji":e=D(t);break;default:throw"mode:"+r}c.push(e),n=null},s.isDark=function(t,r){if(t<0||l<=t||r<0||l<=r)throw t+","+r;return g[t][r]},s.getModuleCount=function(){return l},s.make=function(){if(u<1){for(var t=1;t<40;t++){for(var r=b.getRSBlocks(t,f),e=M(),n=0;n<c.length;n++){var o=c[n];e.put(o.getMode(),4),e.put(o.getLength(),B.getLengthInBits(o.getMode(),t)),o.write(e)}var i=0;for(n=0;n<r.length;n++)i+=r[n].dataCount;if(e.getLengthInBits()<=8*i)break}u=t}a(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){a(!0,e);var n=B.getLostPoint(s);(0==e||n<t)&&(t=n,r=e)}return r}())},s.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<s.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<s.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=s.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},s.createSvgTag=function(t,r,e,n){var o={};"object"==typeof t&&(t=(o=t).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,f,c=s.getModuleCount()*t+2*r,g="";for(f="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",g+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',g+=o.scalable?"":' width="'+c+'px" height="'+c+'px"',g+=' viewBox="0 0 '+c+" "+c+'" ',g+=' preserveAspectRatio="xMinYMin meet"',g+=n.text||e.text?' role="img" aria-labelledby="'+p([n.id,e.id].join(" ").trim())+'"':"",g+=">",g+=n.text?'<title id="'+p(n.id)+'">'+p(n.text)+"</title>":"",g+=e.text?'<description id="'+p(e.id)+'">'+p(e.text)+"</description>":"",g+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',g+='<path d="',a=0;a<s.getModuleCount();a+=1)for(u=a*t+r,i=0;i<s.getModuleCount();i+=1)s.isDark(a,i)&&(g+="M"+(i*t+r)+","+u+f);return g+='" stroke="transparent" fill="black"/>',g+="</svg>"},s.createDataURL=function(o,t){o=o||2,t=void 0===t?4*o:t;var r=s.getModuleCount()*o+2*t,i=t,a=r-t;return I(r,r,function(t,r){if(i<=t&&t<a&&i<=r&&r<a){var e=Math.floor((t-i)/o),n=Math.floor((r-i)/o);return s.isDark(n,e)?0:1}return 1})},s.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=s.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=s.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=p(e),o+='"'),o+="/>"};var p=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return s.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*s.getModuleCount()+2*t,u=t,f=a-t,c={"██":"█","█ ":"▀"," █":"▄","  ":" "},g={"██":"▀","█ ":"▀"," █":" ","  ":" "},l="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<f&&u<=r&&r<f&&s.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<f&&u<=r+1&&r+1<f&&s.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",l+=t<1&&f<=r+1?g[i]:c[i];l+="\n"}return a%2&&0<t?l.substring(0,l.length-a-1)+Array(1+a).join("▀"):l.substring(0,l.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=s.getModuleCount()*t+2*r,u=r,f=a-r,c=Array(t+1).join("██"),g=Array(t+1).join("  "),l="",h="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),h="",n=0;n<a;n+=1)i=1,u<=n&&n<f&&u<=e&&e<f&&s.isDark(o,Math.floor((n-u)/t))&&(i=0),h+=i?c:g;for(o=0;o<t;o+=1)l+=h+"\n"}return l.substring(0,l.length-1)},s.renderTo2dContext=function(t,r){r=r||2;for(var e=s.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=s.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},s}i.stringToBytes=(i.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,i.createStringToBytes=function(u,f){var i=function(){function t(){var t=r.read();if(-1==t)throw"eof";return t}for(var r=S(u),e=0,n={};;){var o=r.read();if(-1==o)break;var i=t(),a=t()<<8|t();n[String.fromCharCode(o<<8|i)]=a,e+=1}if(e!=f)throw e+" != "+f;return n}(),a="?".charCodeAt(0);return function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);if(n<128)r.push(n);else{var o=i[t.charAt(e)];"number"==typeof o?(255&o)==o?r.push(o):(r.push(o>>>8),r.push(255&o)):r.push(a)}}return r}};var r,t,a=1,u=2,o=4,f=8,y={L:1,M:0,Q:3,H:2},e=0,n=1,c=2,g=3,l=4,h=5,s=6,v=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],(t={}).getBCHTypeInfo=function(t){for(var r=t<<10;0<=d(r)-d(1335);)r^=1335<<d(r)-d(1335);return 21522^(t<<10|r)},t.getBCHTypeNumber=function(t){for(var r=t<<12;0<=d(r)-d(7973);)r^=7973<<d(r)-d(7973);return t<<12|r},t.getPatternPosition=function(t){return r[t-1]},t.getMaskFunction=function(t){switch(t){case e:return function(t,r){return(t+r)%2==0};case n:return function(t,r){return t%2==0};case c:return function(t,r){return r%3==0};case g:return function(t,r){return(t+r)%3==0};case l:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case h:return function(t,r){return t*r%2+t*r%3==0};case s:return function(t,r){return(t*r%2+t*r%3)%2==0};case v:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},t.getErrorCorrectPolynomial=function(t){for(var r=C([1],0),e=0;e<t;e+=1)r=r.multiply(C([1,w.gexp(e)],0));return r},t.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case o:case f:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case o:return 16;case f:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case o:return 16;case f:return 12;default:throw"mode:"+t}}},t.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);5<i&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},t);function d(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r}var w=function(){for(var r=new Array(256),e=new Array(256),t=0;t<8;t+=1)r[t]=1<<t;for(t=8;t<256;t+=1)r[t]=r[t-4]^r[t-5]^r[t-6]^r[t-8];for(t=0;t<255;t+=1)e[r[t]]=t;var n={glog:function(t){if(t<1)throw"glog("+t+")";return e[t]},gexp:function(t){for(;t<0;)t+=255;for(;256<=t;)t-=255;return r[t]}};return n}();function C(n,o){if(void 0===n.length)throw n.length+"/"+o;var r=function(){for(var t=0;t<n.length&&0==n[t];)t+=1;for(var r=new Array(n.length-t+o),e=0;e<n.length-t;e+=1)r[e]=n[e+t];return r}(),i={getAt:function(t){return r[t]},getLength:function(){return r.length},multiply:function(t){for(var r=new Array(i.getLength()+t.getLength()-1),e=0;e<i.getLength();e+=1)for(var n=0;n<t.getLength();n+=1)r[e+n]^=w.gexp(w.glog(i.getAt(e))+w.glog(t.getAt(n)));return C(r,0)},mod:function(t){if(i.getLength()-t.getLength()<0)return i;for(var r=w.glog(i.getAt(0))-w.glog(t.getAt(0)),e=new Array(i.getLength()),n=0;n<i.getLength();n+=1)e[n]=i.getAt(n);for(n=0;n<t.getLength();n+=1)e[n]^=w.gexp(w.glog(t.getAt(n))+r);return C(e,0).mod(t)}};return i}function p(){var e=[],o={writeByte:function(t){e.push(255&t)},writeShort:function(t){o.writeByte(t),o.writeByte(t>>>8)},writeBytes:function(t,r,e){r=r||0,e=e||t.length;for(var n=0;n<e;n+=1)o.writeByte(t[n+r])},writeString:function(t){for(var r=0;r<t.length;r+=1)o.writeByte(t.charCodeAt(r))},toByteArray:function(){return e},toString:function(){var t="";t+="[";for(var r=0;r<e.length;r+=1)0<r&&(t+=","),t+=e[r];return t+="]"}};return o}var k,A,b=(k=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],(A={}).getRSBlocks=function(t,r){var e=function(t,r){switch(r){case y.L:return k[4*(t-1)+0];case y.M:return k[4*(t-1)+1];case y.Q:return k[4*(t-1)+2];case y.H:return k[4*(t-1)+3];default:return}}(t,r);if(void 0===e)throw"bad rs block @ typeNumber:"+t+"/errorCorrectionLevel:"+r;for(var n,o,i=e.length/3,a=[],u=0;u<i;u+=1)for(var f=e[3*u+0],c=e[3*u+1],g=e[3*u+2],l=0;l<f;l+=1)a.push((n=g,o=void 0,(o={}).totalCount=c,o.dataCount=n,o));return a},A),M=function(){var e=[],n=0,o={getBuffer:function(){return e},getAt:function(t){var r=Math.floor(t/8);return 1==(e[r]>>>7-t%8&1)},put:function(t,r){for(var e=0;e<r;e+=1)o.putBit(1==(t>>>r-e-1&1))},getLengthInBits:function(){return n},putBit:function(t){var r=Math.floor(n/8);e.length<=r&&e.push(0),t&&(e[r]|=128>>>n%8),n+=1}};return o},x=function(t){var r=a,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+2<r.length;)t.put(o(r.substring(e,e+3)),10),e+=3;e<r.length&&(r.length-e==1?t.put(o(r.substring(e,e+1)),4):r.length-e==2&&t.put(o(r.substring(e,e+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return e},m=function(t){var r=u,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+1<r.length;)t.put(45*o(r.charAt(e))+o(r.charAt(e+1)),11),e+=2;e<r.length&&t.put(o(r.charAt(e)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return e},L=function(t){var r=o,e=i.stringToBytes(t),n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=0;r<e.length;r+=1)t.put(e[r],8)}};return n},D=function(t){var r=f,e=i.stringToBytesFuncs.SJIS;if(!e)throw"sjis not supported.";!function(){var t=e("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=e(t),n={getMode:function(){return r},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return n},S=function(t){var e=t,n=0,o=0,i=0,r={read:function(){for(;i<8;){if(n>=e.length){if(0==i)return-1;throw"unexpected end of file./"+i}var t=e.charAt(n);if(n+=1,"="==t)return i=0,-1;t.match(/^\s$/)||(o=o<<6|a(t.charCodeAt(0)),i+=6)}var r=o>>>i-8&255;return i-=8,r}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return r},I=function(t,r,e){for(var n=function(t,r){var n=t,o=r,l=new Array(t*r),e={setPixel:function(t,r,e){l[r*n+t]=e},write:function(t){t.writeString("GIF87a"),t.writeShort(n),t.writeShort(o),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(n),t.writeShort(o),t.writeByte(0);var r=i(2);t.writeByte(2);for(var e=0;255<r.length-e;)t.writeByte(255),t.writeBytes(r,e,255),e+=255;t.writeByte(r.length-e),t.writeBytes(r,e,r.length-e),t.writeByte(0),t.writeString(";")}},i=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,o=h(),i=0;i<r;i+=1)o.add(String.fromCharCode(i));o.add(String.fromCharCode(r)),o.add(String.fromCharCode(e));var a=p(),u=function(t){var e=t,n=0,o=0,r={write:function(t,r){if(t>>>r!=0)throw"length over";for(;8<=n+r;)e.writeByte(255&(t<<n|o)),r-=8-n,t>>>=8-n,n=o=0;o|=t<<n,n+=r},flush:function(){0<n&&e.writeByte(o)}};return r}(a);u.write(r,n);var f=0,c=String.fromCharCode(l[f]);for(f+=1;f<l.length;){var g=String.fromCharCode(l[f]);f+=1,o.contains(c+g)?c+=g:(u.write(o.indexOf(c),n),o.size()<4095&&(o.size()==1<<n&&(n+=1),o.add(c+g)),c=g)}return u.write(o.indexOf(c),n),u.write(e,n),u.flush(),a.toByteArray()},h=function(){var r={},e=0,n={add:function(t){if(n.contains(t))throw"dup key:"+t;r[t]=e,e+=1},size:function(){return e},indexOf:function(t){return r[t]},contains:function(t){return void 0!==r[t]}};return n};return e}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=p();n.write(a);for(var u=function(){function e(t){a+=String.fromCharCode(r(63&t))}var n=0,o=0,i=0,a="",t={},r=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return t.writeByte=function(t){for(n=n<<8|255&t,o+=8,i+=1;6<=o;)e(n>>>o-6),o-=6},t.flush=function(){if(0<o&&(e(n<<6-o),o=n=0),i%3!=0)for(var t=3-i%3,r=0;r<t;r+=1)a+="="},t.toString=function(){return a},t}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return i}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||57344<=n?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
+</script>
 <script>
 "use strict";
 
 // Used when /tree.json is missing (e.g. only the HTML was uploaded).
 const DEFAULT_LAYOUT = {
-  name: "Xmas Tree", ledsPerStrip: 360, stripCount: 12,
+  name: "Xmas Tree", ledsPerStrip: 360, stripCount: 12, layoutPreset: 10,
   controllers: [{ name: "Dig-Quad A", host: location.host || "4.3.2.1", outputs: [
     { gpio: 16, strips: [1, 2, 3] }, { gpio: 3, strips: [4, 5, 6] },
     { gpio: 1, strips: [7, 8, 9] }, { gpio: 4, strips: [10, 11, 12] } ] }]
 };
+const COLOUR_NAMES = ["Colour 1", "Colour 2", "Colour 3"];
+const RAINBOW = "conic-gradient(#ff2020,#ffd080,#10a040,#1040ff,#ff2020)";
 
-const S = { layout: null, strips: [], attached: new Set(), effects: [], selected: new Set(), on: false, bri: 128,
-            colours: [], ledMap: [], wsSeen: [], rot: 0, dragging: false };
+const S = { layout: null, strips: [], attached: new Set(), effects: [], fxdata: [], palNames: [], palx: {}, presets: {},
+            state: null, cols: ["#ff2020", "#10a040", "#ffd080"], selected: new Set(), on: false, bri: 128,
+            colours: [], ledMap: [], wsSeen: [], rot: 0, dragging: false, picking: false };
 const $ = id => document.getElementById(id);
 
 // ---------- layout: must match TreeTool's LayoutMath ----------
@@ -192,18 +255,23 @@ async function sendAll(body) {
   const failed = results.filter(r => r.status === "rejected").length;
   setConn(failed === 0);
   if (failed) toast(failed + " controller(s) did not respond");
+  refreshState();
 }
 
 // Sends per-segment settings to the selected strips (or all strips), grouped per controller.
+// Also removes any overlay segments a look added on top of the strips (ids after the strip segments),
+// so the chosen effect isn't hidden under, say, Snowfall's white flakes.
 async function sendSegments(segFn, extra = {}) {
-  const targets = S.selected.size ? S.strips.filter(s => S.selected.has(s.n)) : S.strips;
   const jobs = S.layout.controllers.map((_, ci) => {
-    const seg = targets.filter(s => s.ctrl === ci).map(s => Object.assign({ id: s.seg, on: true }, segFn(s)));
+    const count = S.strips.filter(s => s.ctrl === ci).length;
+    const seg = targets().filter(s => s.ctrl === ci).map(s => Object.assign({ id: s.seg, on: true }, segFn(s)));
+    if (seg.length) for (let k = 0; k < count; k++) seg.push({ id: count + k, stop: 0 });
     return seg.length ? api(ci, "/json/state", Object.assign({ on: true, seg }, extra)) : null;
   }).filter(Boolean);
   const results = await Promise.allSettled(jobs);
   setConn(results.every(r => r.status === "fulfilled"));
   S.on = true; renderPower();
+  refreshState();
 }
 
 // ---------- UI helpers ----------
@@ -213,6 +281,8 @@ function toast(msg) {
 }
 function setConn(ok) { $("conn").classList.toggle("ok", ok); }
 function hexToRgb(h) { const v = parseInt(h.slice(1), 16); return [v >> 16, (v >> 8) & 255, v & 255]; }
+function rgbToHex(c) { return "#" + (c || [0, 0, 0]).slice(0, 3).map(x => (+x || 0).toString(16).padStart(2, "0")).join(""); }
+function el(tag, props = {}, ...kids) { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; }
 function throttle(fn, ms) {
   let last = 0, timer = null;
   return (...a) => {
@@ -227,18 +297,29 @@ function renderPower() {
   $("briVal").textContent = Math.round(S.bri / 2.55) + "%";
 }
 
-function targetText() {
+function targets() { return S.selected.size ? S.strips.filter(s => S.selected.has(s.n)) : S.strips; }
+
+function renderTargets() {
   const n = S.selected.size;
-  return n === 0 ? "Applies to: <b>whole tree</b>" : "Applies to: <b>strip" + (n > 1 ? "s " : " ") +
-    [...S.selected].sort((a, b) => a - b).join(", ") + "</b>";
+  const html = n === 0 ? "Applies to: <b>whole tree</b>" : "Applies to: <b>strip" + (n > 1 ? "s " : " ") +
+    [...S.selected].sort((a, b) => a - b).join(", ") + '</b><a href="#" data-clear>use whole tree</a>';
+  for (const id of ["fxTarget", "wheelTarget"]) $(id).innerHTML = html;
 }
+document.addEventListener("click", e => {
+  if (!e.target.matches("[data-clear]")) return;
+  e.preventDefault(); S.selected.clear(); renderStrips(); renderTargets();
+});
 
 // ---------- tabs ----------
-document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
-  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("active", x === b));
-  document.querySelectorAll("main section").forEach(s => s.classList.toggle("active", s.id === "tab-" + b.dataset.tab));
-  if (b.dataset.tab === "effects") $("fxTarget").innerHTML = targetText();
-});
+function showTab(name) {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("active", x.dataset.tab === name));
+  document.querySelectorAll("main section").forEach(s => s.classList.toggle("active", s.id === "tab-" + name));
+  renderTargets();
+  if (name === "effects") syncEffectsFromTree();
+  if (name === "shows") loadShows();
+  if (name === "config") loadInfo();
+}
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
 
 // ---------- power & brightness ----------
 $("power").onclick = () => { S.on = !S.on; renderPower(); sendAll({ on: S.on }); };
@@ -246,33 +327,198 @@ const sendBri = throttle(v => sendAll({ bri: v, on: true }), 150);
 $("bri").addEventListener("input", e => { S.dragging = true; S.bri = +e.target.value; S.on = true; renderPower(); sendBri(S.bri); });
 $("bri").addEventListener("change", () => { S.dragging = false; });
 
-// ---------- quick colours ----------
-const QUICK = [["Warm white", "#ffb060"], ["Red", "#ff1010"], ["Green", "#10c030"], ["Gold", "#ffa000"],
-               ["Blue", "#1040ff"], ["Ice", "#b0e0ff"]];
-for (const [name, hex] of QUICK) {
-  const b = document.createElement("button");
-  b.className = "swatch"; b.style.background = hex; b.title = name; b.setAttribute("aria-label", name);
-  b.onclick = () => { S.selected.clear(); renderStrips(); sendSegments(() => ({ fx: 0, col: [hexToRgb(hex), [0, 0, 0], [0, 0, 0]] })); toast(name); };
-  $("quick").appendChild(b);
+// ---------- colour wheel ----------
+// Hue goes round the wheel (red at the top) and saturation goes out from the white centre.
+// Brightness is the slider at the top.
+function hsvToRgb(h, s, v) {
+  const f = n => { const k = (n + h / 60) % 6; return Math.round(255 * (v - v * s * Math.max(0, Math.min(k, 4 - k, 1)))); };
+  return [f(5), f(3), f(1)];
+}
+function rgbToHs([r, g, b]) {
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0;
+  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return { h: (h * 60 + 360) % 360, s: max ? d / max : 0 };
+}
+const hueAt = (dx, dy) => (Math.atan2(dy, dx) * 180 / Math.PI + 450) % 360;
+
+function drawWheel() {
+  const cv = $("wheel"), size = 300, R = size / 2;
+  cv.width = cv.height = size;
+  const g = cv.getContext("2d"), img = g.createImageData(size, size);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const dx = x - R + 0.5, dy = y - R + 0.5, d = Math.hypot(dx, dy) / R, i = (y * size + x) * 4;
+    if (d > 1) continue;
+    const [r, gg, b] = hsvToRgb(hueAt(dx, dy), d, 1);
+    img.data[i] = r; img.data[i + 1] = gg; img.data[i + 2] = b;
+    img.data[i + 3] = d > 0.985 ? 255 * (1 - d) / 0.015 : 255;
+  }
+  g.putImageData(img, 0, 0);
 }
 
-// ---------- effects ----------
+function placeMark(rgb) {
+  const { h, s } = rgbToHs(rgb), a = (h - 90) * Math.PI / 180, m = $("wheelMark").style;
+  m.left = 50 + 50 * s * Math.cos(a) + "%"; m.top = 50 + 50 * s * Math.sin(a) + "%"; m.background = rgbToHex(rgb);
+}
+
+const sendSolid = throttle(rgb => sendSegments(() => ({ fx: 0, col: [rgb, [0, 0, 0], [0, 0, 0]] })), 150);
+function pickAt(e) {
+  const r = $("wheel").getBoundingClientRect();
+  const dx = e.clientX - r.left - r.width / 2, dy = e.clientY - r.top - r.height / 2;
+  const rgb = hsvToRgb(hueAt(dx, dy), Math.min(1, Math.hypot(dx, dy) / (r.width / 2)), 1);
+  placeMark(rgb); sendSolid(rgb);
+}
+$("wheel").addEventListener("pointerdown", e => { $("wheel").setPointerCapture(e.pointerId); S.picking = true; pickAt(e); });
+$("wheel").addEventListener("pointermove", e => { if (S.picking) pickAt(e); });
+for (const ev of ["pointerup", "pointercancel"]) $("wheel").addEventListener(ev, () => { S.picking = false; });
+
+// ---------- "now showing" ----------
+// A running show or look wins; otherwise describe the strip segments that are lit
+// (overlay segments, ids after the strips, are left out).
+function describeNow(st) {
+  const p = id => S.presets[id];
+  if (!st) return { kind: "Not connected", name: "Can't reach the tree", dot: "#000" };
+  if (!st.on) return { kind: "Now showing", name: "Off", dot: "#000" };
+  if (st.pl > 0 && p(st.pl) && p(st.pl).n) return { kind: "Show", name: p(st.pl).n, dot: "var(--accent)" };
+  if (st.ps > 0 && st.ps !== S.layout.layoutPreset && p(st.ps) && p(st.ps).n)
+    return { kind: p(st.ps).playlist ? "Show" : "Look", name: p(st.ps).n, dot: "var(--accent)" };
+
+  const stripSegs = S.strips.filter(s => s.ctrl === 0).length;
+  const segs = (st.seg || []).filter(s => s.id < stripSegs && s.on !== false && s.stop > s.start);
+  if (!segs.length) return { kind: "Now showing", name: "Nothing lit", dot: "#000" };
+  const fxs = [...new Set(segs.map(s => s.fx))];
+  if (fxs.length === 1 && fxs[0] === 0) {
+    const cols = [...new Set(segs.map(s => rgbToHex(s.col && s.col[0])))];
+    return cols.length === 1
+      ? { kind: "Solid colour", name: cols[0].toUpperCase(), dot: cols[0] }
+      : { kind: "Solid colours", name: cols.length + " colours across the strips", dot: "conic-gradient(" + cols.join(",") + ")" };
+  }
+  if (fxs.length === 1) {
+    const pals = [...new Set(segs.map(s => s.pal))];
+    const pal = fxInfo(fxs[0]).palette && pals.length === 1 ? " · " + (S.palNames[pals[0]] || "palette " + pals[0]) : "";
+    return { kind: "Effect", name: (S.effects[fxs[0]] || "Effect " + fxs[0]) + pal, dot: paletteCss(pals[0], segs[0].col) };
+  }
+  return { kind: "Effects", name: fxs.length + " different effects across the strips", dot: RAINBOW };
+}
+
+function renderNow() {
+  const d = describeNow(S.state);
+  $("nowKind").textContent = d.kind; $("nowName").textContent = d.name; $("nowDot").style.background = d.dot;
+}
+
+// ---------- effects & palettes ----------
+// /json/fxdata gives each effect's metadata: "sliders;colours;palette;flags;defaults".
+// An empty colour slot means the effect ignores that colour; an empty palette part means no palette.
+function fxInfo(id) {
+  if (id === 0) return { cols: ["Colour"], palette: false };
+  const d = S.fxdata[id];
+  if (typeof d !== "string" || d === "") return { cols: COLOUR_NAMES, palette: true };
+  const parts = d.split(";");
+  const cols = parts.length < 2 ? COLOUR_NAMES : parts[1].split(",").map((t, i) => t === "" ? null : t === "!" ? COLOUR_NAMES[i] : t);
+  return { cols: cols.slice(0, 3), palette: parts.length < 3 || parts[2] !== "" };
+}
+
+// /json/palx?page=N returns { m: lastPage, p: { id: [[pos, r, g, b], …] | ["c1", "c2", …] | ["r", …] } }.
+async function loadPalx() {
+  for (let page = 0, last = 0; page <= last && page < 40; page++) {
+    const r = await api(0, "/json/palx?page=" + page);
+    last = r.m || 0;
+    Object.assign(S.palx, r.p || {});
+  }
+}
+
+// The colours a palette really shows. "cN" entries are the segment's own colours, so those stay editable.
+function paletteStops(id, hexCols) {
+  const p = S.palx[id];
+  if (!p) return null;
+  if (p[0] === "r") return { random: true, stops: [], slots: [] };
+  const slots = [], stops = p.map((e, i, a) => {
+    if (typeof e === "string") {
+      const k = +e.slice(1) - 1; if (!slots.includes(k)) slots.push(k);
+      return { pos: a.length > 1 ? i / (a.length - 1) : 0, hex: hexCols[k] || "#000000", slot: k };
+    }
+    return { pos: e[0] / 255, hex: rgbToHex(e.slice(1)) };
+  });
+  return { random: false, stops, slots: slots.sort() };
+}
+
+function paletteCss(id, rgbCols) {
+  const p = paletteStops(id, (rgbCols || []).map(rgbToHex));
+  if (!p || p.random) return RAINBOW;
+  if (p.stops.length === 1) return p.stops[0].hex;
+  return "linear-gradient(90deg," + p.stops.map(s => s.hex + " " + Math.round(s.pos * 100) + "%").join(",") + ")";
+}
+
 function renderEffects() {
   const f = $("fxFilter").value.trim().toLowerCase();
   const sel = $("fxSel"), current = sel.value;
   sel.innerHTML = "";
   S.effects.forEach((name, id) => {
     if (name === "RSVD" || name === "-" || (f && !name.toLowerCase().includes(f))) return;
-    const o = document.createElement("option"); o.value = id; o.textContent = name; sel.appendChild(o);
+    sel.appendChild(el("option", { value: id, textContent: name }));
   });
   if (current) sel.value = current;
   if (sel.selectedIndex < 0 && sel.options.length) sel.selectedIndex = 0;
+  renderColours();
 }
 $("fxFilter").addEventListener("input", renderEffects);
+$("fxSel").addEventListener("change", renderColours);
+$("palSel").addEventListener("change", renderColours);
+
+function colourInput(k, label) {
+  const inp = el("input", { type: "color", value: S.cols[k] });
+  inp.setAttribute("aria-label", label);
+  inp.oninput = () => { S.cols[k] = inp.value; $("palBar").style.background = paletteCss(+$("palSel").value, S.cols.map(hexToRgb)); };
+  return el("label", { className: "chip" }, inp, label);
+}
+
+// Shows only the colours that will actually appear: the palette's own colours, plus pickers for the
+// segment colours that the palette (or, with no palette, the effect) really uses.
+function renderColours() {
+  const fx = +$("fxSel").value || 0, info = fxInfo(fx), pal = +$("palSel").value || 0;
+  const box = $("colours"); box.innerHTML = "";
+  $("palBlock").style.display = info.palette ? "" : "none";
+  let note = "";
+
+  if (!info.palette) {
+    $("colTitle").textContent = "Colours";
+    info.cols.forEach((name, k) => { if (name) box.appendChild(colourInput(k, name)); });
+    if (!box.children.length) note = "This effect makes its own colours.";
+  } else {
+    const p = paletteStops(pal, S.cols);
+    $("palBar").style.background = paletteCss(pal, S.cols.map(hexToRgb));
+    $("colTitle").textContent = "Palette colours";
+    if (!p) note = "The palette's colours couldn't be loaded.";
+    else if (p.random) note = "This palette picks random colours as it runs.";
+    else {
+      const seen = new Set();
+      for (const s of p.stops) {
+        if (s.slot !== undefined || seen.has(s.hex)) continue;
+        seen.add(s.hex);
+        box.appendChild(el("div", { className: "chip", title: s.hex }, el("div", { className: "dot", style: "background:" + s.hex })));
+      }
+      for (const k of p.slots) box.appendChild(colourInput(k, COLOUR_NAMES[k]));
+      if (pal === 0) note = "Default lets the effect choose its own palette. These are the usual Default colours.";
+      else if (p.slots.length) note = "This palette is made from the colours you pick.";
+    }
+  }
+  $("colNote").textContent = note;
+}
+
+// Fills the Effects tab from what the first targeted strip is doing now.
+function syncEffectsFromTree() {
+  const t = targets()[0], seg = S.state && t && t.ctrl === 0 && (S.state.seg || []).find(s => s.id === t.seg);
+  if (!seg) { renderColours(); return; }
+  if (![...$("fxSel").options].some(o => +o.value === seg.fx)) { $("fxFilter").value = ""; renderEffects(); }
+  $("fxSel").value = seg.fx; $("palSel").value = seg.pal;
+  $("sx").value = seg.sx; $("ix").value = seg.ix;
+  if (seg.col) S.cols = seg.col.map(rgbToHex);
+  renderColours();
+}
 
 function currentFx() {
   return { fx: +$("fxSel").value || 0, pal: +$("palSel").value || 0, sx: +$("sx").value, ix: +$("ix").value,
-           col: ["c0", "c1", "c2"].map(id => hexToRgb($(id).value)) };
+           col: S.cols.map(hexToRgb) };
 }
 $("fxApply").onclick = () => { sendSegments(currentFx); toast("Applied"); };
 for (const id of ["sx", "ix"]) {
@@ -298,7 +544,7 @@ function renderStrips() {
     const c = document.createElementNS(NS, "circle"); c.setAttribute("r", 22);
     const t = document.createElementNS(NS, "text"); t.textContent = s.n;
     g.append(c, t);
-    g.onclick = () => { S.selected.has(s.n) ? S.selected.delete(s.n) : S.selected.add(s.n); renderStrips(); };
+    g.onclick = () => { S.selected.has(s.n) ? S.selected.delete(s.n) : S.selected.add(s.n); renderStrips(); renderTargets(); };
     svg.appendChild(g);
   }
 }
@@ -317,36 +563,110 @@ function renderGroups() {
   ];
   for (const [label, pick] of groups) {
     const b = document.createElement("button"); b.className = "btn"; b.textContent = label;
-    b.onclick = () => { S.selected = new Set(pick().map(s => s.n)); renderStrips(); };
+    b.onclick = () => { S.selected = new Set(pick().map(s => s.n)); renderStrips(); renderTargets(); };
     $("groups").appendChild(b);
   }
 }
 
-// ---------- presets ----------
+// ---------- shows and looks (WLED playlists and presets) ----------
+// The layout preset only holds the strip segments, so it sits under Config ("Reset strip layout"), not here.
 async function loadPresets() {
-  const list = $("presetList"); list.innerHTML = "";
-  let presets = {};
-  try { const r = await fetch("/presets.json"); if (r.ok) presets = await r.json(); } catch { /* none saved yet */ }
-  const ids = Object.keys(presets).filter(id => id !== "0" && presets[id] && presets[id].n).sort((a, b) => a - b);
-  if (!ids.length) { list.innerHTML = '<p class="note">No presets saved yet.</p>'; return presets; }
-  for (const id of ids) {
-    const b = document.createElement("button"); b.className = "btn";
-    b.textContent = (presets[id].playlist ? "▶ " : "") + presets[id].n;
-    b.onclick = () => { sendAll({ ps: +id }); S.on = true; renderPower(); toast(presets[id].n); };
-    list.appendChild(b);
-  }
-  return presets;
+  try { const r = await fetch("/presets.json", { cache: "no-store" }); if (r.ok) S.presets = await r.json(); } catch { /* none saved yet */ }
+  return S.presets;
 }
 
-$("savePreset").onclick = async () => {
-  const name = prompt("Preset name?");
+async function loadShows() {
+  await loadPresets();
+  const list = $("showList"); list.innerHTML = "";
+  const lp = String(S.layout.layoutPreset);
+  const ids = Object.keys(S.presets).filter(id => id !== "0" && id !== lp && S.presets[id] && S.presets[id].n);
+  // shows (playlists) first, then looks, each in id order
+  ids.sort((a, b) => (!S.presets[a].playlist - !S.presets[b].playlist) || a - b);
+  if (!ids.length) { list.innerHTML = '<p class="note">No shows or looks saved yet.</p>'; return; }
+  const cur = S.state && (S.state.pl > 0 ? S.state.pl : S.state.ps);
+  for (const id of ids) {
+    const b = el("button", { className: "btn" + (+id === cur ? " cur" : ""), textContent: (S.presets[id].playlist ? "▶ " : "") + S.presets[id].n });
+    b.onclick = () => { sendAll({ ps: +id }); S.on = true; renderPower(); toast(S.presets[id].n); setTimeout(loadShows, 600); };
+    list.appendChild(b);
+  }
+}
+
+$("saveShow").onclick = async () => {
+  const name = prompt("Name for this look?");
   if (!name) return;
-  const presets = await loadPresets();
+  await loadPresets();
   let id = 2;
-  while (presets[id] && id < 250) id++;
+  while ((S.presets[id] || id === S.layout.layoutPreset) && id < 250) id++;
   await sendAll({ psave: id, n: name, ib: true, sb: true });
-  setTimeout(loadPresets, 800);
+  setTimeout(loadShows, 800);
   toast("Saved as preset " + id);
+};
+
+// ---------- config ----------
+async function loadInfo() {
+  const dl = $("devInfo");
+  try {
+    const i = await api(0, "/json/info");
+    const ip = i.ip || location.hostname, up = i.uptime || 0, leds = i.leds || {};
+    $("phoneUrl").textContent = appUrl(i);
+    const rows = [
+      ["Name", i.name], ["Firmware", "WLED " + i.ver], ["IP address", ip],
+      ["Network", ip === "4.3.2.1" ? "Its own Wi-Fi (WLED-AP)" : "Home Wi-Fi"],
+      ["Wi-Fi signal", i.wifi ? i.wifi.signal + "%" : "?"],
+      ["LEDs", leds.count ?? "?"],
+      ["Current", leds.pwr != null ? (leds.pwr / 1000).toFixed(1) + " A estimated, limit " + (leds.maxpwr / 1000).toFixed(0) + " A" : "?"],
+      ["Free memory", Math.round((i.freeheap || 0) / 1024) + " KB"],
+      ["Storage", i.fs ? i.fs.u + " of " + i.fs.t + " KB used" : "?"],
+      ["Up for", Math.floor(up / 3600) + " h " + Math.floor(up % 3600 / 60) + " min"],
+    ];
+    dl.innerHTML = "";
+    for (const [k, v] of rows) dl.append(el("dt", { textContent: k }), el("dd", { textContent: v }));
+  } catch { dl.innerHTML = "<dt>Status</dt><dd>Can't reach the controller</dd>"; }
+}
+
+// ---------- share ----------
+// The IP, not xmastree.local: many Android phones can't resolve .local names. Read live, so a new DHCP address is picked up.
+function appUrl(info) { return "http://" + (info.ip || location.hostname) + "/tree.htm"; }
+
+// Dark modules on white with a 4-module quiet zone, so phone cameras get the contrast they need.
+function drawQr(canvas, text) {
+  const qr = qrcode(0, "M");
+  qr.addData(text); qr.make();
+  const n = qr.getModuleCount(), total = n + 8;
+  const px = Math.max(1, Math.floor(canvas.clientWidth * (window.devicePixelRatio || 1) / total));
+  canvas.width = canvas.height = total * px;
+  const g = canvas.getContext("2d");
+  g.fillStyle = "#fff"; g.fillRect(0, 0, canvas.width, canvas.height);
+  g.fillStyle = "#000";
+  for (let r = 0; r < n; r++)
+    for (let c = 0; c < n; c++)
+      if (qr.isDark(r, c)) g.fillRect((c + 4) * px, (r + 4) * px, px, px);
+}
+
+let shareLock = null;
+async function openShare() {
+  let info;
+  try { info = await api(0, "/json/info"); } catch { toast("Can't reach the controller"); return; }
+  const url = appUrl(info);
+  $("share").hidden = false;
+  drawQr($("qr"), url);
+  $("shareUrl").textContent = url;
+  $("shareNote").textContent = "The phone must be on the same Wi-Fi as the tree (" +
+    (info.ip === "4.3.2.1" ? "WLED-AP" : "the home Wi-Fi") + ").";
+  try { shareLock = await navigator.wakeLock?.request("screen"); } catch { /* not supported, or not allowed */ }
+}
+function closeShare() {
+  $("share").hidden = true;
+  shareLock?.release().catch(() => {}); shareLock = null;
+}
+$("shareBtn").onclick = $("shareCfg").onclick = openShare;
+$("shareClose").onclick = closeShare;
+$("share").addEventListener("click", e => { if (e.target.id === "share") closeShare(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("share").hidden) closeShare(); });
+
+$("resetLayout").onclick = () => {
+  if (!confirm("Put every strip back to the saved layout? This replaces the current look.")) return;
+  sendAll({ ps: S.layout.layoutPreset || 10 }); toast("Strip layout restored");
 };
 
 // ---------- live preview ----------
@@ -429,9 +749,9 @@ function drawTree() {
     return { x: cx + r * Math.sin(a), y: baseY - hh * H + r * 0.18 * Math.cos(a), z: Math.cos(a) }; };
 
   // strip guide lines: solid for attached strips, dashed for ones that aren't wired up yet
-  g.lineWidth = 1;
   for (const s of S.strips) {
     const b = proj(s, 0), t = proj(s, 1), live = S.attached.has(s.n);
+    g.lineWidth = live ? 1 : 0.5;
     g.setLineDash(live ? [] : [3, 5]);
     g.strokeStyle = live ? (b.z > 0 ? "#4cc38a99" : "#4cc38a44") : (b.z > 0 ? "#29423a" : "#1a2c24");
     g.beginPath(); g.moveTo(b.x, b.y); g.lineTo(t.x, t.y); g.stroke();
@@ -445,7 +765,7 @@ function drawTree() {
     const live = S.attached.has(s.n), depth = (z + 1) / 2, cols = S.colours[si] || [];
     g.globalAlpha = live ? 0.55 + 0.45 * depth : 0.3 + 0.5 * depth;
     g.shadowBlur = live ? 6 : 0;
-    const rad = (live ? 1.6 : 1.3) + 0.7 * depth;
+    const rad = live ? 1.6 + 0.7 * depth : 0.7 + 0.4 * depth;
     for (let p = 0; p < L; p++) {
       const c = cols[p];
       if (!c || c === "#000000") continue;
@@ -473,14 +793,17 @@ function drawTree() {
 }
 
 // ---------- state sync ----------
-async function pollState() {
+async function refreshState() {
   try {
     const st = await api(0, "/json/state");
-    S.on = st.on; if (!S.dragging) S.bri = st.bri;
+    S.state = st; S.on = st.on; if (!S.dragging) S.bri = st.bri;
+    const lit = (st.seg || []).find(s => s.on !== false);
+    if (!S.picking && lit && lit.fx === 0 && lit.col) placeMark(lit.col[0]);
     renderPower(); setConn(true);
-  } catch { setConn(false); }
-  setTimeout(pollState, 3000);
+  } catch { S.state = null; setConn(false); }
+  renderNow();
 }
+async function pollState() { await refreshState(); setTimeout(pollState, 3000); }
 
 // ---------- start ----------
 (async function init() {
@@ -489,22 +812,21 @@ async function pollState() {
   $("title").textContent = S.layout.name || "Xmas Tree";
   S.strips = buildStrips(S.layout);
   S.attached = new Set(Array.isArray(S.layout.attached) ? S.layout.attached : S.strips.map(s => s.n));
-  if (S.attached.size < S.strips.length) {
-    const live = [...S.attached].sort((a, b) => a - b);
-    $("previewNote").textContent = `Strip${live.length > 1 ? "s" : ""} ${live.join(", ")} ${live.length > 1 ? "are" : "is"} wired up and live. ` +
-      `The other ${S.strips.length - live.length} show what they would display: the controller calculates them too.`;
-    $("previewLegend").hidden = false;
-  }
   buildLedMaps();
-  renderStrips(); renderGroups();
+  renderStrips(); renderGroups(); renderTargets(); drawWheel();
 
   try {
     const [eff, pal] = await Promise.all([api(0, "/json/eff"), api(0, "/json/pal")]);
-    S.effects = eff; renderEffects();
-    pal.forEach((name, id) => { const o = document.createElement("option"); o.value = id; o.textContent = name; $("palSel").appendChild(o); });
-  } catch { toast("Can't reach the tree. Are you on its Wi-Fi?"); }
+    S.effects = eff; S.palNames = pal;
+    pal.forEach((name, id) => $("palSel").appendChild(el("option", { value: id, textContent: name })));
+    renderEffects();
+  } catch { toast("Can't reach the tree. Is the phone on the same Wi-Fi?"); }
+  // Extras for the colour display. The app still works without them.
+  try { S.fxdata = await api(0, "/json/fxdata"); } catch { /* older firmware */ }
+  try { await loadPalx(); } catch { /* older firmware */ }
+  renderColours();
 
-  loadPresets();
+  await loadPresets();
   pollState();
   S.layout.controllers.forEach((_, ci) => openLiveSocket(ci));
   pollLive();

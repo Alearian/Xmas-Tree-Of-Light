@@ -1,5 +1,5 @@
 {
-  "name": "Prototype tree (strip 1 live)",
+  "name": "Prototype tree (strips 1–2 live)",
   "ledsPerStrip": 300,
   "stripCount": 12,
   "heightMetres": 5,
@@ -7,7 +7,7 @@
   "colorOrder": 0,
   "abl": { "ledMa": 11, "maxMa": 60000 },
   "layoutPreset": 10,
-  "attached": [1],
+  "attached": [1, 2],
   "controllers": [
     {
       "name": "Dig-Quad A",

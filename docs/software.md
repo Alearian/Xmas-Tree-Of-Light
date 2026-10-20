@@ -40,7 +40,8 @@ dotnet run --project tools/TreeTool -- <command> [--layout config/bench.json] [-
 
 ## Phone app
 
-- **Header:** connection dot, power button and brightness (these affect every controller)
+- **Header:** connection dot, share button, power button and brightness (these affect every controller)
+- **Share:** the QR-code button (also "Show QR code" on the Config tab) opens a full-screen QR code of `http://<board IP>/tree.htm`, so someone else can scan it and get the app. It uses the IP rather than `xmastree.local`, because many Android phones can't resolve `.local` names. The phone still has to be on the same Wi-Fi. The QR generator ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, MIT) is built into `tree.htm`, so it works offline.
 - **Tree:** a slowly rotating 3D cone preview made from WLED's live feed (about 15 samples per strip), plus quick whole-tree colours. Strips listed in the layout's `attached` glow and are tagged LIVE. The others are drawn faded with dashed guides, showing what they would display.
 - **Effects:** search the effect list, palette, 3 colours, speed and intensity. Applies to the selected strips (or the whole tree).
 - **Strips:** a top-down tree with 12 tappable strips, plus groups (North/East/South/West, odd, even)

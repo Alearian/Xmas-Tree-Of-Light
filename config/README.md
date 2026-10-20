@@ -6,7 +6,7 @@ A layout file describes how the physical strips map onto controllers and outputs
 |---|---|
 | `tree.json` | The full tree: 12 strips, one Dig-Quad, 3 strips per output |
 | `bench.json` | Bench test: one strip on LED1 (GPIO 16), with the current limiter capped at 5 A |
-| `proto-tree.json` | **Current (2026-10-03):** the whole tree at 12 × 300 LEDs, with only strip 1 wired up (`attached`). WLED calculates every strip, so the app previews all 12. |
+| `proto-tree.json` | **Current (2026-10-20):** the whole tree at 12 × 300 LEDs, with strips 1 and 2 wired up end to end on LED1 (`attached`). WLED calculates every strip, so the app previews all 12. |
 | `looks.json` | The cone look library and shows, installed as presets by `treetool looks` (not a layout) |
 
 ## Fields
@@ -47,6 +47,7 @@ Each look is one WLED effect applied to every strip, with cone-aware tweaks:
 | `twist` | LEDs of offset added per strip going round the tree. 0 makes rings. A non-zero value turns bands into a **spiral**. |
 | `flip` | `odd`, `even` or `all`: reverse the direction on those strips (for example up on odd, down on even) |
 | `groups` | Overrides for `odd`, `even`, `N`, `E`, `S`, `W` or a strip number, for example a different colour per side |
+| `overlay` | A second effect drawn on top of every strip (`fx`, `pal`, `sx`, `ix`, `colours`, `twist`, `flip`, `groups`), using the effect's Overlay option, so only effects that have one work (Drip, Glitter, Sparkle). It uses extra segments after the strip segments. Looks without an overlay, and effect changes in the app, remove them. |
 
 A **show** is a WLED playlist: `looks` (preset ids), `seconds` per look and `fadeSeconds` between looks.
 
