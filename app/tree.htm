@@ -72,6 +72,16 @@
   #nowName { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #nowSub { color: var(--accent); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #nowSub[hidden] { display: none; }
+  /* the next look in a show, centred in the bar, when there's room for it */
+  #now { position: relative; }
+  #nowNext { display: none; }
+  @media (min-width: 600px) {
+    #now:has(#nowNext:not([hidden])) #nowText { flex: 0 1 34%; margin-right: auto; }
+    #nowNext:not([hidden]) { display: block; position: absolute; left: 50%; transform: translateX(-50%); max-width: 30%;
+      text-align: center; pointer-events: none; }
+    #nowNext .k { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    #nowNextName { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  }
   #nowPlay { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); background: var(--accent);
     color: #231a05; cursor: pointer; display: grid; place-items: center; padding: 0; }
 
@@ -141,7 +151,8 @@
   .showCard.cur { border-color: var(--accent); }
   .showCard .top { display: flex; align-items: center; gap: 8px; }
   .showCard .top b { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .showCard .status { color: var(--dim); font-size: 13px; margin: 2px 0 10px; }
+  .showCard .status { color: var(--dim); font-size: 13px; margin: 2px 0 4px; }
+  .showCard .meta { color: var(--dim); font-size: 13px; margin: 2px 0 10px; }
   .showCard.cur .status { color: var(--accent); }
   .showCard .ctl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .showCard .ctl .btn { padding: 12px 2px; font-size: 14px; }
@@ -179,6 +190,10 @@
   #shareUrl { font-family: ui-monospace, monospace; color: var(--accent); margin: 14px 0 6px; word-break: break-all; user-select: all; }
   #share .btn { margin-top: 14px; width: 100%; }
   .col + .col > h2:first-child { margin-top: 20px; }
+  /* "Applies to" sits right of the title when there's room, otherwise under it */
+  .pickHead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 20px 0 8px; }
+  .pickHead h2 { margin: 0; }
+  .pickHead .target { flex: 1 1 220px; }
 
   /* Tablets in landscape (and wide screens): the tree and the colour wheel side by side,
      and the Effects and Shows tabs in two columns. Phones keep the single column. */
@@ -188,9 +203,11 @@
       grid-template-areas: "now now" "tree wheel"; column-gap: 24px; align-items: start; }
     #now { grid-area: now; }
     #treeWrap { grid-area: tree; }
-    .wheelCol { grid-area: wheel; }
-    /* header, brightness, "now showing" and the nav take about 300px */
-    #treeCanvas { aspect-ratio: auto; height: calc(100vh - 300px); height: calc(100dvh - 300px); min-height: 320px; max-height: none; }
+    /* a line between the tree and the wheel, only in this side-by-side layout */
+    .wheelCol { grid-area: wheel; align-self: stretch; border-left: 1px solid var(--line); padding-left: 24px; }
+    .wheelCol .pickHead { margin-top: 0; }
+    /* header, brightness, "now showing" (two lines) and the nav take about 320px */
+    #treeCanvas { aspect-ratio: auto; height: calc(100vh - 320px); height: calc(100dvh - 320px); min-height: 320px; max-height: none; }
     .wheelWrap { width: min(100%, 440px); }
     #tab-effects.active, #tab-shows.active { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       column-gap: 24px; align-items: start; }
@@ -217,7 +234,7 @@
 
 <main>
   <section id="tab-tree" class="active">
-    <div id="now"><div id="nowDot"></div><div id="nowText"><div id="nowKind">Now showing</div><div id="nowName">…</div><div id="nowSub" hidden></div></div><div id="nowLeft" hidden></div></div>
+    <div id="now"><div id="nowDot"></div><div id="nowText"><div id="nowKind">Now showing</div><div id="nowName">…</div><div id="nowSub" hidden></div></div><div id="nowNext" hidden><div class="k">Next</div><div id="nowNextName"></div></div><div id="nowLeft" hidden></div></div>
     <div id="treeWrap">
       <canvas id="treeCanvas"></canvas>
       <button id="spinBtn" title="Rotate on/off" aria-label="Rotate on/off" aria-pressed="true">
@@ -225,8 +242,7 @@
       </button>
     </div>
     <div class="wheelCol">
-      <h2>Pick a colour</h2>
-      <div class="target" id="wheelTarget"></div>
+      <div class="pickHead"><h2>Pick a colour</h2><div class="target" id="wheelTarget"></div></div>
       <div class="wheelWrap"><canvas id="wheel"></canvas><div id="wheelMark"></div></div>
     </div>
   </section>
@@ -277,7 +293,7 @@
       <a class="btn" id="goAp">Switch to tree's Wi-Fi</a><button class="btn" id="qrAp">QR code</button>
     </div>
     <h2>Strips</h2>
-    <p class="note">Tap strips to choose where colours and effects go. Nothing selected means the whole tree. Strips with a green ring are attached.</p>
+    <p class="note">Colours and effects go to the filled strips. Tap a strip to add or take it away. Taking the last one away selects the whole tree again. Strips with a green ring are attached.</p>
     <svg id="stripSvg" viewBox="-170 -170 340 340"></svg>
     <h2>Groups</h2>
     <div class="grid" id="groups"></div>
@@ -288,7 +304,7 @@
       <a class="btn" href="/settings" target="_blank" rel="noopener">WLED settings</a>
     </div>
     <!-- bump when changing the app, so it's easy to tell which copy a phone has loaded -->
-    <p class="note" style="text-align:center;margin-top:24px" id="appVer">App version 2026-10-25a</p>
+    <p class="note" style="text-align:center;margin-top:24px" id="appVer">App version 2026-10-25e</p>
   </section>
 </main>
 
@@ -403,9 +419,10 @@ async function sendSegments(segFn, extra = {}) {
   const jobs = S.layout.controllers.map((_, ci) => {
     const count = S.strips.filter(s => s.ctrl === ci).length;
     const chosen = targets().filter(s => s.ctrl === ci);
-    const seg = chosen.map(s => Object.assign({ id: s.seg, on: true, frz: false }, segFn(s)));
+    // on and bri 255 also undo a show's Fade down step, if it was stopped halfway
+    const seg = chosen.map(s => Object.assign({ id: s.seg, on: true, bri: 255, frz: false }, segFn(s)));
     if (seg.length) {
-      for (const s of S.strips) if (s.ctrl === ci && !chosen.includes(s)) seg.push({ id: s.seg, frz: false });
+      for (const s of S.strips) if (s.ctrl === ci && !chosen.includes(s)) seg.push({ id: s.seg, on: true, bri: 255, frz: false });
       for (let id = count; id < MAX_SEGMENTS; id++) seg.push({ id, stop: 0 });
     }
     return seg.length ? api(ci, "/json/state", Object.assign({ on: true, seg }, extra)) : null;
@@ -525,14 +542,10 @@ function describeNow(st) {
   if (!st) return { kind: "Not connected", name: "Can't reach the tree", dot: "#000" };
   if (!st.on) return { kind: "Now showing", name: "Off", dot: "#000" };
   const paused = pausedShow(st);
-  if (paused) {
-    const sh = showOf(paused), k = sh.ps.indexOf(S.pausedPs);
-    return { kind: "Show · paused", name: presetName(paused), dot: "var(--accent)",
-             sub: (k >= 0 ? "Look " + (k + 1) + " of " + sh.ps.length + ": " : "") + presetName(S.pausedPs) };
-  }
-  if (st.pl > 0 && p(st.pl) && p(st.pl).n) return { kind: "Show", name: p(st.pl).n, dot: "var(--accent)" };
+  if (paused) return showNow(paused, "Show · paused", showOf(paused).ps.indexOf(S.pausedPs));
   // a resumed show runs as an unsaved playlist (pl 0)
-  if (st.pl === 0 && S.resumed && p(S.resumed)) return { kind: "Show", name: p(S.resumed).n, dot: "var(--accent)" };
+  const running = runningShow(st);
+  if (running) return showNow(running, "Show", lookIndex(running, st.ps));
   if (st.ps > 0 && st.ps !== S.layout.layoutPreset && p(st.ps) && p(st.ps).n)
     return { kind: p(st.ps).playlist ? "Show" : "Look", name: p(st.ps).n, dot: "var(--accent)" };
 
@@ -554,10 +567,25 @@ function describeNow(st) {
   return { kind: "Effects", name: fxs.length + " different effects across the strips", dot: RAINBOW };
 }
 
+// A show: its name, the look that's up (k = its entry, -1 if unknown) and, on a wide enough screen, the next one.
+function showNow(id, kind, k) {
+  const sh = showOf(id), n = sh.ps.length;
+  return { kind, name: presetName(id), dot: "var(--accent)",
+           sub: k >= 0 ? "Look " + (k + 1) + " of " + n + ": " + presetName(sh.ps[k]) : "",
+           next: k >= 0 && n > 1 ? presetName(sh.ps[(k + 1) % n]) : "" };
+}
+// Which entry of a running show is up: the one noteLook followed (also during the fade step), else the first match.
+function lookIndex(id, ps) {
+  const sh = showOf(id), L = S.look;
+  if (L.show === id && L.idx >= 0 && (ps === FADE_DOWN || sh.ps[L.idx] === ps)) return L.idx;
+  return sh.ps.indexOf(ps);
+}
+
 function renderNow() {
   const d = describeNow(S.state);
   $("nowKind").textContent = d.kind; $("nowName").textContent = d.name; $("nowDot").style.background = d.dot;
   $("nowSub").textContent = d.sub || ""; $("nowSub").hidden = !d.sub;
+  $("nowNextName").textContent = d.next || ""; $("nowNext").hidden = !d.next;
   renderLeft();
 }
 
@@ -569,7 +597,9 @@ function runningShow(st) {
   return id && S.presets[id] && S.presets[id].playlist ? id : 0;
 }
 function noteLook(st) {
-  const id = runningShow(st), key = id ? id + ":" + st.ps : null;
+  const id = runningShow(st);
+  if (id && st.ps === FADE_DOWN && S.look.show === id) return;   // the step between looks: still the same look
+  const key = id ? id + ":" + st.ps : null;
   if (key === S.look.key) return;
   const prev = S.look;
   // which entry this is: the one after the last, if it matches (a look can be in a show twice)
@@ -579,7 +609,17 @@ function noteLook(st) {
     idx = next >= 0 && ps[next] === st.ps ? next : ps.indexOf(st.ps);
   }
   // A change seen after the first state means the look started now; the first state the app sees is partway through.
-  S.look = { key, show: id, idx, t: prev.key !== undefined && id ? Date.now() : 0 };
+  let t = prev.key !== undefined && id ? Date.now() : 0;
+  // On opening, carry on from when this phone last saw this look start, if that's still within the look's time
+  // (an app update reloads every open phone, and a long look would otherwise show a dash for minutes).
+  if (prev.key === undefined && id && idx >= 0) {
+    try {
+      const saved = JSON.parse(localStorage.getItem("lookStart")) || {};
+      if (saved.key === key && saved.idx === idx && Date.now() - saved.t < showOf(id).dur[idx] * 100) t = saved.t;
+    } catch { /* none */ }
+  }
+  S.look = { key, show: id, idx, t };
+  if (t) try { localStorage.setItem("lookStart", JSON.stringify({ key, idx, t })); } catch { /* private mode */ }
 }
 // While a show is paused, the countdown's place holds a play button that resumes it.
 const PLAY_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
@@ -768,12 +808,18 @@ function renderStrips() {
   svg.appendChild(ring);
   for (const s of S.strips) {
     const g = document.createElementNS(NS, "g");
-    g.setAttribute("class", "s" + (S.selected.has(s.n) ? " sel" : "") + (S.attached.has(s.n) ? " live" : ""));
+    // an empty selection is the whole tree, so every strip is drawn selected
+    g.setAttribute("class", "s" + (!S.selected.size || S.selected.has(s.n) ? " sel" : "") + (S.attached.has(s.n) ? " live" : ""));
     g.setAttribute("transform", `translate(${110 * Math.sin(s.angle)} ${-110 * Math.cos(s.angle)})`);
     const c = document.createElementNS(NS, "circle"); c.setAttribute("r", 22);
     const t = document.createElementNS(NS, "text"); t.textContent = s.n;
     g.append(c, t);
-    g.onclick = () => { S.selected.has(s.n) ? S.selected.delete(s.n) : S.selected.add(s.n); renderStrips(); renderTargets(); };
+    g.onclick = () => {
+      if (!S.selected.size) S.selected = new Set(S.strips.map(x => x.n));   // the whole tree: take this one away
+      S.selected.has(s.n) ? S.selected.delete(s.n) : S.selected.add(s.n);
+      if (S.selected.size === S.strips.length) S.selected.clear();          // every strip again = the whole tree
+      renderStrips(); renderTargets();
+    };
     svg.appendChild(g);
   }
 }
@@ -782,7 +828,7 @@ function renderGroups() {
   const deg = s => (s.angle * 180 / Math.PI + 360) % 360;
   const inQuad = (s, centre) => { const d = Math.abs(((deg(s) - centre + 540) % 360) - 180); return d < 45 || (d === 45 && centre !== 270); };
   const groups = [
-    ["All (clear)", () => []],
+    ["All strips", () => []],
     ["North", () => S.strips.filter(s => inQuad(s, 0))],
     ["East", () => S.strips.filter(s => inQuad(s, 90))],
     ["South", () => S.strips.filter(s => inQuad(s, 180))],
@@ -801,7 +847,12 @@ function renderGroups() {
 // The board's presets.json is the only store. A preset with a "playlist" is a show; any other preset is a look.
 // The layout preset sits under Config ("Reset strip layout"), and preset 250 "Lights off" ends shows and is used by Stop.
 // Daily start/end times are WLED timers: start applies the show, end applies 250.
+// Preset 249 "Fade down" is a hidden step between a show's looks (see playlistBody); it isn't listed either.
 const LIGHTS_OFF = 250;
+const FADE_DOWN = 249;
+// Tenths at black between the fade-down and the next look: WLED 0.14 won't start a transition while one is still
+// running, so a look that arrived just as the fade-down ended would skip its fade-up. Matches Looks.FadeGap.
+const FADE_GAP = 2;
 const MAX_DUR = 65000;     // WLED keeps each playlist time in tenths of a second, in 16 bits
 const MAX_REPEAT = 100;
 const MAX_TIMERS = 8;      // WLED 0.14 has 8 clock timers (plus sunrise and sunset)
@@ -823,7 +874,7 @@ function loadMarks() {
 function pausedShow(st) {
   const id = S.paused, seg0 = st && (st.seg || [])[0];
   if (!id || !st || !st.on || st.pl >= 0 || !isShow(id)) return 0;
-  return (st.ps === S.pausedPs || st.ps < 1) && (!seg0 || seg0.fx === S.pausedFx) ? id : 0;
+  return (st.ps === S.pausedPs || st.ps < 1) && (!seg0 || S.pausedFx < 0 || seg0.fx === S.pausedFx) ? id : 0;
 }
 // Drops the notes once the tree is clearly doing something else (after a moment, so a state read
 // that was already on its way doesn't undo a fresh pause).
@@ -841,7 +892,7 @@ const isShow = id => !!(S.presets[id] && S.presets[id].playlist);
 const presetName = id => (S.presets[id] && S.presets[id].n) || "Preset " + id;
 
 function presetIds(pick) {
-  const skip = new Set(["0", String(S.layout.layoutPreset), String(LIGHTS_OFF)]);
+  const skip = new Set(["0", String(S.layout.layoutPreset), String(LIGHTS_OFF), String(FADE_DOWN)]);
   return Object.keys(S.presets).filter(id => !skip.has(id) && S.presets[id] && S.presets[id].n && pick(+id))
     .map(Number).sort((a, b) => a - b);
 }
@@ -849,15 +900,40 @@ const lookIds = () => presetIds(id => !isShow(id));
 const BIN_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 3h4M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
 
 function freePresetId() {
-  for (let id = 1; id < LIGHTS_OFF; id++) if (id !== S.layout.layoutPreset && !S.presets[id]) return id;
+  for (let id = 1; id < FADE_DOWN; id++) if (id !== S.layout.layoutPreset && !S.presets[id]) return id;
   return 0;
 }
 
-// A show's playlist with dur and transition as lists, whichever form WLED stored them in.
+// A show as the editor sees it: its looks, each look's time (tenths of a second, including its fades) and the
+// fade between looks (tenths). The stored playlist has a Fade down step after each look (see playlistBody);
+// older shows without those steps just have WLED's own transition, which doesn't fade between effects.
 function showOf(id) {
-  const p = S.presets[id].playlist, ps = p.ps || [];
-  const list = (v, d) => Array.isArray(v) ? v : ps.map(() => v ?? d);
-  return { ps, dur: list(p.dur, 100), transition: list(p.transition, 7), repeat: p.repeat || 0, end: p.end || 0 };
+  const p = S.presets[id].playlist, raw = p.ps || [];
+  const list = (v, d) => Array.isArray(v) ? v : raw.map(() => v ?? d);
+  const rawDur = list(p.dur, 100), rawTr = list(p.transition, 7);
+  const ps = [], dur = [];
+  let fade = rawTr[0] ?? 7;
+  // a look's time is its own step (which starts with the fade-up) plus the Fade down step after it
+  raw.forEach((look, i) => {
+    if (look === FADE_DOWN) { if (dur.length) dur[dur.length - 1] += rawDur[i]; fade = 2 * rawTr[i]; return; }
+    ps.push(look); dur.push(rawDur[i]);
+  });
+  return { ps, dur, fade, repeat: p.repeat || 0, end: p.end || 0 };
+}
+
+// The playlist for looks shown for the given times (tenths, each including its fades), with a fade between looks:
+// half of it fading the look down (the Fade down step turns every segment to brightness 0), half fading the next
+// look up (looks turn their segments back on at their own brightness). WLED 0.14 swaps effects instantly, so
+// this dip is what makes a visible fade, and it runs every step at the show's "transition" rather than the
+// per-step times. Must match Looks.Playlist in TreeTool.
+function playlistBody(ps, dur, fade, repeat) {
+  const half = Math.floor(fade / 2), steps = [], d = [], tr = [];
+  ps.forEach((look, i) => {
+    const gap = half > 0 ? FADE_GAP : 0;
+    steps.push(look); d.push(Math.max(1, dur[i] - half - gap)); tr.push(half);
+    if (half > 0) { steps.push(FADE_DOWN); d.push(half + gap); tr.push(half); }
+  });
+  return { on: true, transition: half, playlist: { ps: steps, dur: d, transition: tr, repeat, end: LIGHTS_OFF, r: 0 } };
 }
 
 function fmtTime(sec) {
@@ -879,6 +955,12 @@ async function ensureLightsOff() {
   if (S.presets[LIGHTS_OFF]) return;
   await presetAll({ psave: LIGHTS_OFF, n: "Lights off", o: true, on: false });
   S.presets[LIGHTS_OFF] = { n: "Lights off", on: false };
+}
+async function ensureFadeDown() {
+  if (S.presets[FADE_DOWN]) return;
+  const seg = Array.from({ length: MAX_SEGMENTS }, (_, id) => ({ id, bri: 0 }));   // ids that don't exist are ignored
+  await presetAll({ psave: FADE_DOWN, n: "Fade down", o: true, seg });
+  S.presets[FADE_DOWN] = { n: "Fade down", seg };
 }
 
 // ----- daily schedule (WLED timers) -----
@@ -939,27 +1021,28 @@ async function writeTimers(showId, sched) {
 // WLED 0.14 reports the running playlist (pl) and the preset it is showing (ps), but not the position or a pause.
 // A resumed show runs as an unsaved playlist, which WLED reports as pl 0.
 function showStatus(id) {
-  const st = S.state, sh = showOf(id);
-  const k = st ? sh.ps.indexOf(st.ps) : -1, at = k >= 0 ? "look " + (k + 1) + " of " + sh.ps.length + ": " + presetName(st.ps) : "";
-  if (st && st.on && (st.pl === id || (st.pl === 0 && k >= 0 && (!S.resumed || S.resumed === id))))
-    return { running: true, text: "Showing " + (at || "") };
-  if (pausedShow(st) === id) {
-    const kp = sh.ps.indexOf(S.pausedPs);
-    return { paused: true, text: "Paused on " + (kp >= 0 ? "look " + (kp + 1) + " of " + sh.ps.length + ": " : "") + presetName(S.pausedPs) };
+  const st = S.state, sh = showOf(id), n = sh.ps.length;
+  const at = k => k >= 0 ? "look " + (k + 1) + " of " + n + ": " + presetName(sh.ps[k]) : "";
+  if (st && st.on && (st.pl === id || (st.pl === 0 && (S.resumed === id || (!S.resumed && sh.ps.includes(st.ps)))))) {
+    const k = lookIndex(id, st.ps);
+    return { running: true, text: st.ps === FADE_DOWN && k >= 0 ? "Fading from " + at(k) : "Showing " + at(k) };
   }
-  return { text: showSummary(id) };
+  if (pausedShow(st) === id) return { paused: true, text: "Paused on " + (at(sh.ps.indexOf(S.pausedPs)) || presetName(S.pausedPs)) };
+  return {};
 }
 
+// The card's details: looks, a pass and the fade; how long the show runs; and its start time, if it has one.
 function showSummary(id) {
-  const sh = showOf(id), pass = sh.dur.reduce((a, d) => a + d, 0) / 10;
-  let text = sh.ps.length + " look" + (sh.ps.length === 1 ? "" : "s") + " · " + fmtTime(pass) + " a pass · ";
-  text += sh.repeat ? sh.repeat + (sh.repeat === 1 ? " time" : " times") + (sh.repeat > 1 ? " (≈ " + fmtTime(pass * sh.repeat) + ")" : "") : "forever";
-  const sched = scheduleOf(id);
-  if (sched) {
-    const days = sched.dow === 127 ? "daily" : DAY_NAMES.filter((_, b) => sched.dow & (1 << b)).join(" ");
-    text += " · " + days + " " + sched.start + (sched.end ? "–" + sched.end : "");
-  }
-  return text;
+  const sh = showOf(id), pass = sh.dur.reduce((a, d) => a + d, 0) / 10, sched = scheduleOf(id);
+  const parts = [sh.ps.length + " look" + (sh.ps.length === 1 ? "" : "s"), fmtTime(pass) + " a pass"];
+  if (sh.fade >= 2) parts.push(sh.fade / 10 + " s fade");
+  const minutes = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const runs = sched && sched.end ? "Runs until " + sched.end + " (" + fmtTime(((minutes(sched.end) - minutes(sched.start) + 1440) % 1440) * 60) + ")"
+    : sh.repeat ? "Runs " + fmtTime(pass * sh.repeat) + (sh.repeat > 1 ? " (" + sh.repeat + " passes)" : "")
+    : "Runs until stopped";
+  const lines = [parts.join(" · ") + " · " + runs];
+  if (sched) lines.push("Starts " + sched.start + " " + (sched.dow === 127 ? "every day" : DAY_NAMES.filter((_, b) => sched.dow & (1 << b)).join(" ")));
+  return lines;
 }
 
 function renderShows() {
@@ -974,7 +1057,8 @@ function renderShows() {
     const s = showStatus(id);
     box.append(el("div", { className: "showCard" + (s.running || s.paused ? " cur" : "") },
       el("div", { className: "top" }, el("b", { textContent: presetName(id) }), btn("✎ Edit", "Edit this show", () => openEditor(id), true, "btn mini")),
-      el("div", { className: "status", textContent: s.text }),
+      s.text ? el("div", { className: "status", textContent: s.text }) : "",
+      el("div", { className: "meta" }, ...showSummary(id).map(t => el("div", { textContent: t }))),
       el("div", { className: "ctl" },
         btn("▶ Start", "Start from the first look", () => startShow(id), true),
         btn("⏸ Pause", "Hold the current look", () => pauseShow(id), s.running),
@@ -1033,6 +1117,12 @@ function startShow(id) { setMarks(); sendAll({ ps: id }); S.on = true; renderPow
 // showing, but setting an effect outside a preset unloads the playlist, so segment 0's own effect is sent again.
 function pauseShow(id) {
   const st = S.state, seg0 = st && (st.seg || [])[0];
+  if (st && st.ps === FADE_DOWN) {
+    // between looks the tree is fading to black, so hold the next look instead (showing it ends the playlist)
+    const sh = showOf(id), k = lookIndex(id, st.ps), next = sh.ps[k >= 0 ? (k + 1) % sh.ps.length : 0];
+    setMarks(id, 0, next, -1);
+    sendAll({ ps: next }); toast("Paused"); return;
+  }
   if (!st || !(st.ps > 0) || !seg0) return;
   setMarks(id, 0, st.ps, seg0.fx);
   sendAll({ seg: [{ id: seg0.id, fx: seg0.fx }] }); toast("Paused");
@@ -1044,7 +1134,9 @@ function resumeShow(id) {
   const sh = showOf(id), k = Math.max(0, sh.ps.indexOf(from));
   const rot = a => a.slice(k).concat(a.slice(0, k));
   setMarks(0, id);
-  sendAll({ on: true, playlist: { ps: rot(sh.ps), dur: rot(sh.dur), transition: rot(sh.transition), repeat: sh.repeat, end: sh.end, r: 0 } });
+  const body = playlistBody(rot(sh.ps), rot(sh.dur), sh.fade, sh.repeat);
+  body.playlist.end = sh.end;
+  sendAll(body);
   toast("Resumed");
 }
 
@@ -1092,7 +1184,7 @@ function openEditor(id) {
     const sh = showOf(id);
     ED = { id, entries: sh.ps.map((ps, i) => ({ ps, secs: Math.max(1, Math.round(sh.dur[i] / 10)) })), sched: scheduleOf(id) };
     $("edName").value = presetName(id);
-    $("edFade").value = (sh.transition[0] ?? 7) / 10;
+    $("edFade").value = sh.fade / 10;
     $("edLimit").value = sh.repeat ? "times" : "forever";
     $("edLimitN").value = sh.repeat || 1;
   } else {
@@ -1127,12 +1219,15 @@ function renderDays() {
   $("edSchedBox").style.display = $("edSched").checked ? "" : "none";
 }
 
+// The editor offers the looks A–Z by name.
+const lookIdsByName = () => lookIds().sort((a, b) => presetName(a).localeCompare(presetName(b), undefined, { numeric: true }));
+
 function renderEntries() {
-  const box = $("edEntries"), looks = lookIds();
+  const box = $("edEntries"), looks = lookIdsByName();
   box.innerHTML = "";
   const mini = (label, title, fn) => { const b = el("button", { className: "btn mini", textContent: label, title }); b.onclick = fn; return b; };
   ED.entries.forEach((e, i) => {
-    const sel = el("select", {}, ...looks.map(id => el("option", { value: id, textContent: presetName(id) })));
+    const sel = el("select", {}, ...looks.map(id => el("option", { value: id, textContent: presetName(id) })));   // A–Z
     if (!looks.includes(e.ps)) sel.prepend(el("option", { value: e.ps, textContent: presetName(e.ps) + " (missing)" }));
     sel.value = e.ps; sel.setAttribute("aria-label", "Look " + (i + 1));
     sel.onchange = () => { e.ps = +sel.value; };
@@ -1191,7 +1286,7 @@ function renderCycle() {
 $("newShow").onclick = () => openEditor(0);
 $("edCancel").onclick = closeEditor;
 $("edAdd").onclick = () => {
-  const looks = lookIds(), last = ED.entries[ED.entries.length - 1];
+  const looks = lookIdsByName(), last = ED.entries[ED.entries.length - 1];
   ED.entries.push({ ps: looks[0], secs: last ? last.secs : 60 });
   renderEntries();
 };
@@ -1217,13 +1312,16 @@ $("edSave").onclick = async () => {
   const name = $("edName").value.trim();
   if (!name) { toast("Give the show a name"); return; }
   if (!ED.entries.length) { toast("Add at least one look"); return; }
-  if (ED.entries.length > 100) { toast("A show can have up to 100 looks"); return; }
+  const fade = Math.max(0, Math.round((+$("edFade").value || 0) * 10));
+  // WLED plays up to 100 playlist steps, and with a fade every look has a Fade down step after it
+  const maxLooks = fade >= 2 ? 50 : 100;
+  if (ED.entries.length > maxLooks) { toast("A show can have up to " + maxLooks + " looks" + (fade >= 2 ? " with a fade" : "")); return; }
   const dur = ED.entries.map(e => Math.max(1, Math.round(e.secs) || 1) * 10);
   if (dur.some(d => d > MAX_DUR)) { toast("A look can stay up for at most " + fmtTime(MAX_DUR / 10)); return; }
+  if (fade >= 2 && dur.some(d => d < fade + FADE_GAP)) { toast("Each look needs to be longer than the fade (" + fade / 10 + " s)"); return; }
   const sched = $("edSched").checked ? { start: $("edStart").value, end: $("edEnd").value, dow: ED.dow } : null;
   if (sched && (!sched.start || !sched.dow)) { toast("Pick a start time and at least one day"); return; }
   if (sched && sched.end === sched.start) { toast("Start and lights-off can't be the same time"); return; }
-  const fade = Math.max(0, Math.round((+$("edFade").value || 0) * 10));
   const ps = ED.entries.map(e => e.ps), repeat = limitPlan().repeat;
   const id = ED.id || (await loadPresets(), freePresetId());
   if (!id) { toast("No free preset numbers left"); return; }
@@ -1231,8 +1329,9 @@ $("edSave").onclick = async () => {
   $("edSave").disabled = true;
   try {
     await ensureLightsOff();
+    if (fade >= 2) await ensureFadeDown();
     await presetAll({ psave: id, n: name, o: true, on: true,
-      playlist: { ps, dur, transition: ps.map(() => fade), repeat, end: LIGHTS_OFF, r: 0 } });
+      ...playlistBody(ps, dur, fade, repeat) });
     if (JSON.stringify(sched) !== JSON.stringify(old)) await writeTimers(id, sched);
     closeEditor(); toast("Saved " + name);
   } catch (e) { toast("Couldn't save: " + e.message); }

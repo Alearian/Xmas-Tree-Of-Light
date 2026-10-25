@@ -115,6 +115,12 @@
       "id": 29, "name": "Green sparkle",
       "fx": "Solid Glitter", "pal": "Default", "sx": 128, "ix": 200,
       "colours": ["#10c030", "#000000", "#ffffff"]
+    },
+    {
+      "id": 33, "name": "Laser Search",
+      "fx": "Scanner", "pal": "* Color 1", "sx": 34, "ix": 245,
+      "colours": ["#ff0000", "#000000", "#000000"],
+      "across": { "from": 1, "to": 12, "bands": 19, "endBrightness": 30 }
     }
   ],
   "shows": [

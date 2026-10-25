@@ -14,9 +14,11 @@ Commands
   apply           Backup, then set LED outputs, current limiter, one segment per strip,
                   and save them as the layout preset (asks for confirmation)
   upload          Upload the phone app (app/tree.htm) and the layout (as tree.json)
-  looks [--looks config/looks.json]
-                  Backup, then save the cone looks as presets and the shows as playlists,
-                  and start the first show (asks for confirmation)
+  looks [--looks config/looks.json] [--force]
+                  Backup, then save the cone looks as presets, preset 250 "Lights off" and
+                  the shows as playlists, and start the first show (asks for confirmation).
+                  A show is only written if its preset number is free on the board, so shows
+                  made in the phone app are kept; --force replaces them.
   test <mode>     strips  - each strip a different colour (check numbering/mapping)
                   chase   - chase effect on every strip (check up/down direction)
                   white   - full white on every strip (for current measurement;
@@ -37,6 +39,7 @@ if (argsList.Count == 0 || argsList[0] is "-h" or "--help" or "help")
 var root = FindRepoRoot();
 var layoutPath = Path.GetFullPath(Path.Combine(root, Option("--layout") ?? "config/tree.json"));
 var assumeYes = argsList.Contains("--yes");
+var force = argsList.Contains("--force");
 
 try
 {
@@ -195,12 +198,14 @@ async Task<int> InstallLooks(TreeLayout layout)
     foreach (var c in layout.Controllers)
     {
         using var wled = new WledClient(c.Host);
-        if (!assumeYes && !Confirm($"Save these presets on {c.Name}? Presets with the same numbers are replaced."))
+        if (!assumeYes && !Confirm($"Save these presets on {c.Name}? Looks with the same numbers are replaced" +
+                (force ? ", and so are shows." : "; shows only go to free numbers (use --force to replace them).")))
         {
             Console.WriteLine("Skipped.");
             continue;
         }
         await Backup(wled, c);
+        var onBoard = await Presets(wled);
         var effects = Names(await wled.GetJsonAsync("json/eff"));
         var palettes = Names(await wled.GetJsonAsync("json/pal"));
         int Find(List<string> names, string name, string kind)
@@ -209,24 +214,53 @@ async Task<int> InstallLooks(TreeLayout layout)
             return i >= 0 ? i : throw new InvalidDataException($"{kind} '{name}' not found on {c.Name}");
         }
 
+        // Everything goes into one compact presets.json, uploaded in one go. Saving presets one by one makes
+        // WLED blank out each old copy and append the new one, and a presets.json near 64 KB has restarted the board.
+        // A stored preset is the "o": true body without psave/o, plus its name.
         foreach (var look in looks.Select(n => n!))
         {
-            // "o": true stores exactly this body as the preset, without showing it first. Saving the live
-            // state instead would also capture anything another phone or app changes at the same moment.
+            var id = look["id"]!.ToString();
+            // a show made in the phone app may have taken a look's number
+            if (onBoard[id] is JsonObject taken && taken["playlist"] is not null && !force)
+            {
+                Console.WriteLine($"Kept preset {id}: the show '{taken["n"]}' is there (--force replaces it)");
+                continue;
+            }
             var preset = Looks.State(layout, c, look, n => Find(effects, n, "Effect"), n => Find(palettes, n, "Palette"));
-            preset["psave"] = look["id"]!.GetValue<int>();
             preset["n"] = look["name"]!.ToString();
-            preset["o"] = true;
-            await wled.PostJsonAsync("json/state", preset);
-            await Task.Delay(400); // let WLED finish writing presets.json
-            Console.WriteLine($"Saved preset {look["id"]}: {look["name"]}");
+            onBoard[id] = preset;
+            Console.WriteLine($"Preset {id}: {look["name"]}");
         }
+        if (onBoard[Looks.LightsOff.ToString()] is null)
+        {
+            onBoard[Looks.LightsOff.ToString()] = Stored(Looks.LightsOffPreset());
+            Console.WriteLine($"Preset {Looks.LightsOff}: Lights off");
+        }
+        // always rewritten: it's the hidden step shows use to fade between looks
+        onBoard[Looks.FadeDown.ToString()] = Stored(Looks.FadeDownPreset());
+        Console.WriteLine($"Preset {Looks.FadeDown}: Fade down (step between a show's looks)");
         foreach (var show in shows.Select(n => n!))
         {
-            await wled.PostJsonAsync("json/state", Looks.ShowPreset(show));
-            await Task.Delay(400);
-            Console.WriteLine($"Saved playlist {show["id"]}: {show["name"]}");
+            var id = show["id"]!.ToString();
+            if (onBoard[id] is JsonObject existing && !force)
+            {
+                Console.WriteLine($"Kept preset {id}: '{existing["n"]}' is already on the board (--force replaces it)");
+                continue;
+            }
+            onBoard[id] = Stored(Looks.ShowPreset(show));
+            Console.WriteLine($"Playlist {id}: {show["name"]}");
         }
+        // shows saved before fades existed (or by an older app) get the Fade down steps, keeping their looks and times
+        foreach (var (id, node) in onBoard.ToList())
+            if (node is JsonObject preset && Looks.AddFades(preset))
+                Console.WriteLine($"Playlist {id}: '{preset["n"]}' now fades between its looks");
+
+        var json = onBoard.ToJsonString();
+        var temp = Path.GetTempFileName();
+        await File.WriteAllTextAsync(temp, json);
+        await wled.UploadAsync(temp, "presets.json");
+        File.Delete(temp);
+        Console.WriteLine($"Uploaded presets.json ({json.Length / 1024} KB).");
         if (shows.Count > 0)
         {
             await wled.PostJsonAsync("json/state", new JsonObject { ["ps"] = shows[0]!["id"]!.GetValue<int>() });
@@ -234,6 +268,27 @@ async Task<int> InstallLooks(TreeLayout layout)
         }
     }
     return 0;
+}
+
+/// <summary>A preset as presets.json holds it: the body saved with "o": true, without psave and o.</summary>
+static JsonObject Stored(JsonObject body)
+{
+    body.Remove("psave");
+    body.Remove("o");
+    return body;
+}
+
+/// <summary>The board's presets.json, keyed by preset number (empty if none are saved yet).</summary>
+static async Task<JsonObject> Presets(WledClient wled)
+{
+    try
+    {
+        return await wled.GetJsonAsync("presets.json") as JsonObject ?? new JsonObject();
+    }
+    catch (Exception e) when (e is HttpRequestException or System.Text.Json.JsonException or InvalidDataException)
+    {
+        return new JsonObject();
+    }
 }
 
 static List<string> Names(JsonNode list) => list.AsArray().Select(n => n?.ToString() ?? "").ToList();

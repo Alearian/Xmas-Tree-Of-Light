@@ -40,6 +40,10 @@ dotnet run --project tools/TreeTool -- <command> [--layout config/bench.json] [-
 
 **Pause (fixed 2026-10-25):** WLED 0.14 ignores `{"ps": n}` when `n` is the look already showing, so the old Pause did nothing. The app now re-sends segment 0's own effect, which unloads the playlist and leaves the look up. WLED then reports `pl` -1 and `ps` -1, so the phone remembers (in `localStorage`) which show and look were paused. Resume starts an unsaved copy of the show at that look, which WLED reports as `pl` 0. Checked on the board.
 
+**Fades between looks (2026-10-25):** WLED 0.14 swaps effects instantly; a playlist's transition only blends colours, so shows didn't visibly fade. A show's playlist now has a hidden step after each look, preset **249 "Fade down"**, which sets every segment's brightness to 0. The show sets `transition` to half the fade, so the look fades down over half the fade, and the next look (which switches its segments back on at brightness 255) fades up over the other half. The fade-down step lasts 0.2 s longer than its fade (`FADE_GAP` / `Looks.FadeGap`), because WLED 0.14 won't start a transition while one is running, and a look that arrived exactly as the fade-down ended skipped its fade-up. Measured on the board from the WebSocket live feed. Every look must set `on` and `bri` on its segments (TreeTool looks and app-saved looks do). `treetool looks` converts existing shows to this format and keeps their looks and times. With fades, a show can have up to 50 looks (WLED plays 100 playlist steps).
+
+**presets.json size:** when WLED re-saves a preset that has grown, it blanks the old copy with spaces and appends the new one, so the file swells. The board restarted at 66 KB on 2026-10-25. `treetool looks` now builds the whole file and uploads it compacted in one go (about 51 KB).
+
 **Wi-Fi gotcha (AP mode only):** when `apply` reboots the board, Windows doesn't always rejoin `WLED-AP` by itself. If `apply` times out, reconnect the PC to `WLED-AP` and run `apply` again.
 
 ## Phone app
