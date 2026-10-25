@@ -15,12 +15,17 @@
 - [hardware.md](hardware.md): the controller as it is **right now**, compared with the target
 - [strip-spec-ws2815.md](strip-spec-ws2815.md): the purchased strip (HD 12V WS2815 60L B IP67): 7.2 A per run, 86.4 A for the tree
 - [quinled-dig-quad-guide.md](quinled-dig-quad-guide.md): the manufacturer's ratings, pinout, wiring steps and WLED settings (from Quindor's tutorial and quinled.info)
+- [bom.md](bom.md): shopping list for the final tree (5 m strips, bottom-fed)
+- [bom-checklist-no-prices.md](bom-checklist-no-prices.md) / : the live shopping list exported, with prices and what the builder owes. [bom-checklist-no-prices.pdf](bom-checklist-no-prices.pdf) is the same without prices
+- [tree-wiring-build-guide.md](tree-wiring-build-guide.md) / [.pdf](tree-wiring-build-guide.pdf): step-by-step wiring build instructions (2 supplies, 6 strips each)
+- [tree-wiring-3d.html](tree-wiring-3d.html): 3D view of the strips, cables and box
 - [power-and-wiring.md](power-and-wiring.md): power and data wiring, reconciling the PDFs with the builder's email
 - [prototype-one-strip.md](prototype-one-strip.md): **current prototype**: one strip powered through the Dig-Quad, with test steps. The drawn version is [prototype-one-strip.html](prototype-one-strip.html).
 - [dig-quad-connections.md](dig-quad-connections.md): **final build (stored for later)**, the 12-strip connection diagram: what goes to each Dig-Quad terminal, PSU, fuse block and strip, with a wire and fuse list. The drawn version is [dig-quad-wiring.html](dig-quad-wiring.html).
 - [open-questions.md](open-questions.md): **conflicts and errors found in the docs**, to settle with the builder
 - [software.md](software.md): TreeTool (C#), the phone app and the shared layout, with how to use them
 - [roadmap.md](roadmap.md): the build stages, including our own software
+- [shows-and-effects-plan.md](shows-and-effects-plan.md): **planned**: show builder and controls on WLED playlists, and the finger-friendly effect list
 
 ## People
 

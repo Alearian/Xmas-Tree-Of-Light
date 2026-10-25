@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>Xmas Tree Wiring 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a night-garden 3D stage on the left, an engineer's control and spec panel on the right; tables below. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --line: #d3d9e0; --fg: #17202b; --muted: #5a6776;
+  --scene: #dfe5ec; --ground: #c9d2dc; --struct: #7b8794; --accent: #0f6f8f;
+  --o1: #0a8fb8; --o2: #7b5cd6; --o3: #2f9e44; --o4: #d6338a;
+  --psu1: #d9363e; --psu2: #e8730c; --psu3: #b8860b; --gnd: #5f6b78;
+  --display: "Saira Semi Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1016; --panel: #121a23; --line: #24313f; --fg: #e6edf3; --muted: #8b9aab;
+  --scene: #070b10; --ground: #121b25; --struct: #5b6876; --accent: #5cc8e8;
+  --o1: #4cc9f0; --o2: #a78bfa; --o3: #69db7c; --o4: #f472b6;
+  --psu1: #ff5c63; --psu2: #ffa94d; --psu3: #e0c060; --gnd: #9aa7b5; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1016; --panel: #121a23; --line: #24313f; --fg: #e6edf3; --muted: #8b9aab;
+  --scene: #070b10; --ground: #121b25; --struct: #5b6876; --accent: #5cc8e8;
+  --o1: #4cc9f0; --o2: #a78bfa; --o3: #69db7c; --o4: #f472b6;
+  --psu1: #ff5c63; --psu2: #ffa94d; --psu3: #e0c060; --gnd: #9aa7b5; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.5; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 40px; display: flex; flex-direction: column; gap: 18px; }
+header h1 { font-family: var(--display); font-weight: 700; font-size: 1.9rem; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 75ch; }
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.stage { position: relative; height: min(76vh, 760px); min-height: 420px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--scene); }
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+#labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.lbl { position: absolute; transform: translate(-50%, -50%); font-family: var(--mono); font-size: 11px; white-space: nowrap; padding: 1px 5px; border-radius: 4px; background: color-mix(in srgb, var(--panel) 82%, transparent); color: var(--fg); border: 1px solid var(--line); }
+.lbl.big { font-family: var(--display); font-size: 13px; font-weight: 700; }
+.lbl.plain { background: none; border: none; color: var(--muted); font-weight: 500; }
+.views { position: absolute; left: 10px; top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.hint { position: absolute; left: 10px; bottom: 8px; font-size: 12px; color: var(--muted); pointer-events: none; }
+
+button, .chip { font: 500 12.5px var(--body); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button[aria-pressed="true"] { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+aside { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; }
+.card h2 { font: 700 12px var(--display); text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; }
+.layer { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.sw { width: 22px; height: 4px; border-radius: 2px; flex: none; }
+.slider { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; }
+.slider input { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+dl.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+#pick .empty { color: var(--muted); }
+.note { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+section h2 { font-family: var(--display); font-weight: 700; font-size: 1.25rem; margin: 0 0 8px; }
+.tables { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 900px) { .tables { grid-template-columns: minmax(0, 1fr); } }
+.tscroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 12px; }
+tr:last-child td { border-bottom: none; }
+td.m { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.rules .card p { margin: 0; font-size: 13px; }
+.rules .card strong { font-family: var(--display); font-size: 15px; }
+svg text { font-family: var(--mono); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Xmas Tree wiring, in 3D</h1>
+    <p>12 × 5 m WS2815 strips round a centre mast, driven by one QuinLED Dig-Quad in the base box. Drag to rotate, scroll or pinch to zoom, and tap a strip for its details. The moving light shows the order pixels receive data along each output's zig-zag chain.</p>
+  </header>
+
+  <div class="main">
+    <div class="stage" id="stage">
+      <div id="labels"></div>
+      <div class="views" id="views">
+        <button data-view="overview" aria-pressed="true">Overview</button>
+        <button data-view="top">From above</button>
+        <button data-view="base">Base close-up</button>
+        <button data-view="apex">Top ring close-up</button>
+        <button id="spin" aria-pressed="false">Auto-rotate</button>
+      </div>
+      <div class="hint">Strip numbers run clockwise from north, seen from above.</div>
+    </div>
+
+    <aside>
+      <div class="card">
+        <h2>Layers</h2>
+        <label class="layer"><input type="checkbox" id="L-strips" checked> <span class="sw" style="background:linear-gradient(90deg,var(--o1),var(--o2),var(--o3),var(--o4))"></span> LED strips</label>
+        <label class="layer"><input type="checkbox" id="L-data" checked> <span class="sw" style="background:var(--fg)"></span> Data path and jumpers</label>
+        <label class="layer"><input type="checkbox" id="L-power"> <span class="sw" style="background:linear-gradient(90deg,var(--psu1) 50%,var(--psu2) 50%)"></span> Power feeds (+12 V / GND pair)</label>
+        <label class="layer"><input type="checkbox" id="L-struct" checked> <span class="sw" style="background:var(--struct)"></span> Mast and rings</label>
+        <label class="layer"><input type="checkbox" id="L-labels" checked> <span class="sw" style="background:var(--muted)"></span> Labels</label>
+        <label class="layer"><input type="checkbox" id="L-chase" checked> <span class="sw" style="background:var(--accent)"></span> Animate data order</label>
+      </div>
+
+      <div class="card">
+        <h2>Show output</h2>
+        <div class="row" id="outs">
+          <button data-out="-1" aria-pressed="true">All</button>
+          <button data-out="0"><span class="dot" style="background:var(--o1)"></span>LED1</button>
+          <button data-out="1"><span class="dot" style="background:var(--o2)"></span>LED2</button>
+          <button data-out="2"><span class="dot" style="background:var(--o3)"></span>LED3</button>
+          <button data-out="3"><span class="dot" style="background:var(--o4)"></span>LED4</button>
+        </div>
+      </div>
+
+      <div class="card" id="pick">
+        <h2>Selected strip</h2>
+        <p class="empty">Tap or click a strip on the tree.</p>
+      </div>
+
+      <div class="card">
+        <h2>Tree size (assumed)</h2>
+        <div class="slider"><label for="baseD">Base ring diameter</label><span class="num" id="baseDv"></span><input type="range" id="baseD" min="2" max="4.4" step="0.1" value="3.2"></div>
+        <div class="slider"><label for="topD">Top ring diameter</label><span class="num" id="topDv"></span><input type="range" id="topD" min="0.4" max="1.2" step="0.05" value="0.8"></div>
+        <dl class="kv">
+          <dt>Strip length (slant)</dt><dd>5.00 m (fixed)</dd>
+          <dt>Tree height</dt><dd id="hv"></dd>
+          <dt>Top jumper</dt><dd id="jt"></dd>
+          <dt>Base jumper</dt><dd id="jb"></dd>
+        </dl>
+        <p class="note">The site isn't measured yet. The BOM's top ring is 0.5–1 m across; the base diameter here is a guess. Jumper lengths are the straight gap between neighbouring strip ends.</p>
+      </div>
+    </aside>
+  </div>
+
+  <section>
+    <h2>How the data and power run</h2>
+    <div class="tables">
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>Output</th><th>Chain, in data order</th><th>Pixels (WLED)</th><th>Data lead from box</th></tr></thead>
+          <tbody id="chainBody"></tbody>
+        </table>
+      </div>
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>Supply</th><th>Fuses</th><th>Feeds</th><th>Load (working)</th></tr></thead>
+          <tbody>
+            <tr><td><span class="dot" style="background:var(--psu1)"></span>PSU 1 · HLG-320H-12A</td><td class="m">F1–F5, 5 A each</td><td>Bottoms of strips 1–5, plus the Dig-Quad (2 A)</td><td class="m">~16.5 A of 22 A</td></tr>
+            <tr><td><span class="dot" style="background:var(--psu2)"></span>PSU 2 · HLG-320H-12A</td><td class="m">F6–F9, 5 A each</td><td>Bottoms of strips 6–9</td><td class="m">~13 A of 22 A</td></tr>
+            <tr><td><span class="dot" style="background:var(--psu3)"></span>PSU 3 · 150 W</td><td class="m">F10–F12, 5 A each</td><td>Bottoms of strips 10–12</td><td class="m">~10 A of 12.5 A</td></tr>
+            <tr><td><span class="dot" style="background:var(--gnd)"></span>Common GND bar</td><td>–</td><td>Both PSU −, Dig-Quad GND, every feed's GND core</td><td>–</td></tr>
+            <tr><td colspan="4" id="pwrSum" class="note"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rules the diagram follows</h2>
+    <div class="rules">
+      <div class="card"><strong>Data always enters at the base</strong><p>Each output's lead goes from the box to the bottom of its first strip (1, 4, 7, 10). That strip runs up, the next runs down, the third runs up. No data cable ever climbs the tree.</p></div>
+      <div class="card"><strong>Jumpers join neighbours</strong><p>Strip A's top joins strip B's top across the top ring; strip B's bottom joins strip C's bottom across the base ring. Each jumper carries DO→DI, BO→BI and GND. Tie BI to GND only at the chain start.</p></div>
+      <div class="card"><strong>Power goes in at the bottom</strong><p>Every strip has its own fused 1.5 mm² two-core cable from the base box, along the ground and round the base ring to the strip's bottom end. No power goes up the mast. Strip power never passes through the Dig-Quad, which only sends data.</p></div>
+      <div class="card"><strong>Three supplies, one ground</strong><p>PSU 1 feeds strips 1–5, PSU 2 feeds 6–9 and PSU 3 feeds 10–12. Join the GNDs at one bar. Never join any two +12 V outputs.</p></div>
+      <div class="card"><strong>LED 0 sits at the bottom</strong><p>In WLED each strip is its own segment. The down strips (2, 5, 8, 11) are reversed, so every effect runs bottom to top even though the data runs down those strips.</p></div>
+      <div class="card"><strong>Measure one strip first</strong><p>Measure one strip at full white. Above about 4 A means capping PSU 3 (150 W) in WLED or swapping it for a third HLG-320H-12A. Below about 10.5 V at the top end means adding top feeds.</p></div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+// ---------- Layout, from config/tree.json ----------
+const LAYOUT = {
+  ledsPerStrip: 300, stripCount: 12, stripLen: 5,
+  outputs: [
+    { name: "LED1", gpio: 16, strips: [1, 2, 3] },
+    { name: "LED2", gpio: 3,  strips: [4, 5, 6] },
+    { name: "LED3", gpio: 1,  strips: [7, 8, 9] },
+    { name: "LED4", gpio: 4,  strips: [10, 11, 12] }
+  ]
+};
+const BOX_ANGLE = 165 * Math.PI / 180;      // base box sits just south-south-east of the tree
+const BOX_DIST = 2.2;                       // metres from the mast (BOM: about 2 m)
+const LIFT = 0.15;                          // strip bottoms 15 cm off the ground
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const col = n => new THREE.Color(css(n) || "#888");
+
+// strip info
+const strips = {};
+LAYOUT.outputs.forEach((o, oi) => o.strips.forEach((n, i) => {
+  strips[n] = { n, oi, i, down: i % 2 === 1, angle: (n - 1) * 2 * Math.PI / LAYOUT.stripCount,
+    start: oi * 3 * LAYOUT.ledsPerStrip + i * LAYOUT.ledsPerStrip, psu: n <= 5 ? 1 : n <= 9 ? 2 : 3 };
+}));
+
+// ---------- Three.js scene ----------
+const stage = document.getElementById("stage");
+const labelsEl = document.getElementById("labels");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+stage.insertBefore(renderer.domElement, labelsEl);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 200);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarAngle = Math.PI * 0.495;
+controls.minDistance = 0.8; controls.maxDistance = 30;
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+const sun = new THREE.DirectionalLight(0xffffff, 0.6); sun.position.set(4, 10, 6); scene.add(sun);
+
+let world = null, geo = null, layers = {}, labels = [], pickables = [], chasePts = [], particles = [];
+let focusOut = -1, selected = null;
+
+const pos = (r, a, y) => new THREE.Vector3(r * Math.sin(a), y, -r * Math.cos(a));
+
+function tube(points, radius, color, opacity = 1) {
+  const path = new THREE.CurvePath();
+  for (let k = 0; k < points.length - 1; k++) path.add(new THREE.LineCurve3(points[k], points[k + 1]));
+  const g = new THREE.TubeGeometry(path, Math.max(8, points.length * 16), radius, 8, false);
+  const m = new THREE.MeshLambertMaterial({ color, transparent: opacity < 1, opacity, emissive: color, emissiveIntensity: 0.35 });
+  return new THREE.Mesh(g, m);
+}
+function polyLen(pts) { let s = 0; for (let k = 1; k < pts.length; k++) s += pts[k].distanceTo(pts[k - 1]); return s; }
+function pointAt(pts, cum, d) {
+  for (let k = 1; k < pts.length; k++) if (d <= cum[k]) {
+    const t = (d - cum[k - 1]) / (cum[k] - cum[k - 1] || 1); return pts[k - 1].clone().lerp(pts[k], t);
+  }
+  return pts[pts.length - 1].clone();
+}
+function label(text, p, layer, cls = "") {
+  const el = document.createElement("div"); el.className = "lbl " + cls; el.textContent = text;
+  labelsEl.appendChild(el); labels.push({ el, p: p.clone(), layer });
+}
+
+function build() {
+  if (world) { world.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); scene.remove(world); }
+  labelsEl.innerHTML = ""; labels = []; pickables = []; chasePts = []; particles = [];
+  world = new THREE.Group(); scene.add(world);
+  layers = {}; ["strips", "data", "power", "struct"].forEach(k => { layers[k] = new THREE.Group(); world.add(layers[k]); });
+
+  const Rb = +document.getElementById("baseD").value / 2;
+  const Rt = +document.getElementById("topD").value / 2;
+  const h = Math.sqrt(LAYOUT.stripLen ** 2 - (Rb - Rt) ** 2);
+  const yTop = LIFT + h;
+  geo = { Rb, Rt, h, yTop };
+  const oc = [col("--o1"), col("--o2"), col("--o3"), col("--o4")];
+  const structC = col("--struct");
+
+  // ground
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(BOX_DIST, Rb) + 2.2, 64), new THREE.MeshLambertMaterial({ color: col("--ground") }));
+  ground.rotation.x = -Math.PI / 2; world.add(ground);
+
+  // structure
+  const S = layers.struct;
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, yTop + 0.45, 16), new THREE.MeshLambertMaterial({ color: structC }));
+  mast.position.y = (yTop + 0.45) / 2; S.add(mast);
+  const ringMat = new THREE.MeshLambertMaterial({ color: structC });
+  const topRing = new THREE.Mesh(new THREE.TorusGeometry(Rt, 0.015, 8, 64), ringMat); topRing.rotation.x = Math.PI / 2; topRing.position.y = yTop + 0.03; S.add(topRing);
+  const baseRing = new THREE.Mesh(new THREE.TorusGeometry(Rb, 0.012, 8, 96), ringMat); baseRing.rotation.x = Math.PI / 2; baseRing.position.y = 0.04; S.add(baseRing);
+  for (let n = 1; n <= 12; n++) { // spokes from mast to top-ring fixing points
+    const a = strips[n].angle; S.add(tube([new THREE.Vector3(0, yTop + 0.03, 0), pos(Rt, a, yTop + 0.03)], 0.007, structC));
+  }
+  const compass = [["N", 0], ["E", Math.PI / 2], ["S", Math.PI], ["W", Math.PI * 1.5]];
+  compass.forEach(([t, a]) => label(t, pos(Rb + 0.9, a, 0.02), "struct", "plain big"));
+  label("Top ring Ø " + (Rt * 2).toFixed(2) + " m", new THREE.Vector3(0, yTop + 0.85, 0), "struct", "plain");
+  label("Centre mast", new THREE.Vector3(0, yTop * 0.55, 0), "struct", "plain");
+
+  // base box
+  const box = pos(BOX_DIST, BOX_ANGLE, 0);
+  const bx = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.45, 0.25), new THREE.MeshLambertMaterial({ color: col("--struct") }));
+  bx.position.copy(box).setY(0.225); bx.lookAt(new THREE.Vector3(0, 0.225, 0)); world.add(bx);
+  label("Base box", box.clone().setY(0.75), "struct", "big");
+  const boxOut = box.clone().setY(0.03);
+
+  // strips + LEDs
+  for (let n = 1; n <= 12; n++) {
+    const s = strips[n], a = s.angle;
+    s.B = pos(Rb, a, LIFT); s.T = pos(Rt, a, yTop);
+    const t = tube([s.B, s.T], 0.022, oc[s.oi], 0.5); t.userData.strip = n; s.mesh = t;
+    layers.strips.add(t); pickables.push(t);
+    // 300 LEDs, physical order from the data-in end
+    const g = new THREE.BufferGeometry(); const p = new Float32Array(300 * 3), c = new Float32Array(300 * 3);
+    for (let k = 0; k < 300; k++) {
+      const f = k / 299; const v = s.down ? s.T.clone().lerp(s.B, f) : s.B.clone().lerp(s.T, f);
+      const out = v.clone().setY(0).normalize().multiplyScalar(0.03); v.add(out);
+      p.set([v.x, v.y, v.z], k * 3);
+    }
+    g.setAttribute("position", new THREE.BufferAttribute(p, 3)); g.setAttribute("color", new THREE.BufferAttribute(c, 3));
+    const pts = new THREE.Points(g, new THREE.PointsMaterial({ size: 0.045, vertexColors: true, transparent: true }));
+    s.points = pts; layers.strips.add(pts); chasePts.push(s);
+    label(String(n), pos(Rt + 0.45, a, yTop + 0.25), "strips", "big");
+    // data-in marker (physical LED 1)
+    const inEnd = s.down ? s.T : s.B;
+    const mk = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 8), new THREE.MeshLambertMaterial({ color: oc[s.oi], emissive: oc[s.oi], emissiveIntensity: 0.6 }));
+    mk.position.copy(inEnd); layers.data.add(mk); s.marker = mk;
+  }
+  // which end is LED 1, labelled at the bottom for up strips, at the top for down strips
+  for (let n = 1; n <= 12; n++) {
+    const s = strips[n];
+    if (s.i === 0) label(LAYOUT.outputs[s.oi].name + " in ▲ strip " + n, pos(Rb + 0.55, s.angle, LIFT + 0.1), "data");
+    else if (!s.down) label("in ▲", pos(Rb + 0.28, s.angle, LIFT + 0.08), "data", "plain");
+    else label("in ▼", pos(Rt + 0.42, s.angle, yTop - 0.2), "data", "plain");
+  }
+
+  // data chains
+  LAYOUT.outputs.forEach((o, oi) => {
+    const [a, b, c] = o.strips.map(n => strips[n]);
+    const lead = [boxOut, a.B.clone().setY(0.03), a.B];
+    const jTop = [a.T, a.T.clone().add(new THREE.Vector3(0, 0.07, 0)), b.T.clone().add(new THREE.Vector3(0, 0.07, 0)), b.T];
+    const jBot = [b.B, b.B.clone().setY(0.05), c.B.clone().setY(0.05), c.B];
+    const m1 = tube(lead, 0.016, oc[oi]); const m2 = tube(jTop, 0.014, oc[oi]); const m3 = tube(jBot, 0.014, oc[oi]);
+    [m1, m2, m3].forEach(m => { m.userData.out = oi; layers.data.add(m); });
+    o.leadLen = boxOut.distanceTo(a.B.clone().setY(0.03)) + LIFT;
+    // full data path for the moving particles
+    const path = [boxOut, a.B.clone().setY(0.03), a.B, a.T, ...jTop.slice(1), b.B, ...jBot.slice(1), c.T];
+    const cum = [0]; for (let k = 1; k < path.length; k++) cum.push(cum[k - 1] + path[k].distanceTo(path[k - 1]));
+    for (let q = 0; q < 5; q++) {
+      const sp = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      sp.userData = { path, cum, phase: q / 5, out: oi }; layers.data.add(sp); particles.push(sp);
+    }
+  });
+  geo.jt = 2 * Rt * Math.sin(Math.PI / 12); geo.jb = 2 * Rb * Math.sin(Math.PI / 12);
+  label("top jumper " + (geo.jt * 100).toFixed(0) + " cm", pos(Rt + 0.55, strips[1].angle + Math.PI / 12, yTop + 0.1), "data", "plain");
+  label("base jumper " + (geo.jb * 100).toFixed(0) + " cm", pos(Rb + 0.3, strips[2].angle + Math.PI / 12, 0.05), "data", "plain");
+
+  // power feeds: box → along the ground → up to the strip bottom
+  const pc = [col("--psu1"), col("--psu2"), col("--psu3")];
+  geo.feed = [];
+  for (let n = 1; n <= 12; n++) {
+    // box → base ring at the box's side → round the ring (short way) → up to the strip's bottom leads
+    const s = strips[n]; const y = 0.02 + n * 0.004; const r = Rb + 0.08 + n * 0.012;
+    let d = s.angle - BOX_ANGLE; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+    const pts = [box.clone().setY(y)];
+    const steps = Math.max(1, Math.ceil(Math.abs(d) / 0.08));
+    for (let k = 0; k <= steps; k++) pts.push(pos(r, BOX_ANGLE + d * k / steps, y));
+    pts.push(s.B.clone().add(new THREE.Vector3(0, 0.04, 0)));
+    layers.power.add(tube(pts, 0.011, pc[s.psu - 1]));
+    geo.feed[n] = polyLen(pts) + 0.3;
+    // the unused top power leads are cut short and capped
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 8), new THREE.MeshLambertMaterial({ color: pc[s.psu - 1] }));
+    cap.position.copy(s.T).add(new THREE.Vector3(0, -0.08, 0)); layers.power.add(cap);
+  }
+  label("top power leads capped, not used", new THREE.Vector3(0, yTop + 0.5, 0), "power", "plain");
+  label("12 fused feeds round the base ring", box.clone().multiplyScalar(0.8).setY(0.35), "power");
+  label("PSU 1 → strips 1–5", pos(Rb + 0.9, Math.PI * 0.35, 0.45), "power", "plain");
+  label("PSU 2 → strips 6–9", pos(Rb + 0.9, Math.PI * 1.05, 0.45), "power", "plain");
+  label("PSU 3 → strips 10–12", pos(Rb + 0.9, Math.PI * 1.65, 0.45), "power", "plain");
+
+  // panel numbers
+  document.getElementById("baseDv").textContent = (Rb * 2).toFixed(1) + " m";
+  document.getElementById("topDv").textContent = (Rt * 2).toFixed(2) + " m";
+  document.getElementById("hv").textContent = h.toFixed(2) + " m strips, mast ≈ " + (yTop + 0.45).toFixed(1) + " m";
+  document.getElementById("jt").textContent = (geo.jt * 100).toFixed(0) + " cm gap, cut ~" + Math.ceil(geo.jt * 100 + 20) + " cm";
+  document.getElementById("jb").textContent = (geo.jb * 100).toFixed(0) + " cm gap, cut ~" + Math.ceil(geo.jb * 100 + 20) + " cm";
+  fillChainTable(); fillPowerSum();
+  applyLayers(); applyFocus(); if (selected) showPick(selected);
+}
+
+function fillChainTable() {
+  const tb = document.getElementById("chainBody"); tb.innerHTML = "";
+  LAYOUT.outputs.forEach((o, oi) => {
+    const [a, b, c] = o.strips;
+    const st = oi * 900;
+    tb.insertAdjacentHTML("beforeend",
+      `<tr><td><span class="dot" style="background:var(--o${oi + 1})"></span><strong>${o.name}</strong><br><span class="note">GPIO ${o.gpio}</span></td>
+       <td>Strip ${a} up → top jumper → strip ${b} down → base jumper → strip ${c} up</td>
+       <td class="m">${st}–${st + 899}<br><span class="note">${a}: ${st}–${st + 299}<br>${b}: ${st + 300}–${st + 599}<br>${c}: ${st + 600}–${st + 899}</span></td>
+       <td class="m">≈ ${o.leadLen.toFixed(1)} m<br><span class="note">to bottom of ${a}</span></td></tr>`);
+  });
+}
+function fillPowerSum() {
+  const f = geo.feed.slice(1); const tot = f.reduce((x, y) => x + y, 0);
+  document.getElementById("pwrSum").textContent =
+    `Each feed is one 1.5 mm² two-core cable, ${Math.min(...f).toFixed(1)}–${Math.max(...f).toFixed(1)} m long with 30 cm spare (box → base ring → round the ring the short way → strip bottom). All 12 together ≈ ${tot.toFixed(0)} m, against the 50 m in the BOM.`;
+}
+
+// ---------- Interaction ----------
+const chk = id => document.getElementById(id).checked;
+function applyLayers() {
+  layers.strips.visible = chk("L-strips"); layers.data.visible = chk("L-data");
+  layers.power.visible = chk("L-power"); layers.struct.visible = chk("L-struct");
+}
+["L-strips", "L-data", "L-power", "L-struct", "L-labels", "L-chase"].forEach(id => document.getElementById(id).addEventListener("change", applyLayers));
+
+function applyFocus() {
+  for (const n in strips) {
+    const s = strips[n], on = focusOut < 0 || s.oi === focusOut;
+    s.mesh.material.opacity = on ? 0.55 : 0.08; s.points.material.opacity = on ? 1 : 0.12;
+    s.marker.visible = on;
+  }
+  layers.data.children.forEach(m => { if (m.userData.out !== undefined) m.visible = focusOut < 0 || m.userData.out === focusOut; });
+}
+document.getElementById("outs").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  focusOut = +b.dataset.out;
+  document.querySelectorAll("#outs button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  applyFocus();
+});
+
+function showPick(n) {
+  const s = strips[n], o = LAYOUT.outputs[s.oi];
+  const deg = Math.round((n - 1) * 30);
+  const pos3 = ["first", "second", "third"][s.i];
+  document.getElementById("pick").innerHTML = `<h2>Selected strip</h2>
+    <dl class="kv">
+      <dt>Strip</dt><dd>${n} · ${deg}° from north</dd>
+      <dt>Output</dt><dd>${o.name} (GPIO ${o.gpio}), ${pos3} in chain</dd>
+      <dt>Data runs</dt><dd>${s.down ? "top → bottom" : "bottom → top"}</dd>
+      <dt>Data enters</dt><dd>${s.i === 0 ? "bottom, from the box lead" : s.i === 1 ? "top, via jumper from " + o.strips[0] : "bottom, via jumper from " + o.strips[1]}</dd>
+      <dt>Pixels</dt><dd>${s.start}–${s.start + 299}</dd>
+      <dt>WLED segment</dt><dd>${n - 1}${s.down ? ", reversed" : ""}</dd>
+      <dt>Power</dt><dd>PSU ${s.psu}, fuse F${n}, fed at bottom</dd>
+      <dt>Feed cable</dt><dd>≈ ${geo.feed[n].toFixed(1)} m of 1.5 mm²</dd>
+    </dl>`;
+}
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let downAt = null;
+renderer.domElement.addEventListener("pointerdown", e => { downAt = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(pickables.filter(m => m.parent.visible), false);
+  if (hits.length) { selected = hits[0].object.userData.strip; showPick(selected); }
+});
+
+// camera views
+const VIEWS = {
+  overview: () => [new THREE.Vector3(6.2, 3.8, 7.2), new THREE.Vector3(0, geo.yTop * 0.42, 0)],
+  top: () => [new THREE.Vector3(0.01, 13, 0.6), new THREE.Vector3(0, 0, 0)],
+  base: () => { const b = pos(BOX_DIST, BOX_ANGLE, 0); return [b.clone().multiplyScalar(1.9).setY(1.6), new THREE.Vector3(0, 0.2, 0)]; },
+  apex: () => [new THREE.Vector3(1.6, geo.yTop + 1.4, 1.9), new THREE.Vector3(0, geo.yTop - 0.2, 0)]
+};
+let tween = null;
+function goView(v) {
+  const [p, t] = VIEWS[v](); tween = { p0: camera.position.clone(), t0: controls.target.clone(), p, t, k: 0 };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) tween.k = 1;
+}
+document.getElementById("views").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "spin") { controls.autoRotate = !controls.autoRotate; b.setAttribute("aria-pressed", controls.autoRotate); return; }
+  document.querySelectorAll("#views [data-view]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  goView(b.dataset.view);
+});
+controls.autoRotateSpeed = 1.2;
+["baseD", "topD"].forEach(id => document.getElementById(id).addEventListener("input", build));
+
+// theme
+function applyTheme() { scene.background = col("--scene"); build(); }
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+
+// ---------- Animation ----------
+const tmp = new THREE.Vector3(); const clock = new THREE.Clock(); let t = 0;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function frame() {
+  requestAnimationFrame(frame);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const animate = chk("L-chase") && !reduce;
+  if (animate) t += dt;
+  if (tween) {
+    tween.k = Math.min(1, tween.k + dt * 1.6); const e = 1 - Math.pow(1 - tween.k, 3);
+    camera.position.lerpVectors(tween.p0, tween.p, e); controls.target.lerpVectors(tween.t0, tween.t, e);
+    if (tween.k >= 1) tween = null;
+  }
+  controls.update();
+
+  // chase: a bright head moves through each output's 900 pixels in data order
+  const head = (t * 160) % 1050;
+  for (const s of chasePts) {
+    const c = s.points.geometry.attributes.color; const base = new THREE.Color(css("--o" + (s.oi + 1)));
+    for (let k = 0; k < 300; k++) {
+      const g = s.i * 300 + k; const d = head - g;
+      let b = 0.28; if (animate && d >= 0 && d < 160) b = 0.28 + 0.72 * (1 - d / 160) ** 1.5;
+      if (!animate) b = 0.85;
+      c.setXYZ(k, base.r * b + (b > 0.9 ? 0.3 : 0), base.g * b + (b > 0.9 ? 0.3 : 0), base.b * b + (b > 0.9 ? 0.3 : 0));
+    }
+    c.needsUpdate = true;
+  }
+  for (const sp of particles) {
+    const { path, cum, phase } = sp.userData; const L = cum[cum.length - 1];
+    sp.position.copy(pointAt(path, cum, ((t * 0.9 / L + phase) % 1) * L));
+    sp.visible = animate && (focusOut < 0 || sp.userData.out === focusOut);
+  }
+  renderer.render(scene, camera);
+
+  // labels
+  const showL = chk("L-labels"), w = stage.clientWidth, h = stage.clientHeight;
+  for (const L of labels) {
+    const vis = showL && layers[L.layer].visible;
+    if (!vis) { L.el.hidden = true; continue; }
+    tmp.copy(L.p).project(camera);
+    if (tmp.z > 1 || tmp.x < -1.1 || tmp.x > 1.1 || tmp.y < -1.1 || tmp.y > 1.1) { L.el.hidden = true; continue; }
+    L.el.hidden = false;
+    L.el.style.left = ((tmp.x + 1) / 2 * w) + "px"; L.el.style.top = ((1 - tmp.y) / 2 * h) + "px";
+  }
+}
+
+scene.background = col("--scene");
+build(); resize();
+const [p0, t0] = VIEWS.overview(); camera.position.copy(p0); controls.target.copy(t0);
+frame();
+})();
+</script>
+
+</html>

@@ -1,0 +1,53 @@
+{
+  "name": "Bench test (full 12-strip layout, 1 real strip, 5 A supply)",
+  "ledsPerStrip": 300,
+  "stripCount": 12,
+  "heightMetres": 5,
+  "ledType": 22,
+  "colorOrder": 0,
+  "abl": {
+    "ledMa": 25,
+    "maxMa": 4500
+  },
+  "layoutPreset": 10,
+  "controllers": [
+    {
+      "name": "Dig-Quad A",
+      "host": "4.3.2.1",
+      "outputs": [
+        {
+          "gpio": 16,
+          "strips": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "gpio": 3,
+          "strips": [
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "gpio": 1,
+          "strips": [
+            7,
+            8,
+            9
+          ]
+        },
+        {
+          "gpio": 4,
+          "strips": [
+            10,
+            11,
+            12
+          ]
+        }
+      ]
+    }
+  ]
+}

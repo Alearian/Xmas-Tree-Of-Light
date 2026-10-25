@@ -1,0 +1,27 @@
+{
+  "name": "Bench test (one strip)",
+  "ledsPerStrip": 300,
+  "stripCount": 1,
+  "heightMetres": 5,
+  "ledType": 22,
+  "colorOrder": 0,
+  "abl": {
+    "ledMa": 25,
+    "maxMa": 4500
+  },
+  "layoutPreset": 10,
+  "controllers": [
+    {
+      "name": "Dig-Quad A",
+      "host": "4.3.2.1",
+      "outputs": [
+        {
+          "gpio": 16,
+          "strips": [
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

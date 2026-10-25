@@ -5,7 +5,7 @@
   "heightMetres": 5,
   "ledType": 22,
   "colorOrder": 0,
-  "abl": { "ledMa": 11, "maxMa": 5000 },
+  "abl": { "ledMa": 25, "maxMa": 4500 },
   "layoutPreset": 10,
   "controllers": [
     {
