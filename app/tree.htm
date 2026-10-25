@@ -266,6 +266,7 @@
     <h2>Effect</h2>
     <input id="fxFilter" type="search" placeholder="Search effects…">
     <div id="fxList" role="listbox" tabindex="0" aria-label="Effects"></div>
+    <p class="note" id="fxNote"></p>
     </div>
     <div class="col">
     <div id="palBlock">
@@ -304,7 +305,7 @@
       <a class="btn" href="/settings" target="_blank" rel="noopener">WLED settings</a>
     </div>
     <!-- bump when changing the app, so it's easy to tell which copy a phone has loaded -->
-    <p class="note" style="text-align:center;margin-top:24px" id="appVer">App version 2026-10-25e</p>
+    <p class="note" style="text-align:center;margin-top:24px" id="appVer">App version 2026-10-25f</p>
   </section>
 </main>
 
@@ -567,11 +568,10 @@ function describeNow(st) {
   return { kind: "Effects", name: fxs.length + " different effects across the strips", dot: RAINBOW };
 }
 
-// A show: its name, the look that's up (k = its entry, -1 if unknown) and, on a wide enough screen, the next one.
+// A show: "Show - Look" (k = the look's entry, -1 if unknown) and, on a wide enough screen, the next look.
 function showNow(id, kind, k) {
   const sh = showOf(id), n = sh.ps.length;
-  return { kind, name: presetName(id), dot: "var(--accent)",
-           sub: k >= 0 ? "Look " + (k + 1) + " of " + n + ": " + presetName(sh.ps[k]) : "",
+  return { kind, name: presetName(id) + (k >= 0 ? " - " + presetName(sh.ps[k]) : ""), dot: "var(--accent)",
            next: k >= 0 && n > 1 ? presetName(sh.ps[(k + 1) % n]) : "" };
 }
 // Which entry of a running show is up: the one noteLook followed (also during the fade step), else the first match.
@@ -691,11 +691,21 @@ function paletteCss(id, rgbCols) {
 }
 
 // The effect list, A–Z, as tall rows. The chosen effect is S.fx; if the search hides it, the first match is chosen.
+// Effects flagged 2D-only in /json/fxdata ("2" without "1" in the flags part) draw nothing on plain strips,
+// so they're left out unless the board has a 2D matrix set up (/json/info leds.matrix).
+function only2D(id) {
+  const d = S.fxdata[id], flags = typeof d === "string" ? d.split(";")[3] || "" : "";
+  return flags.includes("2") && !flags.includes("1");
+}
 function renderEffects() {
   const f = $("fxFilter").value.trim().toLowerCase(), list = $("fxList");
-  const rows = S.effects.map((name, id) => ({ name, id }))
-    .filter(e => e.name !== "RSVD" && e.name !== "-" && (!f || e.name.toLowerCase().includes(f)))
+  const usable = e => e.name !== "RSVD" && e.name !== "-" && (S.matrix || !only2D(e.id));
+  const all = S.effects.map((name, id) => ({ name, id }));
+  const rows = all.filter(e => usable(e) && (!f || e.name.toLowerCase().includes(f)))
     .sort((a, b) => a.name.localeCompare(b.name));
+  const hidden = all.filter(e => !S.matrix && only2D(e.id));
+  $("fxNote").textContent = hidden.length ? hidden.length + " effects that need a 2D matrix (such as " +
+    hidden.slice(0, 3).map(e => e.name).join(", ") + ") are hidden: WLED has this tree as 12 separate strips." : "";
   if (rows.length && !rows.some(e => e.id === S.fx)) S.fx = rows[0].id;
   list.innerHTML = "";
   for (const e of rows) {
@@ -1632,6 +1642,8 @@ async function pollState() { await refreshState(); setTimeout(pollState, 3000); 
   } catch { toast("Can't reach the tree. Is the phone on the same Wi-Fi?"); }
   // Extras for the colour display. The app still works without them.
   try { S.fxdata = await api(0, "/json/fxdata"); } catch { /* older firmware */ }
+  try { S.matrix = !!((await api(0, "/json/info")).leds || {}).matrix; } catch { /* assume strips */ }
+  renderEffects();
   try { await loadPalx(); } catch { /* older firmware */ }
   renderColours();
 
