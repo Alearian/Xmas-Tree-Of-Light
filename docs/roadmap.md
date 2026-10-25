@@ -44,7 +44,7 @@ Follows the four phases in the technical doc, plus our own software work.
 - [x] **Laser Search look (built and seen on the tree 2026-10-24):** preset 33, a red strip sweeping round the tree like a Larson scanner, 4 s one way, fading to 30 % at the top and bottom. Started as "Cylon". WLED's Scanner run across the strips with grouped segments. See [plans/cylon-effect-plan.md](plans/cylon-effect-plan.md).
 - [ ] ~~Look library~~ (original note): a version-controlled set of tree presets (whole-tree and per-strip/quadrant looks) and a "show" playlist that cycles through them, applied by TreeTool so the board can be rebuilt from the repo
 - [x] **App time sync (2026-10-24):** the app sends the phone's time when it opens, so WLED timers work even without internet time (on home Wi-Fi the board also has NTP).
-- [ ] **Consider WLED 2D mapping:** the zig-zag strips form a 12 × 300 serpentine matrix, so 2D effects (scrolling text, fire, plasma, rain) could wrap around the tree
+- [ ] **Consider WLED 2D mapping:** the zig-zag strips form a 12 × 300 serpentine matrix, so 2D effects (scrolling text, fire, plasma, rain) could wrap around the tree. **Planned 2026-10-25, on hold until after 28 November 2026:** [plans/2d-matrix-plan.md](plans/2d-matrix-plan.md) (four vertical serpentine panels, one per output; trial on the board first)
 
 ## Stage 5 — Rig, seal, run (doc Phases 2 & 4)
 - [ ] Mechanical rigging, power buses, sealing and the enclosure
