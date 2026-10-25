@@ -63,7 +63,7 @@ GPIO 1 and 3 are the ESP32's serial TX/RX pins, so you lose serial logging while
 | Setting | Value for the tree |
 |---|---|
 | LED outputs | 4 outputs, GPIO 16 / 3 / 1 / 4, type **WS281x**, colour order GRB (check this against the real strip) |
-| Starts / counts | 0 / 1080 / 2160 / 3240, each 1,080 (bench test: one output, 360) |
+| Starts / counts | 0 / 900 / 1800 / 2700, each 900 (bench test: one output, 300) |
 | Current limiter (ABL) | Set to the real PSU budget, **not** the 1,250 mA placeholder |
 | Relay pin | **15** (Q1R), optional, for switching the LED PSU through a relay |
 | Button | GPIO 0 |

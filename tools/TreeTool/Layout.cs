@@ -8,6 +8,9 @@ public sealed record Output(int Gpio, int[] Strips);
 
 public sealed record Controller(string Name, string Host, Output[] Outputs);
 
+/// <summary>ApAlways keeps WLED-AP up alongside the home Wi-Fi (WLED ap.behav 2), so either network reaches the board.</summary>
+public sealed record Network(bool ApAlways, string? ApAddress);
+
 public sealed record TreeLayout(
     string Name,
     int LedsPerStrip,
@@ -18,7 +21,8 @@ public sealed record TreeLayout(
     Abl Abl,
     int LayoutPreset,
     Controller[] Controllers,
-    int[]? Attached = null)
+    int[]? Attached = null,
+    Network? Network = null)
 {
     /// <summary>Strips physically wired up. The rest are still rendered by WLED (and previewed by the app).</summary>
     public IReadOnlyCollection<int> AttachedStrips =>

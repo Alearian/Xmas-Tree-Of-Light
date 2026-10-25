@@ -7,7 +7,7 @@ How the QuinLED Dig-Quad, the two 12 V supplies and the 12 WS2815 strips connect
 This is the layout for **one Dig-Quad** (open-questions §8, option A). Background and the reasoning behind it: [power-and-wiring.md](power-and-wiring.md) and [quinled-dig-quad-guide.md](quinled-dig-quad-guide.md).
 
 > ⚠️ **Before anything is bought or switched on**
-> - This uses the working assumption of **4 A per 6 m strip** (The builder's figure). One source says 7.2 A. Measure one strip at full white first ([open-questions.md](open-questions.md) §1). Above about 4.5 A, change to 3 PSUs with 4 strips each.
+> - This uses the working assumption of **4 A per strip** (The builder's figure for 6 m; a 5 m strip should be about 3.3 A). One source says 7.2 A. Measure one strip at full white first ([open-questions.md](open-questions.md) §1). Above about 4.5 A, change to 3 PSUs with 4 strips each.
 > - Mains wiring to the PSUs, and any relay that switches mains, must be done by a qualified electrician.
 > - Terminal positions are drawn schematically. Use the labels printed on the board and on the strip pads.
 
@@ -61,8 +61,8 @@ All four outputs are wired the same way.
           ┌────┐  DO→DI   ┌────┐             ┌────┐   end of chain
           │ S1 │──BO→BI──►│ S2 │             │ S3 │   (DO, BO unused)
           │ ▲  │          │ ▼  │             │ ▲  │
-          │0–  │          │360–│             │720–│
-          │359 │          │719 │  DO→DI      │1079│
+          │0–  │          │300–│             │600–│
+          │299 │          │599 │  DO→DI      │899 │
           └────┘          └────┘──BO→BI────►└────┘
             ▲                  ▲                  ▲
   BASE      │ +12V/GND from fuse block A (5 A fuse per strip)
@@ -72,7 +72,7 @@ All four outputs are wired the same way.
   S1 BI ──► S1 GND   (chain start only)
 ```
 
-- **Data zig-zags:** S1 runs up, S2 down, S3 up. Pixels 0–359, 360–719 and 720–1079 on that output.
+- **Data zig-zags:** S1 runs up, S2 down, S3 up. Pixels 0–299, 300–599 and 600–899 on that output.
 - **Jumpers** carry both lines to the next strip: DO→DI **and** BO→BI. S1→S2 at the top, S2→S3 at the base.
 - **BI → GND at the chain start only** (the base of S1, S4, S7 and S10).
 - **Power goes into both ends of every strip**, each feed through its own 5 A fuse.
@@ -103,6 +103,6 @@ The **15 A top-bus fuse** and the **2 A controller fuse** are our suggestions to
 - **Data needs a shared 0 V.** The data line is a voltage measured against ground. If the strip's GND and the board's GND aren't connected, the strip can't read the signal. That's why every negative goes to one bar and why each data wire has a GND wire beside it.
 - **Join grounds, never V+.** Two supplies never output exactly 12.00 V. Joining their V+ makes one push current into the other. Joining their grounds is safe and gives everything the same reference.
 - **Power bypasses the board.** Each PSU feeds about 24 A. The Dig-Quad is rated 30 A for the whole board and 10 A per fuse, and takes only one supply, so the strips are fed from fuse blocks instead.
-- **Feeding both ends.** A 6 m strip loses voltage along its thin copper. Feeding the top and the base halves the current in each half, which keeps the far LEDs from going dim and orange at full white.
+- **Feeding both ends.** A 5 m strip loses voltage along its thin copper. Feeding the top and the base halves the current in each half, which keeps the far LEDs from going dim and orange at full white.
 - **A fuse protects the wire.** Each fuse is sized for the thinnest wire after it. A 5 A fuse on an 18 AWG pigtail blows before the wire overheats if a strip end shorts.
 - **BI and the backup line.** WS2815 has a second data line. If one pixel dies, the next one reads BI instead and the rest of the strip keeps working. At the first pixel there's nothing before it, so BI is tied to GND.

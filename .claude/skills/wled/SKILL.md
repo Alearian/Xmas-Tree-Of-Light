@@ -36,7 +36,7 @@ For layout, config and test work, use `dotnet run --project tools/TreeTool -- <c
 
 ## Hardware facts
 - 4 outputs: GPIO 16, 3, 1, 4. GPIO 1 and 3 are also the UART, so there's no serial logging while they drive LEDs.
-- Target: 12 × WS2815 strips of 360 px, 3 per port in a zig-zag, so 4 × 1,080 px (starts 0 / 1080 / 2160 / 3240), LED type WS281x. Strip n (1–12) occupies pixels `(n-1)*360 .. n*360-1`. Strips 2, 5, 8 and 11 run top→bottom (they need `rev` for effects that assume bottom→top).
+- Target: 12 × WS2815 5 m strips of 300 px, 3 per port in a zig-zag, so 4 × 900 px (starts 0 / 900 / 1800 / 2700, 3,600 in total), LED type WS281x. Strip n (1–12) occupies pixels `(n-1)*300 .. n*300-1`. Strips 2, 5, 8 and 11 run top→bottom (they need `rev` for effects that assume bottom→top).
 - Target AP: `MatrixTree-WiFi`. It's still the factory `WLED-AP` for now.
 - xLights streams over DDP (UDP 4048). E1.31 is the alternative.
 - Full details: `docs/design-summary.md`. Unresolved issues: `docs/open-questions.md`.

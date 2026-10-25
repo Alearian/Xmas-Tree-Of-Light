@@ -1,12 +1,13 @@
 {
   "name": "Xmas Tree",
-  "ledsPerStrip": 360,
+  "ledsPerStrip": 300,
   "stripCount": 12,
-  "heightMetres": 6,
+  "heightMetres": 5,
   "ledType": 22,
   "colorOrder": 0,
   "abl": { "ledMa": 11, "maxMa": 40000 },
   "layoutPreset": 10,
+  "network": { "apAlways": true, "apAddress": "4.3.2.1" },
   "controllers": [
     {
       "name": "Dig-Quad A",

@@ -45,14 +45,17 @@
   nav button.active { color: var(--accent); }
 
   input[type=range] { flex: 1; width: 100%; accent-color: var(--accent); height: 28px; }
-  select, input[type=search] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
-    background: var(--panel2); color: var(--text); font-size: 16px; }
+  select, input[type=search], input[type=text], input[type=number], input[type=time] { width: 100%; padding: 12px;
+    border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); font-size: 16px; }
+  input[type=number] { min-width: 0; }
   .row { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
   .row label { color: var(--dim); font-size: 14px; min-width: 76px; }
   .btn { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2);
     color: var(--text); font-size: 15px; cursor: pointer; text-decoration: none; text-align: center; }
   .btn.primary { background: var(--accent); color: #231a05; border-color: var(--accent); font-weight: 600; }
   .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .35; transform: none; cursor: default; }
+  .btn.danger { color: var(--red); border-color: var(--red); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
   .target { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--dim); font-size: 14px; }
   .target b { color: var(--text); }
@@ -63,9 +66,19 @@
     border-radius: var(--radius); padding: 10px 14px; margin-bottom: 12px; }
   #nowDot { width: 34px; height: 34px; border-radius: 50%; flex: none; border: 2px solid var(--line); background: #000; }
   #nowText { flex: 1; min-width: 0; }
+  #nowLeft { flex: none; text-align: right; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--accent); }
+  #nowLeft[hidden] { display: none; }
   #nowKind { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
   #nowName { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #nowSub { color: var(--accent); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #nowSub[hidden] { display: none; }
+  #nowPlay { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); background: var(--accent);
+    color: #231a05; cursor: pointer; display: grid; place-items: center; padding: 0; }
 
+  #treeWrap { position: relative; }
+  #spinBtn { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line);
+    background: var(--panel2); color: var(--dim); cursor: pointer; display: grid; place-items: center; padding: 0; }
+  #spinBtn[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: #231a05; }
   #treeCanvas { width: 100%; aspect-ratio: 3 / 4; max-height: 60vh; display: block; background: radial-gradient(#10201a, var(--bg) 70%); border-radius: var(--radius); }
   .note { color: var(--dim); font-size: 13px; }
 
@@ -86,7 +99,9 @@
     background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
   dl.info dt { color: var(--dim); }
   dl.info dd { margin: 0; word-break: break-all; }
-  #phoneUrl { font-family: ui-monospace, monospace; color: var(--accent); user-select: all; }
+  #netInfo .url { font-family: ui-monospace, monospace; color: var(--accent); user-select: all; }
+  .netBtns { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 10px; }
+  .netBtns a.btn[aria-disabled=true] { opacity: .35; pointer-events: none; }
 
   #stripSvg { width: 100%; max-width: 340px; display: block; margin: 0 auto; }
   #stripSvg .s { cursor: pointer; }
@@ -98,8 +113,61 @@
   #stripSvg .s.live.sel circle { stroke: var(--ok); }
   #stripSvg .compass { fill: var(--dim); font-size: 13px; text-anchor: middle; dominant-baseline: central; }
 
-  #showList .btn { text-align: left; min-height: 56px; }
-  #showList .btn.cur { border-color: var(--accent); color: var(--accent); }
+  /* effect list: big rows that are easy to scroll and tap with a finger. No overscroll containment: on a short
+     screen the list's bottom can sit behind the nav, and the page has to scroll on to show the last rows. */
+  #fxList { position: relative; max-height: min(50vh, 480px); max-height: min(50dvh, 480px); overflow-y: auto; margin: 8px 0;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; scrollbar-width: auto; scrollbar-color: var(--line) var(--panel2); }
+  #fxList::-webkit-scrollbar { width: 16px; }
+  #fxList::-webkit-scrollbar-track { background: var(--panel2); border-radius: 10px; }
+  #fxList::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; border: 3px solid var(--panel2); }
+  #fxList .fx { display: flex; align-items: center; min-height: 52px; padding: 0 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  #fxList .fx:last-child { border-bottom: 0; }
+  #fxList .fx[aria-selected=true] { background: var(--accent); color: #231a05; font-weight: 600; }
+  #fxList:focus-visible { outline: 2px solid var(--accent); }
+
+  /* each look is one tile: the name (tap to show it) with its bin inside on the right */
+  #lookList .lookItem { display: flex; min-height: 56px; min-width: 0; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--panel2); overflow: hidden; }
+  #lookList .lookItem.cur { border-color: var(--accent); }
+  #lookList .lookItem .btn { border: 0; border-radius: 0; background: none; }
+  #lookList .lookItem .name { flex: 1; min-width: 0; text-align: left; overflow-wrap: anywhere; }
+  #lookList .lookItem.cur .name { color: var(--accent); }
+  #lookList .lookItem .del { flex: none; width: 40px; padding: 0; display: grid; place-items: center; color: var(--dim); }
+  #lookList .lookItem .del:hover, #lookList .lookItem .del:active { color: var(--red); }
+  #lookList { grid-auto-rows: 1fr; }   /* every tile the same height, even when a long name wraps */
+
+  /* show cards */
+  .showCard { background: var(--panel2); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px 12px; margin-bottom: 10px; }
+  .showCard.cur { border-color: var(--accent); }
+  .showCard .top { display: flex; align-items: center; gap: 8px; }
+  .showCard .top b { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .showCard .status { color: var(--dim); font-size: 13px; margin: 2px 0 10px; }
+  .showCard.cur .status { color: var(--accent); }
+  .showCard .ctl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .showCard .ctl .btn { padding: 12px 2px; font-size: 14px; }
+  .mini { min-width: 42px; height: 42px; padding: 0 8px; flex: none; }
+
+  /* show editor */
+  #showEd { position: fixed; inset: 0; z-index: 10; background: #000c; overflow-y: auto; overscroll-behavior: contain; padding: 16px; }
+  #showEd[hidden] { display: none; }
+  #showEd .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
+    width: min(100%, 480px); margin: 0 auto; }
+  #showEd h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 18px 0 8px; }
+  #showEd #edTitle { margin: 0 0 8px; font-size: 16px; color: var(--text); text-transform: none; letter-spacing: 0; }
+  .entry { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px; margin-bottom: 8px; }
+  .entry .line { display: flex; gap: 6px; align-items: center; }
+  .entry .line + .line { margin-top: 6px; }
+  .entry .num { color: var(--dim); min-width: 18px; text-align: right; font-size: 14px; }
+  .entry select { flex: 1; min-width: 0; padding: 10px; }
+  .entry input[type=number] { width: 64px; flex: none; padding: 10px 4px; text-align: center; }
+  .entry span { color: var(--dim); font-size: 14px; }
+  .check { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+  .check input { width: 22px; height: 22px; accent-color: var(--accent); }
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 8px 0; }
+  .days .btn { padding: 10px 0; }
+  .days .btn[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: #231a05; font-weight: 600; }
+  .edBtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  #edDelete { width: 100%; margin-top: 10px; }
   /* share: full-screen QR code of the app's address */
   #share { position: fixed; inset: 0; z-index: 10; background: #000c; display: grid; place-items: center; padding: 16px; }
   #share[hidden] { display: none; }
@@ -110,6 +178,26 @@
     border-radius: 8px; image-rendering: pixelated; }
   #shareUrl { font-family: ui-monospace, monospace; color: var(--accent); margin: 14px 0 6px; word-break: break-all; user-select: all; }
   #share .btn { margin-top: 14px; width: 100%; }
+  .col + .col > h2:first-child { margin-top: 20px; }
+
+  /* Tablets in landscape (and wide screens): the tree and the colour wheel side by side,
+     and the Effects and Shows tabs in two columns. Phones keep the single column. */
+  @media (min-width: 900px) and (orientation: landscape) {
+    main { padding-left: 24px; padding-right: 24px; }
+    #tab-tree.active { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+      grid-template-areas: "now now" "tree wheel"; column-gap: 24px; align-items: start; }
+    #now { grid-area: now; }
+    #treeWrap { grid-area: tree; }
+    .wheelCol { grid-area: wheel; }
+    /* header, brightness, "now showing" and the nav take about 300px */
+    #treeCanvas { aspect-ratio: auto; height: calc(100vh - 300px); height: calc(100dvh - 300px); min-height: 320px; max-height: none; }
+    .wheelWrap { width: min(100%, 440px); }
+    #tab-effects.active, #tab-shows.active { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 24px; align-items: start; }
+    .col + .col > h2:first-child { margin-top: 0; }
+    #fxList { max-height: calc(100vh - 330px); max-height: calc(100dvh - 330px); }
+  }
+
   #toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line);
     padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   #toast.show { opacity: 1; }
@@ -129,24 +217,41 @@
 
 <main>
   <section id="tab-tree" class="active">
-    <div id="now"><div id="nowDot"></div><div id="nowText"><div id="nowKind">Now showing</div><div id="nowName">…</div></div></div>
-    <canvas id="treeCanvas"></canvas>
-    <h2>Pick a colour</h2>
-    <div class="target" id="wheelTarget"></div>
-    <div class="wheelWrap"><canvas id="wheel"></canvas><div id="wheelMark"></div></div>
+    <div id="now"><div id="nowDot"></div><div id="nowText"><div id="nowKind">Now showing</div><div id="nowName">…</div><div id="nowSub" hidden></div></div><div id="nowLeft" hidden></div></div>
+    <div id="treeWrap">
+      <canvas id="treeCanvas"></canvas>
+      <button id="spinBtn" title="Rotate on/off" aria-label="Rotate on/off" aria-pressed="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+      </button>
+    </div>
+    <div class="wheelCol">
+      <h2>Pick a colour</h2>
+      <div class="target" id="wheelTarget"></div>
+      <div class="wheelWrap"><canvas id="wheel"></canvas><div id="wheelMark"></div></div>
+    </div>
   </section>
 
   <section id="tab-shows">
-    <h2>Shows and looks</h2>
-    <div class="grid" id="showList"></div>
-    <div class="row" style="margin-top:16px"><button class="btn" id="saveShow" style="flex:1">Save current look…</button></div>
+    <div class="col">
+    <h2>Shows</h2>
+    <div id="showCards"></div>
+    <div class="row"><button class="btn primary" id="newShow" style="flex:1">New show</button></div>
+    </div>
+    <div class="col">
+    <h2>Looks</h2>
+    <div class="grid" id="lookList"></div>
+    <p class="note">Make new looks on the Effects tab.</p>
+    </div>
   </section>
 
   <section id="tab-effects">
+    <div class="col">
     <div class="target" id="fxTarget"></div>
     <h2>Effect</h2>
     <input id="fxFilter" type="search" placeholder="Search effects…">
-    <div class="row"><select id="fxSel" size="6"></select></div>
+    <div id="fxList" role="listbox" tabindex="0" aria-label="Effects"></div>
+    </div>
+    <div class="col">
     <div id="palBlock">
       <h2>Palette</h2>
       <select id="palSel"></select>
@@ -159,13 +264,18 @@
     <div class="row"><label for="sx">Speed</label><input id="sx" type="range" min="0" max="255" value="128"></div>
     <div class="row"><label for="ix">Intensity</label><input id="ix" type="range" min="0" max="255" value="128"></div>
     <div class="row" style="margin-top:16px"><button class="btn primary" id="fxApply" style="flex:1">Apply</button></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="saveLook" style="flex:1">Save as look…</button></div>
+    </div>
   </section>
 
   <section id="tab-config">
     <h2>Open on a phone</h2>
-    <p class="note">The phone must be on the same Wi-Fi as the tree. Type this address into the phone's browser, then use "Add to Home screen".</p>
-    <dl class="info"><dt>Address</dt><dd id="phoneUrl">…</dd></dl>
-    <div class="row"><button class="btn" id="shareCfg" style="flex:1">Show QR code</button></div>
+    <p class="note">The tree can be reached two ways: through the home Wi-Fi, or by joining the tree's own Wi-Fi (WLED-AP). Join that Wi-Fi on the phone first, open the address (or scan the QR code), then use "Add to Home screen". Each home-screen icon opens one address, so add one for each network you use.</p>
+    <dl class="info" id="netInfo"><dt>Home Wi-Fi</dt><dd>…</dd></dl>
+    <div class="netBtns">
+      <a class="btn" id="goHome">Switch to home Wi-Fi</a><button class="btn" id="qrHome">QR code</button>
+      <a class="btn" id="goAp">Switch to tree's Wi-Fi</a><button class="btn" id="qrAp">QR code</button>
+    </div>
     <h2>Strips</h2>
     <p class="note">Tap strips to choose where colours and effects go. Nothing selected means the whole tree. Strips with a green ring are attached.</p>
     <svg id="stripSvg" viewBox="-170 -170 340 340"></svg>
@@ -178,7 +288,7 @@
       <a class="btn" href="/settings" target="_blank" rel="noopener">WLED settings</a>
     </div>
     <!-- bump when changing the app, so it's easy to tell which copy a phone has loaded -->
-    <p class="note" style="text-align:center;margin-top:24px">App version 2026-10-20b</p>
+    <p class="note" style="text-align:center;margin-top:24px" id="appVer">App version 2026-10-25a</p>
   </section>
 </main>
 
@@ -198,6 +308,31 @@
     <button class="btn" id="shareClose">Close</button>
   </div>
 </div>
+<div id="showEd" hidden>
+  <div class="card">
+    <h2 id="edTitle">New show</h2>
+    <div class="row"><label for="edName">Name</label><input id="edName" type="text" maxlength="32" placeholder="My show" autocomplete="off"></div>
+    <div class="row"><label for="edFade">Fade (s)</label><input id="edFade" type="number" min="0" max="25" step="0.5" value="2" inputmode="decimal"></div>
+    <h3>Looks, in order</h3>
+    <div id="edEntries"></div>
+    <div class="row"><button class="btn" id="edAdd" style="flex:1">+ Add look</button></div>
+    <h3>How long</h3>
+    <div class="row"><select id="edLimit"><option value="forever">Forever</option><option value="hours">For a number of hours</option>
+      <option value="times">A number of times</option></select>
+      <input id="edLimitN" type="number" min="1" max="100" value="1" inputmode="numeric" style="width:84px;flex:none"></div>
+    <p class="note" id="edCycle"></p>
+    <h3>Every day</h3>
+    <label class="check"><input type="checkbox" id="edSched"> Start and turn off by itself</label>
+    <div id="edSchedBox">
+      <div class="row"><label for="edStart">Start</label><input id="edStart" type="time" value="16:30"></div>
+      <div class="row"><label for="edEnd">Lights off</label><input id="edEnd" type="time" value="23:00"></div>
+      <div class="days" id="edDays"></div>
+      <p class="note" id="edClock"></p>
+    </div>
+    <div class="edBtns"><button class="btn primary" id="edSave">Save</button><button class="btn" id="edCancel">Cancel</button></div>
+    <button class="btn danger" id="edDelete">Delete show</button>
+  </div>
+</div>
 
 <script>
 /* qrcode-generator 1.4.4, (c) Kazuhiko Arase, MIT licence.
@@ -209,8 +344,9 @@ var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=ne
 
 // Used when /tree.json is missing (e.g. only the HTML was uploaded).
 const DEFAULT_LAYOUT = {
-  name: "Xmas Tree", ledsPerStrip: 360, stripCount: 12, layoutPreset: 10,
-  controllers: [{ name: "Dig-Quad A", host: location.host || "4.3.2.1", outputs: [
+  name: "Xmas Tree", ledsPerStrip: 300, stripCount: 12, layoutPreset: 10,
+  network: { apAddress: "4.3.2.1" },
+  controllers: [{ name: "Dig-Quad A", host: location.host || "xmastree.local", outputs: [
     { gpio: 16, strips: [1, 2, 3] }, { gpio: 3, strips: [4, 5, 6] },
     { gpio: 1, strips: [7, 8, 9] }, { gpio: 4, strips: [10, 11, 12] } ] }]
 };
@@ -218,8 +354,8 @@ const COLOUR_NAMES = ["Colour 1", "Colour 2", "Colour 3"];
 const RAINBOW = "conic-gradient(#ff2020,#ffd080,#10a040,#1040ff,#ff2020)";
 
 const S = { layout: null, strips: [], attached: new Set(), effects: [], fxdata: [], palNames: [], palx: {}, presets: {},
-            state: null, cols: ["#ff2020", "#10a040", "#ffd080"], selected: new Set(), on: false, bri: 128,
-            colours: [], ledMap: [], wsSeen: [], rot: 0, dragging: false, picking: false };
+            state: null, fx: 0, timers: null, resumed: 0, paused: 0, pausedPs: 0, pausedFx: -1, marksAt: 0, cols:["#ff2020", "#10a040", "#ffd080"], selected: new Set(), on: false, bri: 128,
+            colours: [], ledMap: [], wsSeen: [], rot: 0, dragging: false, picking: false, look: { key: undefined, show: 0, idx: -1, t: 0 } };
 const $ = id => document.getElementById(id);
 
 // ---------- layout: must match TreeTool's LayoutMath ----------
@@ -259,15 +395,22 @@ async function sendAll(body) {
 }
 
 // Sends per-segment settings to the selected strips (or all strips), grouped per controller.
-// Also removes any overlay segments a look added on top of the strips (ids after the strip segments),
-// so the chosen effect isn't hidden under, say, Snowfall's white flakes.
+// Also removes any overlay segments or bands a look added on top of the strips (ids after the strip segments),
+// so the chosen effect isn't hidden under, say, Snowfall's white flakes. It also unfreezes every strip,
+// because an "across" look such as Cylon freezes them so they don't draw over its bands.
+const MAX_SEGMENTS = 32;   // WLED 0.14 on an ESP32 (/json/info leds.maxseg)
 async function sendSegments(segFn, extra = {}) {
   const jobs = S.layout.controllers.map((_, ci) => {
     const count = S.strips.filter(s => s.ctrl === ci).length;
-    const seg = targets().filter(s => s.ctrl === ci).map(s => Object.assign({ id: s.seg, on: true }, segFn(s)));
-    if (seg.length) for (let k = 0; k < count; k++) seg.push({ id: count + k, stop: 0 });
+    const chosen = targets().filter(s => s.ctrl === ci);
+    const seg = chosen.map(s => Object.assign({ id: s.seg, on: true, frz: false }, segFn(s)));
+    if (seg.length) {
+      for (const s of S.strips) if (s.ctrl === ci && !chosen.includes(s)) seg.push({ id: s.seg, frz: false });
+      for (let id = count; id < MAX_SEGMENTS; id++) seg.push({ id, stop: 0 });
+    }
     return seg.length ? api(ci, "/json/state", Object.assign({ on: true, seg }, extra)) : null;
   }).filter(Boolean);
+  setMarks();   // a new effect or colour stops any running or paused show
   const results = await Promise.allSettled(jobs);
   setConn(results.every(r => r.status === "fulfilled"));
   S.on = true; renderPower();
@@ -342,8 +485,10 @@ function rgbToHs([r, g, b]) {
 }
 const hueAt = (dx, dy) => (Math.atan2(dy, dx) * 180 / Math.PI + 450) % 360;
 
+// Drawn at the wheel's real size on screen (it is bigger on a tablet), and again when that changes.
 function drawWheel() {
-  const cv = $("wheel"), size = 300, R = size / 2;
+  const cv = $("wheel"), size = Math.round((cv.clientWidth || 300) * (window.devicePixelRatio || 1)), R = size / 2;
+  if (cv.width === size && cv.height === size) return;
   cv.width = cv.height = size;
   const g = cv.getContext("2d"), img = g.createImageData(size, size);
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
@@ -379,7 +524,15 @@ function describeNow(st) {
   const p = id => S.presets[id];
   if (!st) return { kind: "Not connected", name: "Can't reach the tree", dot: "#000" };
   if (!st.on) return { kind: "Now showing", name: "Off", dot: "#000" };
+  const paused = pausedShow(st);
+  if (paused) {
+    const sh = showOf(paused), k = sh.ps.indexOf(S.pausedPs);
+    return { kind: "Show · paused", name: presetName(paused), dot: "var(--accent)",
+             sub: (k >= 0 ? "Look " + (k + 1) + " of " + sh.ps.length + ": " : "") + presetName(S.pausedPs) };
+  }
   if (st.pl > 0 && p(st.pl) && p(st.pl).n) return { kind: "Show", name: p(st.pl).n, dot: "var(--accent)" };
+  // a resumed show runs as an unsaved playlist (pl 0)
+  if (st.pl === 0 && S.resumed && p(S.resumed)) return { kind: "Show", name: p(S.resumed).n, dot: "var(--accent)" };
   if (st.ps > 0 && st.ps !== S.layout.layoutPreset && p(st.ps) && p(st.ps).n)
     return { kind: p(st.ps).playlist ? "Show" : "Look", name: p(st.ps).n, dot: "var(--accent)" };
 
@@ -404,7 +557,55 @@ function describeNow(st) {
 function renderNow() {
   const d = describeNow(S.state);
   $("nowKind").textContent = d.kind; $("nowName").textContent = d.name; $("nowDot").style.background = d.dot;
+  $("nowSub").textContent = d.sub || ""; $("nowSub").hidden = !d.sub;
+  renderLeft();
 }
+
+// Countdown to the end of the current look in a running show. WLED 0.14 doesn't report the time left, so the
+// app notes when it sees the look change. If the phone opened partway through a look, it shows a dash until the next one.
+function runningShow(st) {
+  if (!st || !st.on) return 0;
+  const id = st.pl > 0 ? st.pl : st.pl === 0 ? S.resumed : 0;
+  return id && S.presets[id] && S.presets[id].playlist ? id : 0;
+}
+function noteLook(st) {
+  const id = runningShow(st), key = id ? id + ":" + st.ps : null;
+  if (key === S.look.key) return;
+  const prev = S.look;
+  // which entry this is: the one after the last, if it matches (a look can be in a show twice)
+  let idx = -1;
+  if (id) {
+    const ps = showOf(id).ps, next = prev.show === id && prev.idx >= 0 ? (prev.idx + 1) % ps.length : -1;
+    idx = next >= 0 && ps[next] === st.ps ? next : ps.indexOf(st.ps);
+  }
+  // A change seen after the first state means the look started now; the first state the app sees is partway through.
+  S.look = { key, show: id, idx, t: prev.key !== undefined && id ? Date.now() : 0 };
+}
+// While a show is paused, the countdown's place holds a play button that resumes it.
+const PLAY_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+function renderLeft() {
+  const box = $("nowLeft"), L = S.look, paused = pausedShow(S.state);
+  if (paused) {
+    if (box.dataset.mode !== "play") {
+      const b = el("button", { id: "nowPlay", title: "Resume the show" });
+      b.setAttribute("aria-label", "Resume the show"); b.innerHTML = PLAY_SVG;
+      b.onclick = () => resumeShow(S.paused);
+      box.replaceChildren(b); box.dataset.mode = "play"; box.title = "";
+    }
+    box.hidden = false; return;
+  }
+  box.dataset.mode = "";
+  if (!L.show || runningShow(S.state) !== L.show) { box.hidden = true; return; }
+  box.hidden = false;
+  const dur = (showOf(L.show).dur[L.idx] || 0) / 10;
+  if (!L.t || !dur) { box.textContent = "–"; box.title = "Counts down from the next look"; return; }
+  let left = dur - (Date.now() - L.t) / 1000;
+  if (showOf(L.show).ps.length === 1) left = ((left % dur) + dur) % dur;   // one look: WLED repeats it without a change to see
+  left = Math.max(0, Math.ceil(left));
+  box.textContent = left > 99 ? Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0") : left + " s";
+  box.title = "Time left on this look";
+}
+setInterval(renderLeft, 1000);
 
 // ---------- effects & palettes ----------
 // /json/fxdata gives each effect's metadata: "sliders;colours;palette;flags;defaults".
@@ -449,20 +650,42 @@ function paletteCss(id, rgbCols) {
   return "linear-gradient(90deg," + p.stops.map(s => s.hex + " " + Math.round(s.pos * 100) + "%").join(",") + ")";
 }
 
+// The effect list, A–Z, as tall rows. The chosen effect is S.fx; if the search hides it, the first match is chosen.
 function renderEffects() {
-  const f = $("fxFilter").value.trim().toLowerCase();
-  const sel = $("fxSel"), current = sel.value;
-  sel.innerHTML = "";
-  S.effects.forEach((name, id) => {
-    if (name === "RSVD" || name === "-" || (f && !name.toLowerCase().includes(f))) return;
-    sel.appendChild(el("option", { value: id, textContent: name }));
-  });
-  if (current) sel.value = current;
-  if (sel.selectedIndex < 0 && sel.options.length) sel.selectedIndex = 0;
+  const f = $("fxFilter").value.trim().toLowerCase(), list = $("fxList");
+  const rows = S.effects.map((name, id) => ({ name, id }))
+    .filter(e => e.name !== "RSVD" && e.name !== "-" && (!f || e.name.toLowerCase().includes(f)))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  if (rows.length && !rows.some(e => e.id === S.fx)) S.fx = rows[0].id;
+  list.innerHTML = "";
+  for (const e of rows) {
+    const r = el("div", { className: "fx", textContent: e.name });
+    r.setAttribute("role", "option"); r.dataset.id = e.id;
+    r.onclick = () => selectFx(e.id);
+    list.appendChild(r);
+  }
+  markFx();
   renderColours();
 }
+
+function markFx() {
+  const list = $("fxList");
+  for (const r of list.children) r.setAttribute("aria-selected", +r.dataset.id === S.fx);
+  const r = list.querySelector('[aria-selected="true"]');
+  // scroll only the list, not the page, so the chosen row is in view
+  if (r && (r.offsetTop < list.scrollTop || r.offsetTop + r.offsetHeight > list.scrollTop + list.clientHeight))
+    list.scrollTop = r.offsetTop - (list.clientHeight - r.offsetHeight) / 2;
+}
+
+function selectFx(id) { S.fx = id; markFx(); renderColours(); }
+
 $("fxFilter").addEventListener("input", renderEffects);
-$("fxSel").addEventListener("change", renderColours);
+$("fxList").addEventListener("keydown", e => {
+  if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+  const rows = [...$("fxList").children], i = rows.findIndex(r => +r.dataset.id === S.fx);
+  const next = rows[Math.max(0, Math.min(rows.length - 1, i + (e.key === "ArrowDown" ? 1 : -1)))];
+  if (next) { e.preventDefault(); selectFx(+next.dataset.id); }
+});
 $("palSel").addEventListener("change", renderColours);
 
 function colourInput(k, label) {
@@ -475,7 +698,7 @@ function colourInput(k, label) {
 // Shows only the colours that will actually appear: the palette's own colours, plus pickers for the
 // segment colours that the palette (or, with no palette, the effect) really uses.
 function renderColours() {
-  const fx = +$("fxSel").value || 0, info = fxInfo(fx), pal = +$("palSel").value || 0;
+  const fx = S.fx || 0, info = fxInfo(fx), pal = +$("palSel").value || 0;
   const box = $("colours"); box.innerHTML = "";
   $("palBlock").style.display = info.palette ? "" : "none";
   let note = "";
@@ -509,18 +732,24 @@ function renderColours() {
 function syncEffectsFromTree() {
   const t = targets()[0], seg = S.state && t && t.ctrl === 0 && (S.state.seg || []).find(s => s.id === t.seg);
   if (!seg) { renderColours(); return; }
-  if (![...$("fxSel").options].some(o => +o.value === seg.fx)) { $("fxFilter").value = ""; renderEffects(); }
-  $("fxSel").value = seg.fx; $("palSel").value = seg.pal;
+  if (![...$("fxList").children].some(r => +r.dataset.id === seg.fx)) $("fxFilter").value = "";
+  S.fx = seg.fx; renderEffects();
+  $("palSel").value = seg.pal;
   $("sx").value = seg.sx; $("ix").value = seg.ix;
   if (seg.col) S.cols = seg.col.map(rgbToHex);
   renderColours();
 }
 
 function currentFx() {
-  return { fx: +$("fxSel").value || 0, pal: +$("palSel").value || 0, sx: +$("sx").value, ix: +$("ix").value,
+  return { fx: S.fx || 0, pal: +$("palSel").value || 0, sx: +$("sx").value, ix: +$("ix").value,
            col: S.cols.map(hexToRgb) };
 }
-$("fxApply").onclick = () => { sendSegments(currentFx); toast("Applied"); };
+// Apply, then go to the Tree tab to see it (scrolled to the top, where the preview is)
+$("fxApply").onclick = async () => {
+  await sendSegments(currentFx);
+  showTab("tree"); document.querySelector("main").scrollTop = 0;
+  toast("Applied");
+};
 for (const id of ["sx", "ix"]) {
   const send = throttle(() => sendSegments(() => ({ [id]: +$(id).value })), 200);
   $(id).addEventListener("input", send);
@@ -569,37 +798,457 @@ function renderGroups() {
 }
 
 // ---------- shows and looks (WLED playlists and presets) ----------
-// The layout preset only holds the strip segments, so it sits under Config ("Reset strip layout"), not here.
+// The board's presets.json is the only store. A preset with a "playlist" is a show; any other preset is a look.
+// The layout preset sits under Config ("Reset strip layout"), and preset 250 "Lights off" ends shows and is used by Stop.
+// Daily start/end times are WLED timers: start applies the show, end applies 250.
+const LIGHTS_OFF = 250;
+const MAX_DUR = 65000;     // WLED keeps each playlist time in tenths of a second, in 16 bits
+const MAX_REPEAT = 100;
+const MAX_TIMERS = 8;      // WLED 0.14 has 8 clock timers (plus sunrise and sunset)
+const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];   // timer "dow" bits, Monday = bit 0
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ----- paused and resumed shows -----
+// WLED 0.14 doesn't know about a pause: the app stops the playlist and leaves the look up. WLED then reports
+// pl -1 and ps -1, so this phone notes which show and look were paused (and which show it resumed, which runs
+// as an unsaved playlist, pl 0). The notes are kept on the phone so a reload still shows them.
+function setMarks(paused = 0, resumed = 0, pausedPs = 0, pausedFx = -1) {
+  Object.assign(S, { paused, resumed, pausedPs, pausedFx, marksAt: Date.now() });
+  try { localStorage.setItem("showMarks", JSON.stringify({ paused, resumed, pausedPs, pausedFx })); } catch { /* private mode */ }
+}
+function loadMarks() {
+  try { Object.assign(S, JSON.parse(localStorage.getItem("showMarks")) || {}); } catch { /* none */ }
+}
+// The paused show, if the tree still looks paused: on, no playlist, same look (or none) and the same effect.
+function pausedShow(st) {
+  const id = S.paused, seg0 = st && (st.seg || [])[0];
+  if (!id || !st || !st.on || st.pl >= 0 || !isShow(id)) return 0;
+  return (st.ps === S.pausedPs || st.ps < 1) && (!seg0 || seg0.fx === S.pausedFx) ? id : 0;
+}
+// Drops the notes once the tree is clearly doing something else (after a moment, so a state read
+// that was already on its way doesn't undo a fresh pause).
+function checkMarks(st) {
+  if (!st || Date.now() - S.marksAt < 3000) return;
+  if ((S.paused && !pausedShow(st)) || (S.resumed && !(st.on && st.pl === 0))) setMarks();
+}
+
 async function loadPresets() {
   try { const r = await fetch("/presets.json", { cache: "no-store" }); if (r.ok) S.presets = await r.json(); } catch { /* none saved yet */ }
   return S.presets;
 }
 
-async function loadShows() {
-  await loadPresets();
-  const list = $("showList"); list.innerHTML = "";
-  const lp = String(S.layout.layoutPreset);
-  const ids = Object.keys(S.presets).filter(id => id !== "0" && id !== lp && S.presets[id] && S.presets[id].n);
-  // shows (playlists) first, then looks, each in id order
-  ids.sort((a, b) => (!S.presets[a].playlist - !S.presets[b].playlist) || a - b);
-  if (!ids.length) { list.innerHTML = '<p class="note">No shows or looks saved yet.</p>'; return; }
-  const cur = S.state && (S.state.pl > 0 ? S.state.pl : S.state.ps);
-  for (const id of ids) {
-    const b = el("button", { className: "btn" + (+id === cur ? " cur" : ""), textContent: (S.presets[id].playlist ? "▶ " : "") + S.presets[id].n });
-    b.onclick = () => { sendAll({ ps: +id }); S.on = true; renderPower(); toast(S.presets[id].n); setTimeout(loadShows, 600); };
-    list.appendChild(b);
+const isShow = id => !!(S.presets[id] && S.presets[id].playlist);
+const presetName = id => (S.presets[id] && S.presets[id].n) || "Preset " + id;
+
+function presetIds(pick) {
+  const skip = new Set(["0", String(S.layout.layoutPreset), String(LIGHTS_OFF)]);
+  return Object.keys(S.presets).filter(id => !skip.has(id) && S.presets[id] && S.presets[id].n && pick(+id))
+    .map(Number).sort((a, b) => a - b);
+}
+const lookIds = () => presetIds(id => !isShow(id));
+const BIN_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 3h4M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
+
+function freePresetId() {
+  for (let id = 1; id < LIGHTS_OFF; id++) if (id !== S.layout.layoutPreset && !S.presets[id]) return id;
+  return 0;
+}
+
+// A show's playlist with dur and transition as lists, whichever form WLED stored them in.
+function showOf(id) {
+  const p = S.presets[id].playlist, ps = p.ps || [];
+  const list = (v, d) => Array.isArray(v) ? v : ps.map(() => v ?? d);
+  return { ps, dur: list(p.dur, 100), transition: list(p.transition, 7), repeat: p.repeat || 0, end: p.end || 0 };
+}
+
+function fmtTime(sec) {
+  sec = Math.round(sec);
+  if (sec < 60) return sec + " s";
+  if (sec < 3600) return Math.floor(sec / 60) + " min" + (sec % 60 ? " " + sec % 60 + " s" : "");
+  const m = Math.round(sec / 60);
+  return Math.floor(m / 60) + " h" + (m % 60 ? " " + m % 60 + " min" : "");
+}
+
+// Saves or deletes a preset on every controller, then gives WLED time to finish writing presets.json
+// (two writes on top of each other have corrupted it before).
+async function presetAll(body) {
+  await Promise.all(S.layout.controllers.map((_, ci) => api(ci, "/json/state", body)));
+  await sleep(600);
+}
+
+async function ensureLightsOff() {
+  if (S.presets[LIGHTS_OFF]) return;
+  await presetAll({ psave: LIGHTS_OFF, n: "Lights off", o: true, on: false });
+  S.presets[LIGHTS_OFF] = { n: "Lights off", on: false };
+}
+
+// ----- daily schedule (WLED timers) -----
+const hm = (h, m) => String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+const regularTimers = ins => (ins || []).filter(t => t.hour !== 255);   // hour 255 = the sunrise/sunset timers
+const usedTimer = t => !!(t.macro || t.hour || t.min);
+
+// A show's timer is the one whose preset is the show; the "Lights off" timer straight after it is its end.
+function scheduleOf(id, ins = S.timers) {
+  const reg = regularTimers(ins), i = reg.findIndex(t => t.macro === id);
+  if (i < 0) return null;
+  const s = reg[i], e = reg[i + 1] && reg[i + 1].macro === LIGHTS_OFF ? reg[i + 1] : null;
+  return { start: hm(s.hour, s.min), end: e ? hm(e.hour, e.min) : "", dow: s.dow ?? 127 };
+}
+
+function timer(time, dow, macro) {
+  const [hour, min] = time.split(":").map(Number);
+  return { en: 1, hour, min, macro, dow, start: { mon: 1, day: 1 }, end: { mon: 12, day: 31 } };
+}
+const BLANK_TIMER = { en: 0, hour: 0, min: 0, macro: 0, dow: 127, start: { mon: 1, day: 1 }, end: { mon: 12, day: 31 } };
+
+// Replaces this show's timers (or removes them when sched is null) on every controller. Only the timers are sent
+// to /json/cfg; other timers are kept as they are. WLED reads the list in order and leaves slots it isn't sent
+// unchanged, so the list is padded with blank timers to clear the slots that are no longer used.
+async function writeTimers(showId, sched) {
+  for (let ci = 0; ci < S.layout.controllers.length; ci++) {
+    const ins = ((await api(ci, "/json/cfg")).timers || {}).ins || [];
+    try { localStorage.setItem("timersBackup" + ci, JSON.stringify({ at: new Date().toISOString(), ins })); } catch { /* private mode */ }
+    const reg = regularTimers(ins), out = [];
+    for (let i = 0; i < reg.length; i++) {
+      if (reg[i].macro === showId) { if (reg[i + 1] && reg[i + 1].macro === LIGHTS_OFF) i++; continue; }
+      out.push(reg[i]);
+    }
+    if (sched) {
+      if (out.length + (sched.end ? 2 : 1) > MAX_TIMERS) throw new Error("the tree's " + MAX_TIMERS + " timers are all in use");
+      out.push(timer(sched.start, sched.dow, showId));
+      // an end time before the start time is after midnight, so it falls on the next day
+      const nextDay = ((sched.dow << 1) | (sched.dow >> 6)) & 127;
+      if (sched.end) out.push(timer(sched.end, sched.end > sched.start ? sched.dow : nextDay, LIGHTS_OFF));
+    }
+    while (out.length < MAX_TIMERS) out.push(BLANK_TIMER);
+    const body = { timers: { ins: out.concat(ins.filter(t => t.hour === 255)) } };
+    const key = t => [t.en ? 1 : 0, t.hour, t.min, t.macro, t.dow].join();
+    const want = out.filter(usedTimer).map(key).join("|");
+    let ok = false;
+    // WLED can misread a timer's days when the new value happens to match the old stored byte, so check and retry once
+    for (let attempt = 0; attempt < 2 && !ok; attempt++) {
+      await api(ci, "/json/cfg", body);
+      await sleep(800);
+      const got = regularTimers(((await api(ci, "/json/cfg")).timers || {}).ins);
+      ok = got.filter(usedTimer).map(key).join("|") === want;
+    }
+    if (!ok) throw new Error("the timers on " + S.layout.controllers[ci].name + " didn't save as expected");
   }
 }
 
-$("saveShow").onclick = async () => {
+// ----- status of each show -----
+// WLED 0.14 reports the running playlist (pl) and the preset it is showing (ps), but not the position or a pause.
+// A resumed show runs as an unsaved playlist, which WLED reports as pl 0.
+function showStatus(id) {
+  const st = S.state, sh = showOf(id);
+  const k = st ? sh.ps.indexOf(st.ps) : -1, at = k >= 0 ? "look " + (k + 1) + " of " + sh.ps.length + ": " + presetName(st.ps) : "";
+  if (st && st.on && (st.pl === id || (st.pl === 0 && k >= 0 && (!S.resumed || S.resumed === id))))
+    return { running: true, text: "Showing " + (at || "") };
+  if (pausedShow(st) === id) {
+    const kp = sh.ps.indexOf(S.pausedPs);
+    return { paused: true, text: "Paused on " + (kp >= 0 ? "look " + (kp + 1) + " of " + sh.ps.length + ": " : "") + presetName(S.pausedPs) };
+  }
+  return { text: showSummary(id) };
+}
+
+function showSummary(id) {
+  const sh = showOf(id), pass = sh.dur.reduce((a, d) => a + d, 0) / 10;
+  let text = sh.ps.length + " look" + (sh.ps.length === 1 ? "" : "s") + " · " + fmtTime(pass) + " a pass · ";
+  text += sh.repeat ? sh.repeat + (sh.repeat === 1 ? " time" : " times") + (sh.repeat > 1 ? " (≈ " + fmtTime(pass * sh.repeat) + ")" : "") : "forever";
+  const sched = scheduleOf(id);
+  if (sched) {
+    const days = sched.dow === 127 ? "daily" : DAY_NAMES.filter((_, b) => sched.dow & (1 << b)).join(" ");
+    text += " · " + days + " " + sched.start + (sched.end ? "–" + sched.end : "");
+  }
+  return text;
+}
+
+function renderShows() {
+  const box = $("showCards"), ids = presetIds(isShow);
+  box.innerHTML = "";
+  if (!ids.length) box.append(el("p", { className: "note", textContent: "No shows yet. New show puts your looks in order." }));
+  const btn = (label, title, fn, enabled, cls = "btn") => {
+    const b = el("button", { className: cls, textContent: label, title, disabled: !enabled });
+    b.onclick = fn; return b;
+  };
+  for (const id of ids) {
+    const s = showStatus(id);
+    box.append(el("div", { className: "showCard" + (s.running || s.paused ? " cur" : "") },
+      el("div", { className: "top" }, el("b", { textContent: presetName(id) }), btn("✎ Edit", "Edit this show", () => openEditor(id), true, "btn mini")),
+      el("div", { className: "status", textContent: s.text }),
+      el("div", { className: "ctl" },
+        btn("▶ Start", "Start from the first look", () => startShow(id), true),
+        btn("⏸ Pause", "Hold the current look", () => pauseShow(id), s.running),
+        btn("⏵ Resume", "Carry on from this look", () => resumeShow(id), s.paused),
+        btn("⏹ Stop", "Stop and turn the lights off", stopShow, s.running || s.paused))));
+  }
+  renderShows.sig = showsSig();
+}
+// Re-drawn on each state poll only when something changed, so a tap isn't lost to a re-draw.
+const showsSig = () => JSON.stringify([S.state && [S.state.on, S.state.pl, S.state.ps], S.resumed, S.paused, S.pausedPs]);
+
+function renderLooks() {
+  const list = $("lookList"), ids = lookIds();
+  list.innerHTML = "";
+  if (!ids.length) { list.innerHTML = '<p class="note">No looks saved yet.</p>'; return; }
+  const cur = pausedShow(S.state) ? S.pausedPs : S.state && S.state.ps;
+  for (const id of ids) {
+    const b = el("button", { className: "btn name", textContent: presetName(id) });
+    // show the look, then go to the Tree tab like Apply does
+    b.onclick = async () => {
+      setMarks(); S.on = true; renderPower();
+      await sendAll({ ps: id });
+      showTab("tree"); document.querySelector("main").scrollTop = 0;
+      toast(presetName(id));
+    };
+    const del = el("button", { className: "btn del", title: "Delete this look" });
+    del.setAttribute("aria-label", "Delete " + presetName(id)); del.innerHTML = BIN_SVG;
+    del.onclick = () => deleteLook(id);
+    list.appendChild(el("div", { className: "lookItem" + (id === cur ? " cur" : "") }, b, del));
+  }
+}
+
+// lookIds never includes the layout preset or 250, so those can't be deleted here.
+async function deleteLook(id) {
+  const name = presetName(id);
+  const usedIn = presetIds(isShow).filter(s => showOf(s).ps.includes(id)).map(presetName);
+  if (!confirm('Delete the look "' + name + '"?' +
+    (usedIn.length ? "\n\nIt's used in: " + usedIn.join(", ") + ". Those entries will show as (missing)." : ""))) return;
+  try {
+    await presetAll({ pdel: id });
+    delete S.presets[id];
+    toast("Deleted " + name);
+  } catch (e) { toast("Couldn't delete: " + e.message); }
+  loadShows();
+}
+
+async function loadShows() {
+  await loadPresets();
+  try { S.timers = ((await api(0, "/json/cfg")).timers || {}).ins || []; } catch { S.timers = null; }
+  renderShows(); renderLooks();
+}
+
+function startShow(id) { setMarks(); sendAll({ ps: id }); S.on = true; renderPower(); toast(presetName(id)); }
+
+// Pause = stop the playlist and leave the current look up. WLED 0.14 ignores a "ps" equal to the look already
+// showing, but setting an effect outside a preset unloads the playlist, so segment 0's own effect is sent again.
+function pauseShow(id) {
+  const st = S.state, seg0 = st && (st.seg || [])[0];
+  if (!st || !(st.ps > 0) || !seg0) return;
+  setMarks(id, 0, st.ps, seg0.fx);
+  sendAll({ seg: [{ id: seg0.id, fx: seg0.fx }] }); toast("Paused");
+}
+
+// Resume = an unsaved copy of the show that starts at the paused look, with the show's own limit and ending.
+function resumeShow(id) {
+  const from = S.paused === id ? S.pausedPs : S.state && S.state.ps;
+  const sh = showOf(id), k = Math.max(0, sh.ps.indexOf(from));
+  const rot = a => a.slice(k).concat(a.slice(0, k));
+  setMarks(0, id);
+  sendAll({ on: true, playlist: { ps: rot(sh.ps), dur: rot(sh.dur), transition: rot(sh.transition), repeat: sh.repeat, end: sh.end, r: 0 } });
+  toast("Resumed");
+}
+
+// Stop = lights off; the next Start begins at look 1.
+async function stopShow() {
+  setMarks();
+  try { await ensureLightsOff(); } catch { /* fall back to plain off */ }
+  sendAll(S.presets[LIGHTS_OFF] ? { ps: LIGHTS_OFF } : { on: false });
+  toast("Stopped");
+}
+
+// Save as look (Effects tab): applies what's on the Effects screen, then saves it as a new preset.
+// presets.json is kept under PRESETS_MAX: at about 64 KB the board has rebooted.
+const PRESETS_MAX = 56 * 1024;
+$("saveLook").onclick = async () => {
   const name = prompt("Name for this look?");
   if (!name) return;
+  try {
+    const r = await fetch("/presets.json", { cache: "no-store" });
+    if (r.ok && new Blob([await r.text()]).size > PRESETS_MAX) { toast("No room for another look. Delete a look first."); return; }
+  } catch { /* none saved yet */ }
+  await sendSegments(currentFx);
   await loadPresets();
-  let id = 2;
-  while ((S.presets[id] || id === S.layout.layoutPreset) && id < 250) id++;
+  const id = freePresetId();
+  if (!id) { toast("No free preset numbers left"); return; }
   await sendAll({ psave: id, n: name, ib: true, sb: true });
-  setTimeout(loadShows, 800);
-  toast("Saved as preset " + id);
+  // then make the new look the active preset (this also unloads any running show), once presets.json is written
+  await sleep(600);
+  await loadPresets();
+  setMarks();
+  await sendAll({ ps: id });
+  showTab("tree"); document.querySelector("main").scrollTop = 0;
+  toast("Saved look " + name);
+};
+
+// ----- show editor -----
+// Each look has one time in seconds. An hours limit is saved as
+// a number of passes. Nothing else is stored, so the editor shows what WLED holds.
+let ED = null;
+
+function openEditor(id) {
+  const looks = lookIds();
+  if (!looks.length) { toast("Save a look first"); return; }
+  if (id) {
+    const sh = showOf(id);
+    ED = { id, entries: sh.ps.map((ps, i) => ({ ps, secs: Math.max(1, Math.round(sh.dur[i] / 10)) })), sched: scheduleOf(id) };
+    $("edName").value = presetName(id);
+    $("edFade").value = (sh.transition[0] ?? 7) / 10;
+    $("edLimit").value = sh.repeat ? "times" : "forever";
+    $("edLimitN").value = sh.repeat || 1;
+  } else {
+    const cur = S.state && looks.includes(S.state.ps) ? S.state.ps : looks[0];
+    ED = { id: 0, entries: [{ ps: cur, secs: 60 }], sched: null };
+    $("edName").value = ""; $("edFade").value = 2; $("edLimit").value = "forever"; $("edLimitN").value = 1;
+  }
+  $("edTitle").textContent = id ? "Edit show" : "New show";
+  $("edSched").checked = !!ED.sched;
+  $("edStart").value = ED.sched ? ED.sched.start : "16:30";
+  $("edEnd").value = ED.sched ? ED.sched.end : "23:00";
+  ED.dow = ED.sched ? ED.sched.dow : 127;
+  $("edDelete").hidden = !id;
+  renderDays(); renderEntries();
+  $("showEd").hidden = false;
+  $("edClock").textContent = "";
+  api(0, "/json/info").then(i => {
+    $("edClock").textContent = "The tree's clock says " + (i.time || "?") + ". Times are the tree's time. If the clock is wrong, the timers will be too.";
+  }).catch(() => {});
+}
+
+function closeEditor() { $("showEd").hidden = true; ED = null; }
+
+function renderDays() {
+  const box = $("edDays"); box.innerHTML = "";
+  DAY_NAMES.forEach((d, b) => {
+    const t = el("button", { className: "btn", textContent: d.slice(0, 2) });
+    t.setAttribute("aria-pressed", !!(ED.dow & (1 << b)));
+    t.onclick = () => { ED.dow ^= 1 << b; renderDays(); };
+    box.appendChild(t);
+  });
+  $("edSchedBox").style.display = $("edSched").checked ? "" : "none";
+}
+
+function renderEntries() {
+  const box = $("edEntries"), looks = lookIds();
+  box.innerHTML = "";
+  const mini = (label, title, fn) => { const b = el("button", { className: "btn mini", textContent: label, title }); b.onclick = fn; return b; };
+  ED.entries.forEach((e, i) => {
+    const sel = el("select", {}, ...looks.map(id => el("option", { value: id, textContent: presetName(id) })));
+    if (!looks.includes(e.ps)) sel.prepend(el("option", { value: e.ps, textContent: presetName(e.ps) + " (missing)" }));
+    sel.value = e.ps; sel.setAttribute("aria-label", "Look " + (i + 1));
+    sel.onchange = () => { e.ps = +sel.value; };
+    const secs = el("input", { type: "number", min: 1, max: 6500, value: e.secs, inputMode: "numeric", title: "Seconds" });
+    secs.oninput = () => { e.secs = +secs.value || 0; renderCycle(); };
+    const step = d => () => { e.secs = Math.max(1, Math.round((+e.secs || 0) + d)); secs.value = e.secs; renderCycle(); };
+    // Remove button: a small bin drawn in the button's text colour
+    const binBtn = () => {
+      const b = mini("", "Remove", () => { ED.entries.splice(i, 1); renderEntries(); });
+      b.setAttribute("aria-label", "Remove");
+      b.innerHTML = BIN_SVG;
+      return b;
+    };
+    const move = d => () => {
+      const j = i + d; if (j < 0 || j >= ED.entries.length) return;
+      [ED.entries[i], ED.entries[j]] = [ED.entries[j], ED.entries[i]]; renderEntries();
+    };
+    box.append(el("div", { className: "entry" },
+      el("div", { className: "line" }, el("span", { className: "num", textContent: i + 1 }), sel,
+        mini("▲", "Move up", move(-1)), mini("▼", "Move down", move(1))),
+      el("div", { className: "line" }, mini("−", "5 s less", step(-5)), secs, el("span", { textContent: "s" }),
+        mini("+", "5 s more", step(5)), el("span", { style: "flex:1" }),
+        binBtn())));
+  });
+  if (!ED.entries.length) box.append(el("p", { className: "note", textContent: "Add at least one look." }));
+  renderCycle();
+}
+
+const passSeconds = () => ED.entries.reduce((a, e) => a + Math.max(1, Math.round(e.secs) || 1), 0);
+
+// The number of passes to save (0 = forever), and a note on what it means.
+function limitPlan() {
+  const pass = passSeconds(), n = Math.max(1, Math.round(+$("edLimitN").value || 1));
+  if ($("edSched").checked && $("edEnd").value)
+    return { repeat: 0, note: "One pass takes " + fmtTime(pass) + ". With a lights-off time the show runs until then, so the limit isn't used." };
+  switch ($("edLimit").value) {
+    case "hours": {
+      const want = Math.ceil(n * 3600 / Math.max(pass, 1)), repeat = Math.min(want, MAX_REPEAT);
+      return { repeat, note: "One pass takes " + fmtTime(pass) + ", so " + n + " h is " + want + " passes." +
+        (want > MAX_REPEAT ? " WLED counts up to " + MAX_REPEAT + ", so it will stop after about " + fmtTime(pass * MAX_REPEAT) + ". Use longer looks or a lights-off time." : "") +
+        " Later it shows as " + repeat + " times." };
+    }
+    case "times": return { repeat: Math.min(n, MAX_REPEAT), note: "One pass takes " + fmtTime(pass) + ", about " + fmtTime(pass * Math.min(n, MAX_REPEAT)) + " in all. Then the lights go off." };
+    default: return { repeat: 0, note: "One pass takes " + fmtTime(pass) + ". It runs until you press Stop." };
+  }
+}
+
+function renderCycle() {
+  const mode = $("edLimit").value, scheduled = $("edSched").checked && $("edEnd").value;
+  $("edLimitN").hidden = mode === "forever";
+  $("edLimitN").max = mode === "hours" ? 24 : MAX_REPEAT;
+  $("edLimit").disabled = $("edLimitN").disabled = !!scheduled;
+  $("edCycle").textContent = ED && ED.entries.length ? limitPlan().note : "";
+}
+
+$("newShow").onclick = () => openEditor(0);
+$("edCancel").onclick = closeEditor;
+$("edAdd").onclick = () => {
+  const looks = lookIds(), last = ED.entries[ED.entries.length - 1];
+  ED.entries.push({ ps: looks[0], secs: last ? last.secs : 60 });
+  renderEntries();
+};
+for (const id of ["edLimit", "edLimitN", "edEnd", "edStart"]) $(id).addEventListener("input", renderCycle);
+$("edSched").addEventListener("change", () => { renderDays(); renderCycle(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("showEd").hidden) closeEditor(); });
+
+// A phone can keep an old copy of the app open for days (a home-screen app isn't reloaded).
+// When the app comes back into view, or every 5 minutes, it checks the board's copy and reloads if it's newer,
+// unless the show editor is open.
+async function checkAppVersion() {
+  if (document.hidden || !$("showEd").hidden) return;
+  try {
+    const r = await fetch("/tree.htm", { cache: "no-store" });
+    const m = r.ok && (await r.text()).match(/App version ([\w-]+)</);
+    if (m && m[1] !== $("appVer").textContent.replace("App version ", "")) location.reload();
+  } catch { /* offline: try again later */ }
+}
+document.addEventListener("visibilitychange", checkAppVersion);
+setInterval(checkAppVersion, 5 * 60 * 1000);
+
+$("edSave").onclick = async () => {
+  const name = $("edName").value.trim();
+  if (!name) { toast("Give the show a name"); return; }
+  if (!ED.entries.length) { toast("Add at least one look"); return; }
+  if (ED.entries.length > 100) { toast("A show can have up to 100 looks"); return; }
+  const dur = ED.entries.map(e => Math.max(1, Math.round(e.secs) || 1) * 10);
+  if (dur.some(d => d > MAX_DUR)) { toast("A look can stay up for at most " + fmtTime(MAX_DUR / 10)); return; }
+  const sched = $("edSched").checked ? { start: $("edStart").value, end: $("edEnd").value, dow: ED.dow } : null;
+  if (sched && (!sched.start || !sched.dow)) { toast("Pick a start time and at least one day"); return; }
+  if (sched && sched.end === sched.start) { toast("Start and lights-off can't be the same time"); return; }
+  const fade = Math.max(0, Math.round((+$("edFade").value || 0) * 10));
+  const ps = ED.entries.map(e => e.ps), repeat = limitPlan().repeat;
+  const id = ED.id || (await loadPresets(), freePresetId());
+  if (!id) { toast("No free preset numbers left"); return; }
+  const old = ED.sched;
+  $("edSave").disabled = true;
+  try {
+    await ensureLightsOff();
+    await presetAll({ psave: id, n: name, o: true, on: true,
+      playlist: { ps, dur, transition: ps.map(() => fade), repeat, end: LIGHTS_OFF, r: 0 } });
+    if (JSON.stringify(sched) !== JSON.stringify(old)) await writeTimers(id, sched);
+    closeEditor(); toast("Saved " + name);
+  } catch (e) { toast("Couldn't save: " + e.message); }
+  finally { $("edSave").disabled = false; loadShows(); }
+};
+
+$("edDelete").onclick = async () => {
+  const id = ED.id, name = presetName(id);
+  if (!confirm('Delete the show "' + name + '"? Its looks are kept.')) return;
+  try {
+    if (ED.sched) await writeTimers(id, null);
+    await presetAll({ pdel: id });
+    delete S.presets[id];
+    closeEditor(); toast("Deleted " + name);
+  } catch (e) { toast("Couldn't delete: " + e.message); }
+  loadShows();
 };
 
 // ---------- config ----------
@@ -608,10 +1257,10 @@ async function loadInfo() {
   try {
     const i = await api(0, "/json/info");
     const ip = i.ip || location.hostname, up = i.uptime || 0, leds = i.leds || {};
-    $("phoneUrl").textContent = appUrl(i);
+    renderNetwork(i);
     const rows = [
       ["Name", i.name], ["Firmware", "WLED " + i.ver], ["IP address", ip],
-      ["Network", ip === "4.3.2.1" ? "Its own Wi-Fi (WLED-AP)" : "Home Wi-Fi"],
+      ["Network", ip === apAddress() ? "Its own Wi-Fi (WLED-AP)" : "Home Wi-Fi"],
       ["Wi-Fi signal", i.wifi ? i.wifi.signal + "%" : "?"],
       ["LEDs", leds.count ?? "?"],
       ["Current", leds.pwr != null ? (leds.pwr / 1000).toFixed(1) + " A estimated, limit " + (leds.maxpwr / 1000).toFixed(0) + " A" : "?"],
@@ -624,9 +1273,36 @@ async function loadInfo() {
   } catch { dl.innerHTML = "<dt>Status</dt><dd>Can't reach the controller</dd>"; }
 }
 
+// ---------- networks ----------
+// The board can be reached on the home Wi-Fi and, with WLED-AP set to "always" (treetool apply, layout "network"),
+// on its own Wi-Fi at the same time. The home address is the IP, not xmastree.local: many Android phones can't
+// resolve .local names. It's read live, so a new DHCP address is picked up, and remembered on this phone for when
+// the board can't report it (it isn't on the home Wi-Fi).
+const apAddress = () => (S.layout.network && S.layout.network.apAddress) || "4.3.2.1";
+function homeAddress(info) {
+  let ip = info && info.ip && info.ip !== apAddress() ? info.ip : "";
+  try { if (ip) localStorage.setItem("homeIp", ip); else ip = localStorage.getItem("homeIp") || ""; } catch { /* private mode */ }
+  return ip || "xmastree.local";
+}
+const appUrl = host => "http://" + host + "/tree.htm";
+const onTreeWifi = () => location.hostname === apAddress();
+
+async function renderNetwork(info) {
+  const home = appUrl(homeAddress(info)), ap = appUrl(apAddress());
+  // WLED ap.behav: 0 = no connection after boot, 1 = disconnected, 2 = always, 3 = never
+  let behav = null;
+  try { behav = ((await api(0, "/json/cfg")).ap || {}).behav; } catch { /* leave it unknown */ }
+  const apWhen = behav === 2 ? "always on" : behav === 3 ? "turned off" : behav == null ? "?" : "only when the home Wi-Fi can't be found";
+  const dl = $("netInfo"); dl.innerHTML = "";
+  for (const [k, v, cls] of [["Home Wi-Fi", home, "url"], ["Tree's Wi-Fi", ap, "url"], ["WLED-AP is", apWhen],
+                             ["This page", onTreeWifi() ? "on the tree's Wi-Fi" : "on the home Wi-Fi"]])
+    dl.append(el("dt", { textContent: k }), el("dd", { textContent: v, className: cls || "" }));
+  for (const [id, url, here] of [["goHome", home, !onTreeWifi()], ["goAp", ap, onTreeWifi()]]) {
+    $(id).href = url; $(id).setAttribute("aria-disabled", here);
+  }
+}
+
 // ---------- share ----------
-// The IP, not xmastree.local: many Android phones can't resolve .local names. Read live, so a new DHCP address is picked up.
-function appUrl(info) { return "http://" + (info.ip || location.hostname) + "/tree.htm"; }
 
 // Dark modules on white with a 4-module quiet zone, so phone cameras get the contrast they need.
 function drawQr(canvas, text) {
@@ -643,23 +1319,28 @@ function drawQr(canvas, text) {
       if (qr.isDark(r, c)) g.fillRect((c + 4) * px, (r + 4) * px, px, px);
 }
 
+// The QR code for one network: "home", "ap", or (the header button) the one this page is on.
 let shareLock = null;
-async function openShare() {
-  let info;
-  try { info = await api(0, "/json/info"); } catch { toast("Can't reach the controller"); return; }
-  const url = appUrl(info);
+async function openShare(which) {
+  if (which !== "home" && which !== "ap") which = onTreeWifi() ? "ap" : "home";
+  let info = null;
+  try { info = await api(0, "/json/info"); } catch { if (which === "home") { toast("Can't reach the controller"); return; } }
+  const url = appUrl(which === "ap" ? apAddress() : homeAddress(info));
   $("share").hidden = false;
   drawQr($("qr"), url);
   $("shareUrl").textContent = url;
-  $("shareNote").textContent = "The phone must be on the same Wi-Fi as the tree (" +
-    (info.ip === "4.3.2.1" ? "WLED-AP" : "the home Wi-Fi") + ").";
+  $("shareNote").textContent = which === "ap"
+    ? "Join the tree's Wi-Fi (WLED-AP) on the phone first, then scan."
+    : "The phone must be on the home Wi-Fi.";
   try { shareLock = await navigator.wakeLock?.request("screen"); } catch { /* not supported, or not allowed */ }
 }
 function closeShare() {
   $("share").hidden = true;
   shareLock?.release().catch(() => {}); shareLock = null;
 }
-$("shareBtn").onclick = $("shareCfg").onclick = openShare;
+$("shareBtn").onclick = () => openShare();
+$("qrHome").onclick = () => openShare("home");
+$("qrAp").onclick = () => openShare("ap");
 $("shareClose").onclick = closeShare;
 $("share").addEventListener("click", e => { if (e.target.id === "share") closeShare(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("share").hidden) closeShare(); });
@@ -713,7 +1394,11 @@ function openLiveSocket(ci) {
   ws.binaryType = "arraybuffer";
   ws.onopen = () => ws.send(JSON.stringify({ lv: true }));
   ws.onmessage = ev => {
-    if (!(ev.data instanceof ArrayBuffer)) return;          // text messages are state updates
+    if (!(ev.data instanceof ArrayBuffer)) {                // text messages are state updates
+      if (ci !== 0) return;
+      try { const j = JSON.parse(ev.data), st = j.state || (j.seg ? j : null); if (st && "ps" in st) applyState(st); } catch { /* not state */ }
+      return;
+    }
     const b = new Uint8Array(ev.data);
     if (b[0] !== 76) return;                                 // 'L' = live LED frame
     const pos = b[1] === 2 ? 4 : 2, count = Math.floor((b.length - pos) / 3);
@@ -738,9 +1423,11 @@ async function pollLive() {
 }
 
 function drawTree() {
+  // nothing to draw while another tab is showing; keep checking, cheaply
+  if (!treeVisible()) { requestAnimationFrame(drawTree); return; }
   const cv = $("treeCanvas"), dpr = window.devicePixelRatio || 1;
   const w = cv.clientWidth, h = cv.clientHeight;
-  if (cv.width !== w * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
   const g = cv.getContext("2d");
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
@@ -788,20 +1475,38 @@ function drawTree() {
   // star
   g.fillStyle = "#e8b44c"; g.font = "20px system-ui"; g.textAlign = "center"; g.fillText("★", cx, baseY - H - 4);
 
-  S.rot += 0.004;
+  if (S.spin) S.rot += 0.004;
   requestAnimationFrame(drawTree);
 }
 
+// Rotation toggle for the preview, remembered on this phone. The tree keeps drawing when it's off.
+try { S.spin = localStorage.getItem("treeSpin") !== "0"; } catch { S.spin = true; }
+function renderSpin() { $("spinBtn").setAttribute("aria-pressed", S.spin); }
+$("spinBtn").onclick = () => {
+  S.spin = !S.spin; renderSpin();
+  try { localStorage.setItem("treeSpin", S.spin ? "1" : "0"); } catch { /* private mode */ }
+};
+renderSpin();
+
 // ---------- state sync ----------
-async function refreshState() {
-  try {
-    const st = await api(0, "/json/state");
-    S.state = st; S.on = st.on; if (!S.dragging) S.bri = st.bri;
+// Used by the 3 s poll and by the state WLED pushes over the WebSocket (null = can't reach the tree).
+function applyState(st) {
+  S.state = st;
+  if (st) {
+    S.on = st.on; if (!S.dragging) S.bri = st.bri;
     const lit = (st.seg || []).find(s => s.on !== false);
     if (!S.picking && lit && lit.fx === 0 && lit.col) placeMark(lit.col[0]);
     renderPower(); setConn(true);
-  } catch { S.state = null; setConn(false); }
+  } else setConn(false);
+  checkMarks(st);
+  noteLook(st);
   renderNow();
+  if ($("tab-shows").classList.contains("active") && showsSig() !== renderShows.sig) { renderShows(); renderLooks(); }
+}
+async function refreshState() {
+  let st = null;
+  try { st = await api(0, "/json/state"); } catch { /* not connected */ }
+  applyState(st);
 }
 async function pollState() { await refreshState(); setTimeout(pollState, 3000); }
 
@@ -814,11 +1519,16 @@ async function pollState() { await refreshState(); setTimeout(pollState, 3000); 
   S.attached = new Set(Array.isArray(S.layout.attached) ? S.layout.attached : S.strips.map(s => s.n));
   buildLedMaps();
   renderStrips(); renderGroups(); renderTargets(); drawWheel();
+  if ("ResizeObserver" in window) new ResizeObserver(() => drawWheel()).observe($("wheel"));
+  // Give the board the phone's clock, as WLED's own page does. WLED keeps its internet time if that is close.
+  S.layout.controllers.forEach((_, ci) => api(ci, "/json/state", { time: Math.floor(Date.now() / 1000) }).catch(() => {}));
 
   try {
     const [eff, pal] = await Promise.all([api(0, "/json/eff"), api(0, "/json/pal")]);
     S.effects = eff; S.palNames = pal;
-    pal.forEach((name, id) => $("palSel").appendChild(el("option", { value: id, textContent: name })));
+    // A–Z by name with "Default" (id 0) first; each option's value stays the WLED palette id
+    pal.map((name, id) => ({ name, id })).sort((a, b) => (b.id === 0) - (a.id === 0) || a.name.localeCompare(b.name))
+      .forEach(p => $("palSel").appendChild(el("option", { value: p.id, textContent: p.name })));
     renderEffects();
   } catch { toast("Can't reach the tree. Is the phone on the same Wi-Fi?"); }
   // Extras for the colour display. The app still works without them.
@@ -827,6 +1537,7 @@ async function pollState() { await refreshState(); setTimeout(pollState, 3000); 
   renderColours();
 
   await loadPresets();
+  loadMarks();
   pollState();
   S.layout.controllers.forEach((_, ci) => openLiveSocket(ci));
   pollLive();

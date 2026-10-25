@@ -57,11 +57,11 @@ The final 12-strip build is wired differently, with strip power going around the
 1. Solid white, brightness 255, current limiter off.
 2. **Current:** clamp meter on the red lead, or a multimeter on its 10 A range in series (wire it in before powering on).
 3. **Voltage at the far end** between the bare red and GND leads. Below about 10.8 V (a 10 % drop) shows up as dimmer, pinker white.
-4. Over about 4.5 A per 6 m means the final build needs 3 PSUs instead of 2 ([open-questions.md](open-questions.md) §1).
+4. Over about 4.5 A per strip means the final build needs 3 PSUs instead of 2 ([open-questions.md](open-questions.md) §1).
 
 ## WLED settings for the prototype
 
-The board still has the full-tree layout (LED1 = 1,080 LEDs). The strip shows the first 300 or 360 of those, so it works without a change. Two things are worth changing before long tests. Both are config changes, so back up `/json/cfg` to `device-backups/` first.
+The board still has the full-tree layout (LED1 = 900 LEDs). The strip shows the first 300 of those, so it works without a change. Two things are worth changing before long tests. Both are config changes, so back up `/json/cfg` to `device-backups/` first.
 
 - **Current limiter:** it's set to 40 A for the full tree. For the prototype, set it to about 80 % of the PSU (8,000 mA on a 10 A supply). Turn it off only for the full-white measurement.
-- **LED count (optional):** set LED1 to 300 (or 360) so effects use the whole strip. TreeTool can put the full layout back afterwards (`apply`).
+- **LED count (optional):** set LED1 to 300 so effects use the whole strip. TreeTool can put the full layout back afterwards (`apply`).

@@ -1,13 +1,14 @@
 {
-  "name": "Prototype tree (strips 1–2 live)",
+  "name": "Prototype tree (strips 1–3 live)",
   "ledsPerStrip": 300,
   "stripCount": 12,
   "heightMetres": 5,
   "ledType": 22,
   "colorOrder": 0,
-  "abl": { "ledMa": 11, "maxMa": 60000 },
+  "abl": { "ledMa": 11, "maxMa": 38000 },
   "layoutPreset": 10,
-  "attached": [1, 2],
+  "attached": [1, 2, 3],
+  "network": { "apAlways": true, "apAddress": "4.3.2.1" },
   "controllers": [
     {
       "name": "Dig-Quad A",
