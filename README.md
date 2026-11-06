@@ -26,6 +26,32 @@ An outdoor **5–6 m cone Christmas tree** made of 12 vertical LED strips (**3,6
 
 On the home Wi-Fi the controller answers at `xmastree.local`. If it can't find that network at boot, it falls back to its own access point, `WLED-AP`, at `http://4.3.2.1/`.
 
+## Build materials
+
+### Interactive pages
+
+These open in the browser, served by GitHub Pages:
+
+| Page | What it shows |
+|---|---|
+| [**3D tree wiring**](https://alearian.github.io/Xmas-Tree-Of-Light/docs/tree-wiring-3d.html) | An animated 3D model of the tree: strips, power and data cables, and the base box. Drag to orbit, scroll to zoom. |
+| [**Dig-Quad wiring diagram**](https://alearian.github.io/Xmas-Tree-Of-Light/docs/dig-quad-wiring.html) | The final 12-strip build: what connects to each controller terminal, supply, fuse box and strip |
+| [**One-strip bench wiring**](https://alearian.github.io/Xmas-Tree-Of-Light/docs/prototype-one-strip.html) | The bench prototype: one strip powered through the controller |
+
+### Wiring guides
+
+- [Tree wiring build guide](docs/tree-wiring-build-guide.md) ([PDF](docs/tree-wiring-build-guide.pdf)): step-by-step build with 2 supplies, 6 strips each
+- [Power and wiring](docs/power-and-wiring.md): power and data wiring, feeds, fusing and joints
+- [Dig-Quad connections](docs/dig-quad-connections.md): the 12-strip connection list, with wire and fuse sizes
+- [One-strip prototype](docs/prototype-one-strip.md): bench wiring and test steps
+- [QuinLED Dig-Quad guide](docs/quinled-dig-quad-guide.md): ratings, pinout and WLED settings
+
+### Bill of materials
+
+- [Bill of materials](docs/bom.md): the shopping list for the final tree, with what each part is for
+- [Parts checklist](docs/bom-checklist-no-prices.md) ([PDF](docs/bom-checklist-no-prices.pdf)): what has been bought and what is still needed
+- [WS2815 strip spec](docs/strip-spec-ws2815.md): the strip used, with its current draw
+
 ## Phone app
 
 `app/tree.htm` is one self-contained HTML file, uploaded to and served from the controller, so it works without internet access.
