@@ -106,3 +106,7 @@ Possible next steps include mapping the tree as a WLED 2D matrix (12 × 300) for
 - [WLED](https://kno.wled.ge/) firmware
 - [QuinLED](https://quinled.info/) Dig-Quad controller
 - [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4 (MIT), built into the app
+
+## Licence
+
+MIT - see [LICENSE](LICENSE). The phone app embeds [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4 (MIT).

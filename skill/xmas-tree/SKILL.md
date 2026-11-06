@@ -16,7 +16,7 @@ Call the user **Mr Furniss**. Give **Windows PowerShell** commands only (no bash
 | What | Where |
 |---|---|
 | Repo (source of truth) | `D:\Source\Xmas` on Mr Furniss's PC (git, `main`). Cloud copies are older; stage from the PC before editing. |
-| Board | `http://<board-ip>` (home Wi-Fi). `http://xmastree.local` works on the PC but **not on Android**. AP fallback / "always" AP: `http://4.3.2.1` on Wi-Fi `WLED-AP`. MAC `28:56:2f:55:35:8c`. |
+| Board | `http://<board-ip>` (home Wi-Fi). `http://xmastree.local` works on the PC but **not on Android**. AP fallback / "always" AP: `http://4.3.2.1` on Wi-Fi `WLED-AP`. MAC `<board-mac>`. |
 | Phone app | `app\tree.htm` → served from the board at `/tree.htm`, version string `App version yyyy-MM-ddX` in the Config tab |
 | TreeTool | `tools\TreeTool` (C#, .NET 10): `dotnet run --project tools\TreeTool -- <cmd> --layout config\proto-tree.json` |
 | Layouts | `config\proto-tree.json` (**current**: 12 × 300, strips 1-3 attached), `config\tree.json` (final), `config\bench*.json` |
@@ -63,7 +63,7 @@ session in `D:\Source\Xmas`. Editing files in the repo works through folder acce
 Always start a board task with the presence check:
 
 ```powershell
-& .\skill\xmas-tree\scripts\Test-Tree.ps1          # tries <board-ip>, xmastree.local, 4.3.2.1, then ARP by MAC
+& .\skill\xmas-tree\scripts\Test-Tree.ps1          # tries <board-ip>, xmastree.local, 4.3.2.1, then ARP by MAC if you pass -Mac
 ```
 
 It prints which address answered, WLED version, uptime and free heap. **A short uptime you didn't

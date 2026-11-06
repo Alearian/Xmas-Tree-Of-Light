@@ -36,7 +36,7 @@ Add to this file whenever something new bites (date, symptom, cause, fix).
 |---|---|---|
 | Phone can't open `xmastree.local` | Android doesn't resolve mDNS `.local` names | Use `http://<board-ip>/tree.htm`; reserve that IP in the Virgin hub's DHCP |
 | Board not on the home Wi-Fi | it couldn't join at boot → AP fallback | Join `WLED-AP`, use `http://4.3.2.1`. On Windows after a reboot: `netsh wlan connect name="WLED-AP"` |
-| IP changed | DHCP | `Test-Tree.ps1` finds it by MAC `28:56:2f:55:35:8c` via `arp -a` |
+| IP changed | DHCP | `Test-Tree.ps1 -Mac <board-mac>` finds it via `arp -a` |
 | Phone shows an old app | browser cache | Check Config tab version; reload, clear site data, or re-add the home-screen icon |
 | Claude can't reach the board | cloud and Cowork VM can't see the home LAN | Run the PowerShell on the PC, or use a Remote Control session in `D:\Source\Xmas` |
 | AP open to neighbours | `apAlways` keeps WLED-AP up with the factory password `wled1234` | Ask Mr Furniss to change the AP password in WLED settings |

@@ -13,7 +13,7 @@ Read live from `http://4.3.2.1/json/info` and `/json/cfg` on 2026-09-30.
 | Clock | **Internet time (NTP) on since 2026-10-03**, `0.wled.pool.ntp.org`, time zone GMT/BST. The clock resets on power loss and re-syncs once the board is back on home Wi-Fi. In AP fallback mode there's no internet, so no clock. | same | AP `MatrixTree-WiFi`, strong password, channel 1/6/11 |
 | Client Wi-Fi | SSID `<home-wifi>` saved without a password (not joined) | not needed, because the design is AP-only |
 | DDP / E1.31 input | not checked yet | enabled |
-| MAC | 28:56:2f:55:35:8c | |
+| MAC | <board-mac> | |
 | Usermods | AudioReactive (off) | |
 
 ## LED outputs

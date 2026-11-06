@@ -112,5 +112,5 @@ strip feed, never join the positive outputs of two power supplies, and always jo
 
 ## Licence
 
-Not chosen yet (MIT suggested). The phone app embeds [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)
+MIT - see [LICENSE](../../LICENSE). The phone app embeds [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)
 (MIT).
