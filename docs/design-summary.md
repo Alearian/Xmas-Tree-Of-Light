@@ -50,7 +50,7 @@ Two modes: **A: live stream** (xLights → DDP, used while designing) and **B: s
 ## Power (as specified. ⚠️ Superseded: the Dig-Quad can't carry this current and the total draw is unresolved. See open-questions §1–2 and power-and-wiring.md)
 
 - 0.015 A/px × 4,320 = **64.8 A @ 12 V, about 777 W** (the PDF's 6 m strips; with 12 × 300 = 3,600 px it is 54 A, about 650 W)
-- **Superseded 2026-10-22:** 3 PSUs (2 × HLG-320H-12A + one 150 W supply), see power-and-wiring.md. Original spec: **2 × Mean Well HLG-600H-12A** (480 W, IP67, fanless) with split loads. PSU 1 feeds channels 1–2 and PSU 2 feeds channels 3–4. The grounds are shared, and the V+ outputs must **never** be joined.
+- **Current (decided 2026-10-26):** 2 × Mean Well HLG-320H-12A (12 V, 22 A), each with its own fuse box: PSU 1 strips 1–6 + Dig-Quad, PSU 2 strips 7–12. See power-and-wiring.md. (2026-10-22 had briefly been 3 PSUs with the 150 W supply, now bench-only.) Original spec: **2 × Mean Well HLG-600H-12A** (480 W, IP67, fanless) with split loads. PSU 1 feeds channels 1–2 and PSU 2 feeds channels 3–4. The grounds are shared, and the V+ outputs must **never** be joined.
 - **Superseded 2026-10-17:** each strip is fed at its **bottom end only**, by its own fused 1.5 mm² cable from the base box along the ground (this replaced the 2026-10-10 top feed up the centre mast). See [power-and-wiring.md](power-and-wiring.md).
 - Wire gauges: PSU → Dig-Quad 10–12 AWG, top bus 14 AWG, base pigtails 18 AWG
 

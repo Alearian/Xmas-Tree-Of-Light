@@ -156,9 +156,8 @@ svg text { font-family: var(--mono); }
         <table>
           <thead><tr><th>Supply</th><th>Fuses</th><th>Feeds</th><th>Load (working)</th></tr></thead>
           <tbody>
-            <tr><td><span class="dot" style="background:var(--psu1)"></span>PSU 1 · HLG-320H-12A</td><td class="m">F1–F5, 5 A each</td><td>Bottoms of strips 1–5, plus the Dig-Quad (2 A)</td><td class="m">~16.5 A of 22 A</td></tr>
-            <tr><td><span class="dot" style="background:var(--psu2)"></span>PSU 2 · HLG-320H-12A</td><td class="m">F6–F9, 5 A each</td><td>Bottoms of strips 6–9</td><td class="m">~13 A of 22 A</td></tr>
-            <tr><td><span class="dot" style="background:var(--psu3)"></span>PSU 3 · 150 W</td><td class="m">F10–F12, 5 A each</td><td>Bottoms of strips 10–12</td><td class="m">~10 A of 12.5 A</td></tr>
+            <tr><td><span class="dot" style="background:var(--psu1)"></span>PSU 1 · HLG-320H-12A</td><td class="m">F1–F6, 5 A each</td><td>Bottoms of strips 1–6, plus the Dig-Quad (2 A)</td><td class="m">~20 A of 22 A</td></tr>
+            <tr><td><span class="dot" style="background:var(--psu2)"></span>PSU 2 · HLG-320H-12A</td><td class="m">F7–F12, 5 A each</td><td>Bottoms of strips 7–12</td><td class="m">~20 A of 22 A</td></tr>
             <tr><td><span class="dot" style="background:var(--gnd)"></span>Common GND bar</td><td>–</td><td>Both PSU −, Dig-Quad GND, every feed's GND core</td><td>–</td></tr>
             <tr><td colspan="4" id="pwrSum" class="note"></td></tr>
           </tbody>
@@ -173,9 +172,9 @@ svg text { font-family: var(--mono); }
       <div class="card"><strong>Data always enters at the base</strong><p>Each output's lead goes from the box to the bottom of its first strip (1, 4, 7, 10). That strip runs up, the next runs down, the third runs up. No data cable ever climbs the tree.</p></div>
       <div class="card"><strong>Jumpers join neighbours</strong><p>Strip A's top joins strip B's top across the top ring; strip B's bottom joins strip C's bottom across the base ring. Each jumper carries DO→DI, BO→BI and GND. Tie BI to GND only at the chain start.</p></div>
       <div class="card"><strong>Power goes in at the bottom</strong><p>Every strip has its own fused 1.5 mm² two-core cable from the base box, along the ground and round the base ring to the strip's bottom end. No power goes up the mast. Strip power never passes through the Dig-Quad, which only sends data.</p></div>
-      <div class="card"><strong>Three supplies, one ground</strong><p>PSU 1 feeds strips 1–5, PSU 2 feeds 6–9 and PSU 3 feeds 10–12. Join the GNDs at one bar. Never join any two +12 V outputs.</p></div>
+      <div class="card"><strong>Two supplies, one ground</strong><p>PSU 1 feeds strips 1–6 (outputs LED1–LED2), PSU 2 feeds 7–12 (LED3–LED4), each through its own fuse box. Join the GNDs at one bar. Never join any two +12 V outputs.</p></div>
       <div class="card"><strong>LED 0 sits at the bottom</strong><p>In WLED each strip is its own segment. The down strips (2, 5, 8, 11) are reversed, so every effect runs bottom to top even though the data runs down those strips.</p></div>
-      <div class="card"><strong>Measure one strip first</strong><p>Measure one strip at full white. Above about 4 A means capping PSU 3 (150 W) in WLED or swapping it for a third HLG-320H-12A. Below about 10.5 V at the top end means adding top feeds.</p></div>
+      <div class="card"><strong>Measure one strip first</strong><p>Measure one strip at full white. WLED caps each output at about 9,500 mA so each supply stays near 19 A; above about 3.5 A per strip means lowering those caps. Below about 10.5 V at the top end means adding top feeds.</p></div>
     </div>
   </section>
 </div>
@@ -205,7 +204,7 @@ const col = n => new THREE.Color(css(n) || "#888");
 const strips = {};
 LAYOUT.outputs.forEach((o, oi) => o.strips.forEach((n, i) => {
   strips[n] = { n, oi, i, down: i % 2 === 1, angle: (n - 1) * 2 * Math.PI / LAYOUT.stripCount,
-    start: oi * 3 * LAYOUT.ledsPerStrip + i * LAYOUT.ledsPerStrip, psu: n <= 5 ? 1 : n <= 9 ? 2 : 3 };
+    start: oi * 3 * LAYOUT.ledsPerStrip + i * LAYOUT.ledsPerStrip, psu: n <= 6 ? 1 : 2 };
 }));
 
 // ---------- Three.js scene ----------
@@ -356,9 +355,8 @@ function build() {
   }
   label("top power leads capped, not used", new THREE.Vector3(0, yTop + 0.5, 0), "power", "plain");
   label("12 fused feeds round the base ring", box.clone().multiplyScalar(0.8).setY(0.35), "power");
-  label("PSU 1 → strips 1–5", pos(Rb + 0.9, Math.PI * 0.35, 0.45), "power", "plain");
-  label("PSU 2 → strips 6–9", pos(Rb + 0.9, Math.PI * 1.05, 0.45), "power", "plain");
-  label("PSU 3 → strips 10–12", pos(Rb + 0.9, Math.PI * 1.65, 0.45), "power", "plain");
+  label("PSU 1 → strips 1–6", pos(Rb + 0.9, Math.PI * 0.42, 0.45), "power", "plain");
+  label("PSU 2 → strips 7–12", pos(Rb + 0.9, Math.PI * 1.42, 0.45), "power", "plain");
 
   // panel numbers
   document.getElementById("baseDv").textContent = (Rb * 2).toFixed(1) + " m";

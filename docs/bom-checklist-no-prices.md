@@ -5,7 +5,7 @@ Copy without prices, for sharing. Generated from [bom-checklist-no-prices.md](bo
 
 Last synced: 2026-10-23 16:29 UTC. Based on [bom.md](bom.md) and the 12 × 5 m bottom-fed, no-soldering design.
 
-**Summary:** 13 complete, 3 part-way, 7 ordered, 19 to buy, of 39 parts.
+**Summary:** 14 complete, 2 part-way, 7 ordered, 19 to buy, of 39 parts.
 
 
 ## Already have
@@ -28,9 +28,9 @@ Last synced: 2026-10-23 16:29 UTC. Based on [bom.md](bom.md) and the 12 × 5 m b
 
 | Status | Part | Got / needed | Qty as listed | The builder | Notes |
 |---|---|---|---|---|---|
-| [~] Ordered | Mean Well HLG-320H-12A (PSU 1 and PSU 2) (12 V, 22 A, 264 W, IP65, fanless) | 0 / 2 | 2 | Yes | PSU 1 feeds strips 1–5 (~16.5 A) and the Dig-Quad; PSU 2 feeds strips 6–9 (~13 A). Leave the Vo/Io adjusters at factory settings |
-| [x] Got it | 12 V 150 W supply (PSU 3) (12 V, ~12.5 A (confirm model on label)) | 1 / 1 | 1 |  | Bought 2026-10-22. Feeds strips 10–12 (~10 A, 80 %) |
-| [ ] To buy | 6-way blade fuse box with negative bus (ATO/ATC, 30 A+ total) | 2 / 3 | 3 | Yes | One per PSU. Have two 6-way; the third can be a small 4-way (PSU 3 only feeds 3 strips) |
+| [~] Ordered | Mean Well HLG-320H-12A (PSU 1 and PSU 2) (12 V, 22 A, 264 W, IP65, fanless) | 0 / 2 | 2 | Yes | PSU 1 feeds strips 1–6 and the Dig-Quad; PSU 2 feeds strips 7–12 (~20 A each at full white; WLED caps each output at ~9,500 mA). Leave the Vo/Io adjusters at factory settings |
+| [x] Got it | 12 V 150 W supply (bench) (12 V, ~12.5 A (confirm model on label)) | 1 / 1 | 1 |  | Bought 2026-10-22. Bench only since 2026-10-26: the tree uses the two HLG-320H-12As |
+| [x] Got it | 6-way blade fuse box with negative bus (ATO/ATC, 30 A+ total) | 2 / 2 | 2 | Yes | One per PSU (2 PSUs, decided 2026-10-26). Have both |
 | [x] Got it | ATO blade fuses, 5 A | 1 / 1 | 1 pack (20+) | Yes | One per strip feed, plus spares |
 | [x] Got it | Inline blade fuse holder + 2 A fuse | 1 / 1 | 1 | Yes | Small feed from PSU 1 to the Dig-Quad |
 | [x] Got it | Red/black cable, 6 mm² (10 AWG) (Flexible, tinned) | 2 / 2 | 2 m each colour | Yes | PSU to fuse box |
@@ -56,9 +56,9 @@ Last synced: 2026-10-23 16:29 UTC. Based on [bom.md](bom.md) and the 12 × 5 m b
 |---|---|---|---|---|---|
 | [x] Got it | IP66/67 polycarbonate box, hinged lid (~400 × 300 × 170 mm, mounting plate) | 1 / 1 | 1 | Yes | Polycarbonate so Wi-Fi works |
 | [ ] To buy | Cable glands, M20 IP68 (Nylon, strain relief) | 0 / 1 | 1 pack (20) | Yes | Bottom face only |
-| [ ] To buy | Mains lead, H07RN-F 3-core 1.5 mm² (IP44 plug) | 0 / 3 | 3 |  | Reusing existing cables, one per PSU (3 PSUs), each with its own plug |
-| [~] Ordered | SOMELINE IP68 waterproof junction box cable connector (Outdoor, 230 V, 3-core) | 2 / 6 | 6 | Yes | One per PSU (3 PSUs) joins each PSU's bare AC wires to its own mains lead, plus 3 spares |
-| [ ] To buy | 3-way outdoor socket / extension with 30 mA RCD (IP44+, 13 A total, RCD built in) | 0 / 1 | 1 | Yes | All three PSU mains plugs go in here so they all sit behind the RCD |
+| [ ] To buy | Mains lead, H07RN-F 3-core 1.5 mm² (IP44 plug) | 0 / 2 | 2 |  | Reusing existing cables, one per PSU (2 PSUs), each with its own plug |
+| [~] Ordered | SOMELINE IP68 waterproof junction box cable connector (Outdoor, 230 V, 3-core) | 2 / 6 | 6 | Yes | One per PSU (2 PSUs) joins each PSU's bare AC wires to its own mains lead, plus 4 spares |
+| [ ] To buy | Outdoor socket / extension with 30 mA RCD (2-way or more) (IP44+, 13 A total, RCD built in) | 0 / 1 | 1 | Yes | Both PSU mains plugs go in here so they sit behind the RCD |
 | [ ] To buy | Outdoor smart plug or timer (IP44, 10 A) | 0 / 1 | 1 | Yes | Optional: really turns the tree off |
 
 ## Structure

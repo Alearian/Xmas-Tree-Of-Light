@@ -22,17 +22,17 @@ Why the bottom: the feed cables are much shorter (about 1.5–4.5 m instead of a
 |---|---|---|
 | Per 5 m strip | **~3.3 A** (11 mA × 300) | 7.5 A (0.3 W × 300) |
 | Total, 12 strips | **~40 A / 480 W** | 90 A / 1,080 W |
-| PSUs | **PSU 1 HLG-320H-12A: strips 1–5, ~16.5 A of 22 A (75 %). PSU 2 HLG-320H-12A: strips 6–9, ~13 A of 22 A (60 %). PSU 3 150 W: strips 10–12, ~10 A of 12.5 A (80 %)** | Far beyond 56 A. The limiter must cap it |
+| PSUs | **PSU 1 HLG-320H-12A: strips 1–6 + Dig-Quad, ~20 A of 22 A (92 %). PSU 2 HLG-320H-12A: strips 7–12, ~20 A of 22 A (90 %)** | Far beyond 44 A. The limiter must cap it |
 
-**Decision (2026-10-22): three supplies.** The HLG-480H-12A in the earlier plan doesn't exist (the 12 V, 480 W model is the HLG-600H-12A). Mr Furniss bought a 150 W supply and is adding 2 × **HLG-320H-12A** (12 V, 22 A, 264 W, IP65). That gives about 56 A for a working load of about 40 A. If one strip measures **above about 4 A** at full white, PSU 3 (3 strips on 12.5 A) is the first to run out, so cap it with WLED's per-output limit: output 4 (strips 10–12) at about 11,500 mA, total about 40,000 mA.
+**Decision (2026-10-26): two supplies, two fuse boxes**, replacing the 2026-10-22 three-supply plan. Both are **HLG-320H-12A** (12 V, 22 A, 264 W, IP65), with six strips on each: PSU 1 drives outputs LED1–LED2 (strips 1–6) and the Dig-Quad, PSU 2 drives LED3–LED4 (strips 7–12). That's 44 A for a working load of about 40 A, so there is little margin at full white: **cap each of the four outputs at about 9,500 mA in WLED, total about 38,000 mA**, which keeps each supply at about 19 A. If a strip measures **above about 3.5 A** on the bench, lower those caps to match. (The HLG-480H-12A in an earlier plan doesn't exist; the 12 V, 480 W model is the HLG-600H-12A.)
 
 **HLG-320H-12A adjusters:** the A version is IP65 and has two small adjustment screws under rubber seal caps: Vo (output voltage, factory-set to 12 V) and Io (current limit, factory-set to maximum). Leave both alone and make sure the seal caps are pushed fully home. IP65 is fine inside the base box.
 
-**Check the 150 W supply** is outdoor-rated (IP65 or better) before it goes in the base box. If it isn't, keep it for the bench and buy a third HLG-320H-12A.
+**The 150 W supply** bought on 2026-10-22 is not in the finished tree. It stays as the bench supply (and powers the three bench strips until the HLGs arrive).
 
 ### Split-load rule
-- PSU 1 → strips 1–5 (and the Dig-Quad via its 2 A fuse), PSU 2 → strips 6–9, PSU 3 → strips 10–12. Each PSU has its own fuse block in the base box.
-- A data chain can cross a PSU boundary (output 2 is strips 4–6, so strip 6 is on PSU 2; output 3 is strips 7–9, all PSU 2). That's fine: jumpers carry GND as well as data, and all grounds meet at the bar.
+- PSU 1 → strips 1–6 (outputs LED1–LED2) and the Dig-Quad via its 2 A fuse; PSU 2 → strips 7–12 (outputs LED3–LED4). Each PSU has its own fuse box in the base box.
+- No data chain crosses a PSU boundary, so each output's three strips are all on one supply. Jumpers still carry GND as well as data, and all grounds meet at the bar.
 - **Never join the V+ of two supplies.** **Always join their GNDs** (a shared ground bar, also connected to the controller).
 
 ## Wiring
@@ -49,10 +49,9 @@ Why the bottom: the feed cables are much shorter (about 1.5–4.5 m instead of a
                  BASE RING
                                  ║ 12 two-core cables along the ground
      ┌───────────── BASE BOX ────╨───────────────────────┐
-     │ PSU 1 → fuse block A (5 × 5 A) → feeds 1–5        │
+     │ PSU 1 → fuse box A (6 × 5 A) → feeds 1–6          │
      │       └ inline 2 A fuse → Dig-Quad power in       │
-     │ PSU 2 → fuse block B (4 × 5 A) → feeds 6–9        │
-     │ PSU 3 → fuse block C (3 × 5 A) → feeds 10–12      │
+     │ PSU 2 → fuse box B (6 × 5 A) → feeds 7–12         │
      │ Common GND bar · Dig-Quad (data + GND out)        │
      └───────────────────────────────────────────────────┘
 ```
@@ -76,14 +75,14 @@ The alternative is one thick trunk per PSU (6 mm²) to a fused junction box on t
 ## Mains side (decided 2026-10-17)
 
 - Each PSU has bare AC flying leads. Each one gets **its own mains lead with a plug** (reused existing H07RN-F 3-core cables), joined to the PSU's AC wires with a **SOMELINE IP68 junction connector** (L to brown, N to blue, earth to green/yellow). No shared mains junction box.
-- All three plugs go into a **3-way outdoor socket / extension with a built-in 30 mA RCD**, so every supply is RCD-protected. An optional outdoor smart plug or timer upstream really turns the tree off.
+- Both plugs go into an **outdoor socket / extension (2-way or more) with a built-in 30 mA RCD**, so every supply is RCD-protected. An optional outdoor smart plug or timer upstream really turns the tree off.
 - Have the mains side checked by a qualified electrician before first power-up.
 
 ## Fuse distribution
 
-- **Three blade fuse boxes**, one per PSU, each with a negative bus: the two 6-way boxes for PSU 1 and PSU 2, plus a small 4-way for PSU 3. A single 12-way box is only OK if it is **split-bus** (two independent positive bars with their own inputs, ≥30 A per side). A common single-bar box would join the PSUs' V+, which is never allowed.
+- **Two 6-way blade fuse boxes** (both already bought), one per PSU, each with a negative bus. All six ways in each box carry a strip feed, so the Dig-Quad's 2 A fuse goes in an inline holder from PSU 1's V+ (or a 7-way box if you prefer). A single 12-way box is only OK if it is **split-bus** (two independent positive bars with their own inputs, ≥30 A per side). A common single-bar box would join the PSUs' V+, which is never allowed.
 - 5 A ATO blade per strip feed. 2 A ATO blade in the Dig-Quad's inline holder (car-type holders with 16 AWG leads are fine).
-- PSU → fuse box with short 6 mm² red/black. Every GND (all three PSUs, all fuse-box negative buses, the Dig-Quad) goes to the common ground bar.
+- PSU → fuse box with short 6 mm² red/black. Every GND (both PSUs, all fuse-box negative buses, the Dig-Quad) goes to the common ground bar.
 
 ## Joints (no soldering, decided 2026-10-17)
 
@@ -104,7 +103,7 @@ There is **no soldering anywhere**. Whole 5 m rolls are used as they come, so th
 
 ## Build order
 
-1. **Bench:** one strip on the bench PSU with the Dig-Quad; measure current and far-end voltage at full white (roadmap Stage 1). If a strip draws over about 4 A, cap PSU 3's output in WLED or swap it for a third HLG-320H-12A.
+1. **Bench:** one strip on the bench PSU with the Dig-Quad; measure current and far-end voltage at full white (roadmap Stage 1). If a strip draws over about 3.5 A, lower the WLED per-output caps (about 9,500 mA each) to keep each HLG-320H-12A under 22 A.
 2. **Base box:** mount the PSUs, fuse boxes, ground bar and Dig-Quad on the plate, with a 2–3 cm gap around the PSUs. Fit M20 glands in the **bottom face only**. Wire PSU → fuse boxes (6 mm²), all grounds → ground bar, PSU 1 → 2 A inline fuse → Dig-Quad. Ferrule every wire end. Leave the fuses out.
 3. **Mains:** fit the SOMELINE connectors to each PSU's AC leads and mains lead. Have it checked. Plug into the RCD socket, switch on, and check 12 V at each fuse-box output with no strips connected.
 4. **Feed cables:** measure each run from the box to its strip's bottom, add 30 cm, and cut 12 lengths of 1.5 mm² two-core (about 1.5–4.5 m each, about 40 m in total). Label both ends (S1–S12). Run them along the ground in cable protector or split conduit, then around the base ring, tying them to it with UV ties. Leave a drip loop at the box and at each strip.

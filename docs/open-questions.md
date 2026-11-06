@@ -4,7 +4,7 @@ Found while reading the PDFs on 2026-09-30. These need agreeing with the builder
 
 ## 1. Power budget — WORKING ASSUMPTION: the builder's figures (4 A per strip, 48 A total)
 
-**Updated 2026-10-10:** the strips are now **5 m** (300 LEDs), about **3.3 A each, 40 A in total**, still on 2 × HLG-600H-12A. **Updated 2026-10-22:** now 3 PSUs: 2 × HLG-320H-12A (22 A) + one 150 W (~12.5 A), 56 A in total for strips 1–5 / 6–9 / 10–12. See [power-and-wiring.md](power-and-wiring.md).
+**Updated 2026-10-10:** the strips are now **5 m** (300 LEDs), about **3.3 A each, 40 A in total**, still on 2 × HLG-600H-12A. **Updated 2026-10-26:** 2 × HLG-320H-12A (22 A each, 44 A), strips 1–6 / 7–12, WLED caps each output at ~9,500 mA (2026-10-22 had been 3 PSUs). See [power-and-wiring.md](power-and-wiring.md).
 
 **Decided 2026-09-30:** we're going ahead with **The builder's calculation of 4 A per 6 m strip, 48 A / ~576 W in total**. It matches the WS2815B table (7.92 W/m). The baseline PSU plan is **2 × Mean Well HLG-600H-12A** (80 A, 60 % load), 6 strips each. The builder's single 60 A PSU (80 % load) is still his call, but see the cautions below.
 

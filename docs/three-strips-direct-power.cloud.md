@@ -1,6 +1,6 @@
 # Three strips powered straight from the HLG
 
-**Update 2026-10-22:** the HLG in this guide was never bought (the model didn't exist). Until the two HLG-320H-12As arrive, use the **150 W supply** in its place: three strips draw about 10 A of its 12.5 A. Wire it exactly as shown. When PSU 1 (HLG-320H-12A) arrives, move strips 1–3 to it and give the 150 W supply strips 10–12.
+**Update 2026-10-22:** the HLG in this guide was never bought (the model didn't exist). Until the two HLG-320H-12As arrive, use the **150 W supply** in its place: three strips draw about 10 A of its 12.5 A. Wire it exactly as shown. When PSU 1 (HLG-320H-12A) arrives, move strips 1–3 to it; the 150 W supply then goes back to bench use (decided 2026-10-26: two supplies in the tree).
 
 **Goal:** strips 1–3 get their 12 V from the PSU through the fuse box, not through the Dig-Quad. The board only sends **data** (plus a data ground) and runs on a small 2 A feed. This is the final-build wiring ([dig-quad-connections.md](dig-quad-connections.md)) cut down to one PSU and one output, and it is bottom-fed as decided on 2026-10-17.
 
@@ -75,7 +75,7 @@ Right now all 12 V for three strips goes through the board's **LED1/LED2 fuse (7
 
 ## Board update (after the rewire, needs your go-ahead)
 
-`config/proto-tree.json` now lists strips 1–3 as attached and sets the current limiter to **38,000 mA at 11 mA per LED**: 95 % of one HLG. WLED counts all 12 strips in its estimate (39.6 A at full white), so the three real strips are capped at about a quarter of that, about 9.5 A, which suits the 150 W supply (12.5 A). The fuses protect the wiring; the limiter is not a safety device. With all 12 strips and three PSUs, set about 40,000 mA total and cap output 4 (PSU 3) at about 11,500 mA.
+`config/proto-tree.json` now lists strips 1–3 as attached and sets the current limiter to **38,000 mA at 11 mA per LED**: 95 % of one HLG. WLED counts all 12 strips in its estimate (39.6 A at full white), so the three real strips are capped at about a quarter of that, about 9.5 A, which suits the 150 W supply (12.5 A). The fuses protect the wiring; the limiter is not a safety device. With all 12 strips on the two HLGs, cap each output at about 9,500 mA and set about 38,000 mA total.
 
 In PowerShell on the PC:
 

@@ -16,13 +16,13 @@ Written 2026-10-10, updated 2026-10-17 for the current design: **12 × 5 m BTF-L
 
 | Item | Qty | Spec | Notes |
 |---|---|---|---|
-| **Mean Well HLG-320H-12A** | **2** | 12 V, 22 A, 264 W, IP65, fanless | PSU 1: strips 1–5 (~16.5 A, 75 %) + the Dig-Quad. PSU 2: strips 6–9 (~13 A, 60 %). Leave the Vo/Io adjusters at factory settings. |
-| 12 V 150 W supply (already bought) | 1 | ~12.5 A | PSU 3: strips 10–12 (~10 A, 80 %) |
-| Blade fuse box with negative bus | 3 | 12 V, ATO/ATC blade, rated 30 A+ in total | One per PSU: two 6-way (have), plus a small 4-way for PSU 3 |
+| **Mean Well HLG-320H-12A** | **2** | 12 V, 22 A, 264 W, IP65, fanless | PSU 1: strips 1–6 + the Dig-Quad (~20 A, 92 %). PSU 2: strips 7–12 (~20 A, 90 %). WLED caps each output at ~9,500 mA. Leave the Vo/Io adjusters at factory settings. |
+| 12 V 150 W supply (already bought) | 1 | ~12.5 A | Bench only since 2026-10-26 (two supplies in the tree) |
+| Blade fuse box with negative bus | 2 | 6-way, 12 V, ATO/ATC blade, rated 30 A+ in total | One per PSU (have both) |
 | ATO blade fuses, **5 A** | 1 pack (20+) | | One per strip feed, plus spares |
 | Inline blade fuse holder + 2 A fuse | 1 | | Small feed from PSU 1 to the Dig-Quad |
 | Red/black cable, **6 mm²** (10 AWG) | 2 m each colour | Flexible, tinned | PSU → fuse box, short runs |
-| Earth/ground bus bar | 1 | 6–8 way, 12 V, 60 A+ | Common GND: all three PSUs, all fuse boxes and the Dig-Quad |
+| Earth/ground bus bar | 1 | 6–8 way, 12 V, 60 A+ | Common GND: both PSUs, both fuse boxes and the Dig-Quad |
 | Bootlace ferrules + crimper | 1 kit | 0.5–6 mm² | For every screw terminal |
 
 ## 3. Cabling to the tree
@@ -48,7 +48,7 @@ Written 2026-10-10, updated 2026-10-17 for the current design: **12 × 5 m BTF-L
 | Cable glands, M20 IP68 | 1 pack (20) | Nylon, strain relief | Bottom face only: 12 power + 4 data + mains, plus spares |
 | Mains lead, H07RN-F 3-core 1.5 mm² | 2 | With an IP44 plug | One per PSU (decided 2026-10-17). Reusing existing cables |
 | SOMELINE IP68 waterproof junction box cable connector | 2 | Outdoor, 230 V, 3-core | One per PSU: joins its bare AC wires to its own mains lead. Replaces the WAGO junction (2026-10-17) |
-| **3-way outdoor socket / extension with 30 mA RCD** | 1 | IP44+, 13 A | All three PSU plugs go behind the RCD. Required for outdoor mains |
+| **Outdoor socket / extension with 30 mA RCD** (2-way or more) | 1 | IP44+, 13 A | Both PSU plugs go behind the RCD. Required for outdoor mains |
 | Outdoor smart plug or timer (optional) | 1 | IP44, 10 A | Cuts the mains to really turn the tree off |
 
 Have the mains side checked by a qualified electrician.
