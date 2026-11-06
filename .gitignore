@@ -5,3 +5,6 @@ obj/
 
 # Board backups can contain Wi-Fi passwords; keep them on this PC only
 device-backups/
+
+# Real network details for local use only
+CLAUDE.local.md
