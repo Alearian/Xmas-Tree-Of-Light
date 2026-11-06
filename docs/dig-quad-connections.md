@@ -7,7 +7,7 @@ How the QuinLED Dig-Quad, the two 12 V supplies and the 12 WS2815 strips connect
 This is the layout for **one Dig-Quad** (open-questions §8, option A). Background and the reasoning behind it: [power-and-wiring.md](power-and-wiring.md) and [quinled-dig-quad-guide.md](quinled-dig-quad-guide.md).
 
 > ⚠️ **Before anything is bought or switched on**
-> - This uses the working assumption of **4 A per strip** (The builder's figure for 6 m; a 5 m strip should be about 3.3 A). One source says 7.2 A. Measure one strip at full white first ([open-questions.md](open-questions.md) §1). Above about 4.5 A, change to 3 PSUs with 4 strips each.
+> - This uses the working assumption of **4 A per strip** (the builder's figure for 6 m; a 5 m strip should be about 3.3 A). One source says 7.2 A. Measure one strip at full white first ([open-questions.md](open-questions.md) §1). Above about 4.5 A, change to 3 PSUs with 4 strips each.
 > - Mains wiring to the PSUs, and any relay that switches mains, must be done by a qualified electrician.
 > - Terminal positions are drawn schematically. Use the labels printed on the board and on the strip pads.
 

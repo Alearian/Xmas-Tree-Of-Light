@@ -49,7 +49,7 @@ These open in the browser, served by GitHub Pages:
 ### Bill of materials
 
 - [Bill of materials](docs/bom.md): the shopping list for the final tree, with what each part is for
-- [Parts checklist](docs/bom-checklist-no-prices.md) ([PDF](docs/bom-checklist-no-prices.pdf)): what has been bought and what is still needed
+- [Parts checklist](docs/bom-checklist-no-prices.md): what has been bought and what is still needed
 - [WS2815 strip spec](docs/strip-spec-ws2815.md): the strip used, with its current draw
 
 ## Phone app

@@ -20,6 +20,3 @@
 - [open-questions.md](open-questions.md): **conflicts and errors found in the docs**, to settle with the builder
 - [software.md](software.md): TreeTool (C#), the phone app and the shared layout, with how to use them
 - [roadmap.md](roadmap.md): the build stages, including our own software
-
-## People
-

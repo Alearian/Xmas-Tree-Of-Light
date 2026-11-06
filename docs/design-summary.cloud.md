@@ -12,7 +12,7 @@ Taken from the four PDFs. Where the PDFs are wrong or contradict each other, see
 
 | | |
 |---|---|
-| Strip | **WS2815**, 12 V, 60 LEDs/m. Purchased: **HD 12V WS2815 60L B IP67**, working assumption **about 3.3 A per 5 m strip, 40 A in total** (The builder's figure, still to be measured; see [strip-spec-ws2815.md](strip-spec-ws2815.md)) |
+| Strip | **WS2815**, 12 V, 60 LEDs/m. Purchased: **HD 12V WS2815 60L B IP67**, working assumption **about 3.3 A per 5 m strip, 40 A in total** (the builder's figure, still to be measured; see [strip-spec-ws2815.md](strip-spec-ws2815.md)) |
 | Per strip | 300 px (5 m), one whole roll per strip with no extensions. |
 | Total | **3,600 px**, 60 m (12 × 5 m rolls, plus spares). |
 | Wires | Red +12 V, White GND, Green DI (data), Blue BI (backup in) |

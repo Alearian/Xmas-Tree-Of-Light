@@ -6,7 +6,7 @@ Found while reading the PDFs on 2026-09-30. These need agreeing with the builder
 
 **Updated 2026-10-10:** the strips are now **5 m** (300 LEDs), about **3.3 A each, 40 A in total**, still on 2 × HLG-600H-12A. **Updated 2026-10-26:** 2 × HLG-320H-12A (22 A each, 44 A), strips 1–6 / 7–12, WLED caps each output at ~9,500 mA (2026-10-22 had been 3 PSUs). See [power-and-wiring.md](power-and-wiring.md).
 
-**Decided 2026-09-30:** we're going ahead with **The builder's calculation of 4 A per 6 m strip, 48 A / ~576 W in total**. It matches the WS2815B table (7.92 W/m). The baseline PSU plan is **2 × Mean Well HLG-600H-12A** (80 A, 60 % load), 6 strips each. The builder's single 60 A PSU (80 % load) is still his call, but see the cautions below.
+**Decided 2026-09-30:** we're going ahead with **the builder's calculation of 4 A per 6 m strip, 48 A / ~576 W in total**. It matches the WS2815B table (7.92 W/m). The baseline PSU plan is **2 × Mean Well HLG-600H-12A** (80 A, 60 % load), 6 strips each. The builder's single 60 A PSU (80 % load) is still his call, but see the cautions below.
 
 > ⚠️ **CHECK BEFORE BUYING PSUs:** measure one strip at full white on the bench (roadmap Stage 1). The part-number spec says 7.2 A per strip. If the measurement is above about 4.5 A, revisit this section and use the decision rule below.
 
@@ -100,4 +100,4 @@ QuinLED's guidance is about **2,000 LEDs per ESP32 running WLED** (about 3,000 w
 - **ESP32 load:** QuinLED's guidance is about 2,000 LEDs per ESP32 with WLED, so 3,600 on one board is too many. See §8.
 - **Security:** the controller is still on the factory AP password (`wled1234`). Change it during commissioning.
 - **Antenna:** the doc specifies an ESP32 with an **external SMA antenna**. Check whether our Dig-Quad's ESP32 has one.
-- **Strip model:** confirm it's WS2815 (The builder hasn't said) and that the wire colours match Addendum C before connecting anything.
+- **Strip model:** confirm it's WS2815 (the builder hasn't said) and that the wire colours match Addendum C before connecting anything.

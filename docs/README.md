@@ -16,7 +16,7 @@
 - [strip-spec-ws2815.md](strip-spec-ws2815.md): the purchased strip (HD 12V WS2815 60L B IP67): 7.2 A per run, 86.4 A for the tree
 - [quinled-dig-quad-guide.md](quinled-dig-quad-guide.md): the manufacturer's ratings, pinout, wiring steps and WLED settings (from Quindor's tutorial and quinled.info)
 - [bom.md](bom.md): shopping list for the final tree (5 m strips, bottom-fed)
-- [bom-checklist-no-prices.md](bom-checklist-no-prices.md) / : the live shopping list exported, with prices and what the builder owes. [bom-checklist-no-prices.pdf](bom-checklist-no-prices.pdf) is the same without prices
+- [bom-checklist-no-prices.md](bom-checklist-no-prices.md): the parts checklist: what has been bought and what is still needed
 - [tree-wiring-build-guide.md](tree-wiring-build-guide.md) / [.pdf](tree-wiring-build-guide.pdf): step-by-step wiring build instructions (2 supplies, 6 strips each)
 - [tree-wiring-3d.html](tree-wiring-3d.html): 3D view of the strips, cables and box
 - [power-and-wiring.md](power-and-wiring.md): power and data wiring, reconciling the PDFs with the builder's email
@@ -26,6 +26,3 @@
 - [software.md](software.md): TreeTool (C#), the phone app and the shared layout, with how to use them
 - [roadmap.md](roadmap.md): the build stages, including our own software
 - [shows-and-effects-plan.md](shows-and-effects-plan.md): **planned**: show builder and controls on WLED playlists, and the finger-friendly effect list
-
-## People
-
