@@ -1,5 +1,7 @@
 # Roadmap
 
+> **Status (November 2026): built.** All 12 LED-strips (4 tree-strips) are rigged on the mast, fed from the base box (2 × HLG-320H-12A, two separate 6-way fuse boxes, one per supply), and running looks and shows from the phone app. The checklists below are kept as the history of how it got there. See [build.md](build.md) for photos and [user-guide.md](user-guide.md) for the app.
+
 Follows the four phases in the technical doc, plus our own software work.
 
 ## Stage 0 — Docs & setup

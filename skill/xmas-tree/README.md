@@ -8,22 +8,24 @@ we have already hit.
 
 ## The project
 
-An outdoor cone-shaped tree about 5 m tall, made of **12 vertical LED strips** arranged round a
+<p align="center"><img src="../../docs/images/tree-lit-night.jpg" alt="The finished tree" height="360"> <img src="../../docs/images/base-box.jpg" alt="The base box" height="360"></p>
+
+An outdoor cone-shaped tree about 5 m tall, made of **12 vertical LED-strips** arranged round a
 central mast.
 
 | Part | What we use |
 |---|---|
-| LEDs | 12 × 5 m BTF-LIGHTING WS2815 12 V strips, 60 LEDs/m, IP67 - 300 LEDs each, **3,600** in total |
-| Controller | [QuinLED Dig-Quad V3](https://quinled.info/pre-assembled-quinled-dig-quad/) (ESP32), 4 outputs × 3 strips in a zig-zag |
+| LEDs | 12 × 5 m BTF-LIGHTING WS2815 12 V LED-strips, 60 LEDs/m, IP67 - 300 LEDs each, **3,600** in total |
+| Controller | [QuinLED Dig-Quad V3](https://quinled.info/pre-assembled-quinled-dig-quad/) (ESP32), 4 outputs, each driving one tree-strip (3 LED-strips joined in a zig-zag) |
 | Firmware | [WLED](https://kno.wled.ge/) **0.14.0** |
-| Power | Mean Well HLG 12 V supplies, each strip fed at the bottom through its own 5 A fuse |
+| Power | 2 × Mean Well HLG-320H-12A 12 V supplies (LED-strips 1-6 and the controller on one, 7-12 on the other), two separate 6-way fuse boxes (one per supply), every LED-strip fed at the bottom through its own 5 A fuse |
 | Remote | a single-file phone web app (`tree.htm`) served by the controller itself |
 | Configuration | **TreeTool**, a small C# (.NET 10) command-line tool |
 
 The tree runs **standalone**: no PC is needed at the tree. Every "look" (an animated effect) and
 every "show" (a timed sequence of looks) is stored on the controller as a WLED preset or playlist.
 Phones on the home Wi-Fi open `http://<board-ip>/tree.htm` to pick looks, run and schedule shows,
-set colours per strip or per side of the tree, and see a live 3D preview of all 12 strips.
+set colours per LED-strip or per side of the tree, and see a live 3D preview of all 12 LED-strips.
 
 ```
  config/*.json ──► TreeTool ──► WLED /json/cfg   (LED outputs, current limiter, boot preset)
@@ -36,12 +38,12 @@ set colours per strip or per side of the tree, and see a live 3D preview of all 
 
 ```
 app/tree.htm              phone app (single file, no external resources)
-config/proto-tree.json    current layout: 12 strips, strips 1-3 wired
-config/tree.json          final 12-strip layout
+config/tree.json          the 12-strip layout (all strips wired)
+config/proto-tree.json    the earlier layout with only strips 1-3 wired
 config/looks.json         the look library and shows
 tools/TreeTool/           C# tool: info, backup, plan, apply, upload, looks, test, serve
 device-backups/           snapshots of the board (git-ignored: they contain Wi-Fi passwords)
-docs/                     design, wiring, power, roadmap, open questions, plans
+docs/                     user guide, build docs and photos, design, wiring, power, roadmap, plans
 skill/xmas-tree/          this skill
 ```
 
@@ -49,14 +51,14 @@ skill/xmas-tree/          this skill
 
 | Area | How |
 |---|---|
-| **Control the board** | WLED JSON API recipes in PowerShell: power, brightness, per-strip effects, presets, playlists, timers |
+| **Control the board** | WLED JSON API recipes in PowerShell: power, brightness, per-LED-strip effects, presets, playlists, timers |
 | **Detect the board** | `scripts/Test-Tree.ps1` tries the home IP, `xmastree.local`, the WLED-AP fallback, then ARP by MAC |
 | **Report state and parameters** | `scripts/Get-TreeReport.ps1`: firmware, uptime, heap, filesystem, LED buses, limiter, segments, presets (with size budget), timers, warnings - optionally as Markdown |
 | **Backups and saves** | `scripts/Backup-Tree.ps1` (full snapshot), `scripts/Compress-Presets.ps1` (validate, compact, restore, upload with confirmation), plus TreeTool's own backup-before-write |
 | **Use TreeTool** | when to run `info`, `plan`, `apply`, `upload`, `looks`, `test`, `serve`, with which layout, and what to check afterwards |
-| **Modify TreeTool** | code map, invariants (strip mapping shared with the app, one-shot preset upload, size budget, 32 segments) |
+| **Modify TreeTool** | code map, invariants (LED-strip mapping shared with the app, one-shot preset upload, size budget, 32 segments) |
 | **Update the app** | version bump, local testing via `treetool serve`, upload, verifying on the phone, cache issues |
-| **Create new effects** | a workflow from idea → live test (no save) → `looks.json` → install, with the schema (twist, flip, groups, overlay, across) and effects that suit vertical strips |
+| **Create new effects** | a workflow from idea → live test (no save) → `looks.json` → install, with the schema (twist, flip, groups, overlay, across) and effects that suit vertical LED-strips |
 | **Pitfalls** | a symptom → cause → fix table for everything that has gone wrong so far |
 | **Project memory** | where to record new issues, decisions and board state so the next session knows |
 
@@ -108,7 +110,7 @@ pitfalls apply to any WLED 0.14 build on an ESP32.
 The skill reads freely, changes live colours freely, but **backs up before every persistent write and
 asks before any config change** (LED outputs, Wi-Fi, AP, current limiter), because a bad Wi-Fi config
 can lock you out of the board. The WLED current limiter is an estimate, not protection: fuse every
-strip feed, never join the positive outputs of two power supplies, and always join their grounds.
+LED-strip feed, never join the positive outputs of two power supplies, and always join their grounds.
 
 ## Licence
 

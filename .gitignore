@@ -9,7 +9,8 @@ device-backups/
 # Real network details for local use only
 CLAUDE.local.md
 
-# Local only: money owed and names of people (not published)
+# Local only: redacted docs (money owed, people's names) live in private/ and are not published
+private/
 docs/bom-for-*
 docs/bom-checklist.md
 docs/bom-checklist.pdf
