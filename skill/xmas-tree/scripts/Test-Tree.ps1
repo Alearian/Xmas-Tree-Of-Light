@@ -12,7 +12,7 @@
 [CmdletBinding()]
 param(
     [string[]]$Address = @('xmastree.local', '4.3.2.1'),
-    [string]$Mac = '28-56-2f-55-35-8c',
+    [string]$Mac = '',   # board MAC as aa-bb-cc-dd-ee-ff (arp -a format); enables the ARP fallback
     [int]$TimeoutSec = 3,
     [switch]$Quiet
 )
@@ -30,7 +30,7 @@ foreach ($a in $Address) {
     if (-not $Quiet) { Write-Host ' no answer' -ForegroundColor DarkGray }
 }
 
-if (-not $found -and (Get-Command arp -ErrorAction SilentlyContinue)) {
+if (-not $found -and $Mac -and (Get-Command arp -ErrorAction SilentlyContinue)) {
     # The IP may have changed (DHCP). Look the board up by MAC in the ARP table; it only appears there
     # if this PC has talked to it recently, so this is a best-effort fallback.
     $line = arp -a | Select-String -Pattern $Mac -SimpleMatch | Select-Object -First 1

@@ -11,7 +11,7 @@ Read live from `http://4.3.2.1/json/info` and `/json/cfg` on 2026-09-30.
 | Wi-Fi | AP `WLED-AP`, **factory password**, channel 1, 4.3.2.1 | AP `MatrixTree-WiFi`, strong password, channel 1/6/11 |
 | Client Wi-Fi | SSID `<home-wifi>` saved without a password (not joined) | not needed, because the design is AP-only |
 | DDP / E1.31 input | not checked yet | enabled |
-| MAC | 28:56:2f:55:35:8c | |
+| MAC | <board-mac> | |
 | Usermods | AudioReactive (off) | |
 
 ## LED outputs

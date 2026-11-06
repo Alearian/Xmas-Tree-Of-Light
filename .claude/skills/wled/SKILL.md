@@ -5,7 +5,7 @@ description: Talk to the Xmas tree's WLED controller (QuinLED Dig-Quad V3 at htt
 
 # WLED controller
 
-Device base URL: `http://xmastree.local` (home Wi-Fi, DHCP, currently <board-ip>). If the board can't find the home Wi-Fi at boot, it falls back to its own AP `WLED-AP` at `http://4.3.2.1`. If the name stops resolving, find the board by its MAC 28:56:2f:55:35:8c with `arp -a`.
+Device base URL: `http://xmastree.local` (home Wi-Fi, DHCP, currently <board-ip>). If the board can't find the home Wi-Fi at boot, it falls back to its own AP `WLED-AP` at `http://4.3.2.1`. If the name stops resolving, find the board by its MAC <board-mac> with `arp -a`.
 
 ## Read (always safe)
 ```powershell
